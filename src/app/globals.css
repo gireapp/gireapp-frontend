@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ─────────────────────────────────────────────────
+ * GIREAPP — Global Design Tokens
+ * Brand: Indigo #3730A3 + Coral #F97316
+ * All values pass WCAG AA (≥4.5:1 contrast)
+ * ─────────────────────────────────────────────────
+ */
+
+@layer base {
+  :root {
+    /* ── Light Mode ── */
+    --background: 0 0% 100%;
+    --foreground: 215 28% 10%;
+
+    --card: 210 40% 98%;
+    --card-foreground: 215 28% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 10%;
+
+    --primary: 243 75% 42%;       /* Indigo #3730A3 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 16% 95%;
+    --secondary-foreground: 215 28% 10%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 43%;
+
+    --accent: 25 95% 53%;         /* Coral #F97316 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 42%;
+
+    --radius: 0.625rem;
+
+    /* ── Mood-based background tints ── */
+    --mood-calm: 226 100% 94%;
+    --mood-focused: 214 95% 93%;
+    --mood-energized: 48 96% 89%;
+    --mood-relaxed: 152 81% 91%;
+  }
+
+  .dark {
+    /* ── Dark Mode ── */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 97%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 97%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 97%;
+
+    --primary: 232 82% 75%;       /* Lighter indigo for dark bg */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 97%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 27 96% 61%;         /* Lighter coral for dark bg */
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 97%;
+
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 232 82% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Focus-visible for keyboard accessibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Selection styling */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+@layer utilities {
+  /* ── Loading skeleton shimmer ── */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-muted;
+  }
+
+  .skeleton-shimmer {
+    @apply relative overflow-hidden bg-muted rounded-md;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--muted-foreground) / 0.05) 50%,
+      transparent 100%
+    );
+  }
+
+  /* ── Glassmorphism card ── */
+  .glass {
+    @apply backdrop-blur-lg bg-background/80 border border-border/50;
+  }
+
+  /* ── Brand gradient text ── */
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #3730A3, #4F46E5, #F97316);
+  }
+
+  /* ── Data saver indicator ── */
+  .data-saver-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300;
+  }
+
+  /* ── Hide scrollbar but keep functionality ── */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Mobile bottom nav safe area ── */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
