@@ -90,7 +90,7 @@ export function LoginForm() {
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="login-email" className="text-[20px] font-heading font-bold text-indigo-950 break-words">
+        <label htmlFor="login-email" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">
           Email Address
         </label>
         <input
@@ -103,7 +103,7 @@ export function LoginForm() {
           value={values.email}
           onChange={(e) => handleChange('email', e.target.value)}
           onBlur={() => handleBlur('email')}
-          className={`w-full h-[54px] px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+          className={`w-full h-[54px] px-3 lg:px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
             getError('email') || state.error ? 'border-destructive' : ''
           }`}
           aria-describedby={getError('email') ? 'email-error' : undefined}
@@ -118,10 +118,10 @@ export function LoginForm() {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <label htmlFor="login-password" className="text-[20px] font-heading font-bold text-indigo-950 break-words">
+          <label htmlFor="login-password" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">
             Password
           </label>
-          <Link href="/forgot-password" className="text-[14px] font-sans text-coral-500 font-normal hover:underline">
+          <Link href="/forgot-password" className="text-[12px] lg:text-[14px] font-sans text-coral-500 font-normal hover:underline">
             Forgot password?
           </Link>
         </div>
@@ -136,7 +136,7 @@ export function LoginForm() {
             value={values.password}
             onChange={(e) => handleChange('password', e.target.value)}
             onBlur={() => handleBlur('password')}
-            className={`w-full h-[54px] px-4 pr-12 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+            className={`w-full h-[54px] px-3 lg:px-4 pr-12 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
               getError('password') || state.error ? 'border-destructive' : ''
             }`}
             aria-describedby={getError('password') ? 'password-error' : undefined}
@@ -170,7 +170,7 @@ export function LoginForm() {
         type="submit"
         disabled={isPending}
         id="login-submit"
-        className="w-full flex items-center justify-center gap-2 h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? (
           <>
@@ -182,7 +182,7 @@ export function LoginForm() {
         )}
       </button>
 
-      <p className="text-center text-[14px] font-sans text-indigo-800 mt-3">
+      <p className="text-center text-[12px] lg:text-[14px] font-sans text-indigo-800 mt-3">
         Don&apos;t have an account?{' '}
         <Link href="/register" className="text-coral-500 font-normal hover:underline ml-1">
           Sign up

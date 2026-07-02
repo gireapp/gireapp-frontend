@@ -67,14 +67,14 @@ export default function AuthLayout({
       </div>
 
       {/* ── Right: Auth form ── */}
-      <div className="flex flex-col px-4 sm:px-8 md:px-12 lg:px-16 py-12 bg-white/85 overflow-y-auto max-h-screen">
+      <div className="flex flex-col px-4 sm:px-8 md:px-12 lg:px-16 py-12 bg-indigo-50/95 lg:bg-white/85 overflow-y-auto max-h-screen">
         {/* Mobile logo */}
-        <div className="lg:hidden mb-8">
+        <div className="lg:hidden flex items-center justify-between bg-indigo-800 p-4 -mx-4 sm:-mx-8 md:-mx-12 -mt-12 mb-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" aria-hidden="true" />
+            <div className="w-7 h-7 rounded bg-indigo-50 flex items-center justify-center">
+              <GraduationCap className="w-4 h-4 text-indigo-400" aria-hidden="true" />
             </div>
-            <span className="font-heading font-bold text-xl text-foreground">GIREAPP</span>
+            <span className="font-heading font-bold text-[16px] text-white">GIREAPP</span>
           </Link>
         </div>
 
