@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { loginAction } from '@/features/auth/actions';
 import type { ApiResponse } from '@gireapp/shared';
 import { toast } from 'sonner';
@@ -89,8 +89,8 @@ export function LoginForm() {
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
-      <div className="space-y-1.5">
-        <label htmlFor="login-email" className="text-sm font-medium text-foreground">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="login-email" className="text-[20px] font-heading font-bold text-indigo-950 break-words">
           Email Address
         </label>
         <input
@@ -103,8 +103,8 @@ export function LoginForm() {
           value={values.email}
           onChange={(e) => handleChange('email', e.target.value)}
           onBlur={() => handleBlur('email')}
-          className={`w-full px-4 py-3 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-            getError('email') || state.error ? 'border-destructive' : 'border-input'
+          className={`w-full h-[54px] px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+            getError('email') || state.error ? 'border-destructive' : ''
           }`}
           aria-describedby={getError('email') ? 'email-error' : undefined}
           aria-invalid={getError('email') || !!state.error ? 'true' : undefined}
@@ -116,12 +116,12 @@ export function LoginForm() {
         )}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <label htmlFor="login-password" className="text-sm font-medium text-foreground">
+          <label htmlFor="login-password" className="text-[20px] font-heading font-bold text-indigo-950 break-words">
             Password
           </label>
-          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+          <Link href="/forgot-password" className="text-[14px] font-sans text-coral-500 font-normal hover:underline">
             Forgot password?
           </Link>
         </div>
@@ -136,8 +136,8 @@ export function LoginForm() {
             value={values.password}
             onChange={(e) => handleChange('password', e.target.value)}
             onBlur={() => handleBlur('password')}
-            className={`w-full px-4 py-3 pr-12 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-              getError('password') || state.error ? 'border-destructive' : 'border-input'
+            className={`w-full h-[54px] px-4 pr-12 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+              getError('password') || state.error ? 'border-destructive' : ''
             }`}
             aria-describedby={getError('password') ? 'password-error' : undefined}
             aria-invalid={getError('password') || !!state.error ? 'true' : undefined}
@@ -145,10 +145,14 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-500 transition-colors"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
-            {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M21.544 11.045C21.848 11.4713 22 11.6845 22 12C22 12.3155 21.848 12.5287 21.544 12.955C20.1779 14.8706 16.6892 19 12 19C7.31078 19 3.8221 14.8706 2.45604 12.955C2.15201 12.5287 2 12.3155 2 12C2 11.6845 2.15201 11.4713 2.45604 11.045C3.8221 9.12944 7.31078 5 12 5C16.6892 5 20.1779 9.12944 21.544 11.045Z" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12Z" stroke="currentColor" strokeWidth="1.5"/>
+              {showPassword && <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />}
+            </svg>
           </button>
         </div>
         {getError('password') && (
@@ -166,11 +170,11 @@ export function LoginForm() {
         type="submit"
         disabled={isPending}
         id="login-submit"
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
             Logging in...
           </>
         ) : (
@@ -178,9 +182,9 @@ export function LoginForm() {
         )}
       </button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[14px] font-sans text-indigo-800 mt-3">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-primary font-medium hover:underline">
+        <Link href="/register" className="text-coral-500 font-normal hover:underline ml-1">
           Sign up
         </Link>
       </p>
