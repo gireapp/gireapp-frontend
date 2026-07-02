@@ -3,6 +3,7 @@
 // Shared layout for login, register, verify, etc.
 // ─────────────────────────────────────────────────
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 
@@ -22,11 +23,15 @@ export default function AuthLayout({
         />
         
         <div className="relative z-10 px-8 py-12 xl:p-12 flex flex-col h-full">
-          <Link href="/" className="flex items-center gap-8 mt-12 mb-auto">
-            <div className="w-20 h-20 bg-indigo-50 rounded-[9.6px] relative flex items-center justify-center">
-              <div className="w-[37.76px] h-[34.90px] bg-indigo-400"></div>
-            </div>
-            <span className="font-heading font-bold text-[44px]">GIREAPP</span>
+          <Link href="/" className="mt-12 mb-auto inline-block">
+            <Image 
+              src="/logo-white.svg" 
+              alt="GIREAPP" 
+              width={212} 
+              height={56} 
+              priority 
+              className="w-auto h-12 lg:h-14" 
+            />
           </Link>
 
           <div className="flex-1 flex flex-col justify-center max-w-[460px] mb-24">
@@ -57,7 +62,7 @@ export default function AuthLayout({
       </div>
 
       {/* ── Right: Auth form ── */}
-      <div className="flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-12">
+      <div className="flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-12 bg-white">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8">
           <Link href="/" className="flex items-center gap-2">
