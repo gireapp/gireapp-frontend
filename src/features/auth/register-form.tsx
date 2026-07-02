@@ -83,7 +83,7 @@ export function RegisterForm() {
     const eValid = validateField('email', values.email);
     const pValid = validateField('password', values.password);
     const cpValid = validateField('confirmPassword', values.confirmPassword);
-    
+
     if (nValid && eValid && pValid && cpValid && values.name && values.email && values.password && values.confirmPassword) {
       setStep(2);
     }
@@ -109,8 +109,8 @@ export function RegisterForm() {
 
   const renderBackArrow = () => (
     <svg className="w-full h-full" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M9.1665 20.0034H31.6665" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M18.3334 30.0033C18.3334 30.0033 8.33351 22.6383 8.3335 20.0031C8.33348 17.3679 18.3335 10.0032 18.3335 10.0032" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9.1665 20.0034H31.6665" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18.3334 30.0033C18.3334 30.0033 8.33351 22.6383 8.3335 20.0031C8.33348 17.3679 18.3335 10.0032 18.3335 10.0032" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 
@@ -120,16 +120,15 @@ export function RegisterForm() {
       <div className="lg:hidden w-full flex justify-center items-center py-2 mb-6 relative">
         <div className="relative flex items-center justify-between w-[102px]">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-indigo-200 rounded-full" />
-          <div 
+          <div
             className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-indigo-400 rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${((step - 1) / 3) * 100}%` }}
           />
           {[1, 2, 3, 4].map((s) => (
-            <div 
+            <div
               key={s}
-              className={`w-2 h-2 rounded-full relative z-10 transition-colors duration-300 ease-in-out ${
-                s <= step ? 'bg-indigo-800' : 'bg-indigo-200'
-              }`}
+              className={`w-2 h-2 rounded-full relative z-10 transition-colors duration-300 ease-in-out ${s <= step ? 'bg-indigo-800' : 'bg-indigo-200'
+                }`}
             />
           ))}
         </div>
@@ -139,7 +138,7 @@ export function RegisterForm() {
       <div className="inline-flex w-full max-w-[466px] flex-col items-start gap-2 mb-8">
         <div className="inline-flex items-center justify-start gap-3">
           {step > 1 && step < 4 ? (
-            <button 
+            <button
               type="button"
               onClick={() => setStep(step - 1)}
               className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
@@ -148,8 +147,8 @@ export function RegisterForm() {
               {renderBackArrow()}
             </button>
           ) : (
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
               aria-label="Go back to landing page"
             >
@@ -198,7 +197,7 @@ export function RegisterForm() {
               <input id="register-name" type="text" placeholder="e.g. Tobi Ojo" value={values.name} onChange={(e) => handleChange('name', e.target.value)} onBlur={() => handleBlur('name')} className={`w-full h-[54px] px-3 lg:px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('name') ? 'border-destructive' : ''}`} />
               {getError('name') && <p className="text-sm text-destructive">{getError('name')}</p>}
             </div>
-            
+
             <div className="flex flex-col gap-2">
               <label htmlFor="register-email" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">Email Address</label>
               <input id="register-email" type="email" placeholder="you@example.com" value={values.email} onChange={(e) => handleChange('email', e.target.value)} onBlur={() => handleBlur('email')} className={`w-full h-[54px] px-3 lg:px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('email') ? 'border-destructive' : ''}`} />
@@ -211,8 +210,8 @@ export function RegisterForm() {
                 <input id="register-password" type={showPassword ? 'text' : 'password'} placeholder="Min 8 chars, 1 uppercase, 1 number" value={values.password} onChange={(e) => handleChange('password', e.target.value)} onBlur={() => handleBlur('password')} className={`w-full h-[54px] px-3 lg:px-4 pr-12 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('password') ? 'border-destructive' : ''}`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-500 transition-colors">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.544 11.045C21.848 11.4713 22 11.6845 22 12C22 12.3155 21.848 12.5287 21.544 12.955C20.1779 14.8706 16.6892 19 12 19C7.31078 19 3.8221 14.8706 2.45604 12.955C2.15201 12.5287 2 12.3155 2 12C2 11.6845 2.15201 11.4713 2.45604 11.045C3.8221 9.12944 7.31078 5 12 5C16.6892 5 20.1779 9.12944 21.544 11.045Z" stroke="currentColor" strokeWidth="1.5"/>
-                    <path d="M15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12Z" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M21.544 11.045C21.848 11.4713 22 11.6845 22 12C22 12.3155 21.848 12.5287 21.544 12.955C20.1779 14.8706 16.6892 19 12 19C7.31078 19 3.8221 14.8706 2.45604 12.955C2.15201 12.5287 2 12.3155 2 12C2 11.6845 2.15201 11.4713 2.45604 11.045C3.8221 9.12944 7.31078 5 12 5C16.6892 5 20.1779 9.12944 21.544 11.045Z" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12Z" stroke="currentColor" strokeWidth="1.5" />
                     {showPassword && <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />}
                   </svg>
                 </button>
@@ -226,8 +225,8 @@ export function RegisterForm() {
                 <input id="register-confirm" type={showConfirm ? 'text' : 'password'} placeholder="Re-enter your password" value={values.confirmPassword} onChange={(e) => handleChange('confirmPassword', e.target.value)} onBlur={() => handleBlur('confirmPassword')} className={`w-full h-[54px] px-3 lg:px-4 pr-12 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal break-words focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('confirmPassword') ? 'border-destructive' : ''}`} />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-500 transition-colors">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.544 11.045C21.848 11.4713 22 11.6845 22 12C22 12.3155 21.848 12.5287 21.544 12.955C20.1779 14.8706 16.6892 19 12 19C7.31078 19 3.8221 14.8706 2.45604 12.955C2.15201 12.5287 2 12.3155 2 12C2 11.6845 2.15201 11.4713 2.45604 11.045C3.8221 9.12944 7.31078 5 12 5C16.6892 5 20.1779 9.12944 21.544 11.045Z" stroke="currentColor" strokeWidth="1.5"/>
-                    <path d="M15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12Z" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M21.544 11.045C21.848 11.4713 22 11.6845 22 12C22 12.3155 21.848 12.5287 21.544 12.955C20.1779 14.8706 16.6892 19 12 19C7.31078 19 3.8221 14.8706 2.45604 12.955C2.15201 12.5287 2 12.3155 2 12C2 11.6845 2.15201 11.4713 2.45604 11.045C3.8221 9.12944 7.31078 5 12 5C16.6892 5 20.1779 9.12944 21.544 11.045Z" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12Z" stroke="currentColor" strokeWidth="1.5" />
                     {showConfirm && <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />}
                   </svg>
                 </button>
@@ -253,11 +252,10 @@ export function RegisterForm() {
                   key={trackName}
                   type="button"
                   onClick={() => handleChange('track', trackName)}
-                  className={`w-full h-[64px] px-6 rounded-xl border-2 flex items-center justify-between transition-all duration-200 ${
-                    values.track === trackName 
-                      ? 'border-indigo-600 bg-indigo-50 shadow-sm' 
-                      : 'border-indigo-100 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
-                  }`}
+                  className={`w-full h-[64px] px-6 rounded-xl border-2 flex items-center justify-between transition-all duration-200 ${values.track === trackName
+                    ? 'border-indigo-600 bg-indigo-50 shadow-sm'
+                    : 'border-indigo-100 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
+                    }`}
                 >
                   <span className="text-[16px] lg:text-[18px] font-heading font-bold text-indigo-950">{trackName} Track</span>
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${values.track === trackName ? 'border-indigo-600' : 'border-indigo-200'}`}>
@@ -266,7 +264,7 @@ export function RegisterForm() {
                 </button>
               ))}
             </div>
-            
+
             <button type="button" onClick={handleNextStep2} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors">
               Continue
             </button>
