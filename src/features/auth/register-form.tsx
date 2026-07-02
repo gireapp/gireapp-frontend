@@ -133,8 +133,33 @@ export function RegisterForm() {
     };
   }, [state, router]);
 
+  // Calculate how many steps are completed (0 to 3) based on filled inputs
+  const filledCount = [values.name, values.email, values.password, values.confirmPassword].filter(v => v.trim().length > 0).length;
+  const currentStep = Math.min(filledCount, 3);
+
   return (
     <form action={formAction} className="space-y-5">
+      {/* Mobile Progress Bar (hidden on desktop) */}
+      <div className="lg:hidden w-full flex justify-center items-center pt-2 pb-6 relative">
+        <div className="relative flex items-center justify-between w-[102px]">
+          {/* Inactive line */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-indigo-200 rounded-full" />
+          {/* Active animated line */}
+          <div 
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-indigo-400 rounded-full transition-all duration-300 ease-in-out"
+            style={{ width: `${(currentStep / 3) * 100}%` }}
+          />
+          {/* Dots */}
+          {[0, 1, 2, 3].map((step) => (
+            <div 
+              key={step}
+              className={`w-2 h-2 rounded-full relative z-10 transition-colors duration-300 ease-in-out ${
+                step <= currentStep ? 'bg-indigo-800' : 'bg-indigo-200'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
       {/* Success state */}
       {state.success && (
         <div className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg" role="alert">
