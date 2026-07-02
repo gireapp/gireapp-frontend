@@ -39,13 +39,13 @@ export default function AuthLayout({
             />
           </Link>
 
-          <div className="flex-1 flex flex-col justify-center max-w-[460px] mb-24">
-            <h2 className="text-[56px] leading-[1.1] font-heading font-bold mb-8">
-              <span className="text-white">Get It </span>
+          <div className="flex-1 flex flex-col justify-center max-w-[460px] mt-24 mb-12">
+            <h2 className="text-[56px] leading-[1.1] font-heading font-bold mb-8 break-words">
+              <span className="text-indigo-50">Get It </span>
               <span className="text-coral-500">Right,<br /></span>
-              <span className="text-white">The First Time.</span>
+              <span className="text-indigo-50">The First Time.</span>
             </h2>
-            <p className="text-[20px] text-white font-normal mb-12">
+            <p className="text-[20px] text-indigo-200 font-sans font-normal mb-12 break-words">
               Your path to academic success shouldn’t be a guessing game. GIREAPP gives you the exact courses, mentorship and practice you need to excel at every stage.
             </p>
             <div className="flex flex-row items-center gap-4 lg:gap-5 text-indigo-200 text-[15px] font-sans font-normal">
@@ -67,7 +67,7 @@ export default function AuthLayout({
       </div>
 
       {/* ── Right: Auth form ── */}
-      <div className="flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-12 bg-white/85">
+      <div className="flex flex-col px-4 sm:px-8 md:px-12 lg:px-16 py-12 bg-white/85 overflow-y-auto max-h-screen">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8">
           <Link href="/" className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function AuthLayout({
           </Link>
         </div>
 
-        <div className="w-full max-w-md mx-auto">
+        <div className="w-full max-w-md mx-auto lg:mt-12 pb-12">
           {children}
         </div>
       </div>
