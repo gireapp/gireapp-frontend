@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────
-// GIREAPP — Register Page (M2: FE-AUTH-002)
-// Form: name, email, password, confirmation
-// Zod validation, disabled submit with spinner
-// ─────────────────────────────────────────────────
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RegisterForm } from '@/features/auth/register-form';
