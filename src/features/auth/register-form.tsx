@@ -146,8 +146,8 @@ export function RegisterForm() {
       )}
 
       {/* Name */}
-      <div className="space-y-1.5">
-        <label htmlFor="register-name" className="text-sm font-medium text-foreground">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="register-name" className="text-[20px] font-heading font-bold text-indigo-950">
           Full Name
         </label>
         <input
@@ -160,8 +160,8 @@ export function RegisterForm() {
           value={values.name}
           onChange={(e) => handleChange('name', e.target.value)}
           onBlur={() => handleBlur('name')}
-          className={`w-full px-4 py-3 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-            getError('name') ? 'border-destructive' : 'border-input'
+          className={`w-full h-[54px] px-4 rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+            getError('name') ? 'border-destructive' : ''
           }`}
           aria-describedby={getError('name') ? 'name-error' : undefined}
           aria-invalid={getError('name') ? 'true' : undefined}
@@ -174,8 +174,8 @@ export function RegisterForm() {
       </div>
 
       {/* Email */}
-      <div className="space-y-1.5">
-        <label htmlFor="register-email" className="text-sm font-medium text-foreground">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="register-email" className="text-[20px] font-heading font-bold text-indigo-950">
           Email Address
         </label>
         <input
@@ -188,8 +188,8 @@ export function RegisterForm() {
           value={values.email}
           onChange={(e) => handleChange('email', e.target.value)}
           onBlur={() => handleBlur('email')}
-          className={`w-full px-4 py-3 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-            getError('email') ? 'border-destructive' : 'border-input'
+          className={`w-full h-[54px] px-4 rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+            getError('email') ? 'border-destructive' : ''
           }`}
           aria-describedby={getError('email') ? 'email-error' : undefined}
           aria-invalid={getError('email') ? 'true' : undefined}
@@ -202,8 +202,8 @@ export function RegisterForm() {
       </div>
 
       {/* Password */}
-      <div className="space-y-1.5">
-        <label htmlFor="register-password" className="text-sm font-medium text-foreground">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="register-password" className="text-[20px] font-heading font-bold text-indigo-950">
           Password
         </label>
         <div className="relative">
@@ -217,8 +217,8 @@ export function RegisterForm() {
             value={values.password}
             onChange={(e) => handleChange('password', e.target.value)}
             onBlur={() => handleBlur('password')}
-            className={`w-full px-4 py-3 pr-12 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-              getError('password') ? 'border-destructive' : 'border-input'
+            className={`w-full h-[54px] px-4 pr-12 rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+              getError('password') ? 'border-destructive' : ''
             }`}
             aria-describedby={getError('password') ? 'password-error' : undefined}
             aria-invalid={getError('password') ? 'true' : undefined}
@@ -226,7 +226,7 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-500 transition-colors"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
@@ -240,8 +240,8 @@ export function RegisterForm() {
       </div>
 
       {/* Confirm Password */}
-      <div className="space-y-1.5">
-        <label htmlFor="register-confirm" className="text-sm font-medium text-foreground">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="register-confirm" className="text-[20px] font-heading font-bold text-indigo-950">
           Confirm Password
         </label>
         <div className="relative">
@@ -255,8 +255,8 @@ export function RegisterForm() {
             value={values.confirmPassword}
             onChange={(e) => handleChange('confirmPassword', e.target.value)}
             onBlur={() => handleBlur('confirmPassword')}
-            className={`w-full px-4 py-3 pr-12 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow ${
-              getError('confirmPassword') ? 'border-destructive' : 'border-input'
+            className={`w-full h-[54px] px-4 pr-12 rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[14px] font-sans focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${
+              getError('confirmPassword') ? 'border-destructive' : ''
             }`}
             aria-describedby={getError('confirmPassword') ? 'confirm-error' : undefined}
             aria-invalid={getError('confirmPassword') ? 'true' : undefined}
@@ -264,7 +264,7 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowConfirm(!showConfirm)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-500 transition-colors"
             aria-label={showConfirm ? 'Hide password' : 'Show password'}
           >
             {showConfirm ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
@@ -289,11 +289,11 @@ export function RegisterForm() {
         type="submit"
         disabled={isPending || state.success}
         id="register-submit"
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
             Creating account...
           </>
         ) : (
@@ -302,12 +302,13 @@ export function RegisterForm() {
       </button>
 
       {/* Login link */}
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[14px] font-sans text-indigo-800 mt-3">
         Already have an account?{' '}
-        <Link href="/login" className="text-primary font-medium hover:underline">
+        <Link href="/login" className="text-coral-500 font-normal hover:underline ml-1">
           Log in
         </Link>
       </p>
+
     </form>
   );
 }

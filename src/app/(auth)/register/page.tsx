@@ -6,6 +6,7 @@
 
 import type { Metadata } from 'next';
 import { RegisterForm } from '@/features/auth/register-form';
+import { UserPlus } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Create Account',
@@ -14,11 +15,18 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-h2 text-foreground">Create your account</h1>
-        <p className="text-body-sm text-muted-foreground">
-          Join GIREAPP and start your personalised learning journey
+    <div className="w-full max-w-[490px] mx-auto flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50/50 flex items-center justify-center text-indigo-500">
+            <UserPlus className="w-5 h-5" strokeWidth={2.5} />
+          </div>
+          <h1 className="text-[28px] font-heading font-bold text-indigo-950">
+            Create your account
+          </h1>
+        </div>
+        <p className="text-[16px] text-indigo-950 ml-[52px]">
+          Join GIREAPP and start your personalized learning journey
         </p>
       </div>
 
