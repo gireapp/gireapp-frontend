@@ -25,3 +25,6 @@ yarn-error.log*
 # env files
 .env*.local
 .env
+
+# assets
+Sign up.png

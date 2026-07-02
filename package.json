@@ -4,7 +4,7 @@
   "private": true,
   "description": "GIREAPP — Frontend (Next.js 15 + Tailwind + shadcn/ui)",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
