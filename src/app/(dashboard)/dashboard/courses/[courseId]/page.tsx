@@ -17,9 +17,10 @@ import { EnrollButton } from '@/features/courses/enroll-button';
 import { API_PATHS } from '@gireapp/shared';
 import type { CourseDetail } from '@gireapp/shared';
 
-export async function generateMetadata({ params }: { params: { courseId: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ courseId: string }> }) {
+  const { courseId } = await params;
   try {
-    const { data: course } = await serverApiClient<CourseDetail>(API_PATHS.COURSES.DETAIL(params.courseId));
+    const { data: course } = await serverApiClient<CourseDetail>(API_PATHS.COURSES.DETAIL(courseId));
     return { title: `${course?.title ?? 'Course'} | GIREAPP` };
   } catch (error) {
     return { title: 'Course | GIREAPP' };
@@ -41,11 +42,12 @@ async function getCourse(courseId: string) {
   }
 }
 
-export default async function CourseOverviewPage({ params }: { params: { courseId: string } }) {
+export default async function CourseOverviewPage({ params }: { params: Promise<{ courseId: string }> }) {
+  const { courseId } = await params;
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const course = await getCourse(params.courseId);
+  const course = await getCourse(courseId);
 
   if (!course || !course.published) notFound();
 

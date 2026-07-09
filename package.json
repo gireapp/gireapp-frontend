@@ -18,7 +18,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@gireapp/shared": "file:../gireapp-backend/shared",
+    "@gireapp/shared": "file:./shared",
     "@hookform/resolvers": "^4.1.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.0",

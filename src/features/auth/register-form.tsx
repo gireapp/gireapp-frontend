@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, ChevronDown } from 'lucide-react';
 import { registerAction } from '@/features/auth/actions';
 import type { ApiResponse } from '@gireapp/shared';
 import { toast } from 'sonner';
@@ -18,6 +18,57 @@ const emailSchema = z.string().min(1, 'Email is required').email('Please enter a
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password must be under 128 characters').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Must contain at least one uppercase letter, one lowercase letter, and one number');
 
 type FieldErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword', string>>;
+
+function SecondaryIcon() {
+  return (
+    <svg className="h-8 w-8" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M8 4.50001C11.6907 4.49485 15.2527 5.83063 18 8.25V31.5C15.2527 29.0806 11.6907 27.7449 8 27.75C5.65698 27.75 4.48548 27.75 3.96789 27.4188C3.65715 27.2199 3.53019 27.0929 3.33129 26.7821C3 26.2646 3 25.3411 3 23.4943V9.60483C3 7.46315 3 6.39231 3.82311 5.52429C4.64622 4.65627 5.48885 4.61148 7.17408 4.5219C7.4475 4.50736 7.72287 4.50001 8 4.50001Z" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M28.0001 4.50001C24.3093 4.49485 20.7473 5.83063 18 8.25V31.5C20.7473 29.0806 24.3093 27.7449 28.0001 27.75C30.3431 27.75 31.5146 27.75 32.0321 27.4188C32.3429 27.2199 32.4698 27.0929 32.6687 26.7821C33 26.2646 33 25.3411 33 23.4943V9.60483C33 7.46315 33 6.39231 32.1769 5.52429C31.3537 4.65627 30.5112 4.61148 28.826 4.5219C28.5525 4.50736 28.2771 4.50001 28.0001 4.50001Z" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TertiaryIcon() {
+  return (
+    <svg className="h-8 w-8" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M33 13.5V22.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M27 18V22.6004C27 24.2 27 24.9997 26.6055 25.6606L26.5974 25.6739C26.1991 26.3327 25.4764 26.7357 24.0309 27.5416C21.0967 29.1777 19.6296 29.9958 18.0163 30H17.9837C16.3704 29.9958 14.9033 29.1777 11.9691 27.5416C10.5236 26.7357 9.80087 26.3327 9.4026 25.6739L9.39458 25.6606C9 24.9997 9 24.2 9 22.6004V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.7821 7.83378L6.60967 10.8111C4.20322 11.9719 3 12.5522 3 13.4869C3 14.4215 4.20322 15.0019 6.60967 16.1626L12.897 19.1953C15.3912 20.3985 16.6383 21 17.9724 21C19.3066 21 20.5538 20.3985 23.048 19.1953L29.4579 16.1034C31.8211 14.9636 33.0027 14.3936 33 13.456C32.9973 12.5183 31.8219 11.9598 29.471 10.8429C27.3269 9.8241 25.3027 8.88774 23.1495 7.86276C20.536 6.61864 19.2292 5.99658 17.9029 6.00001C16.5768 6.00343 15.3119 6.61356 12.7821 7.83378Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ProfessionalIcon() {
+  return (
+    <svg className="h-8 w-8" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M18 25.5C15.4896 25.5 13.3046 27.3975 12.1765 30.1968C11.6377 31.5338 12.4108 33 13.4382 33H22.5618C23.5891 33 24.3623 31.5338 23.8235 30.1968C22.6955 27.3975 20.5104 25.5 18 25.5Z" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+      <path d="M27.75 7.5H29.5533C31.3547 7.5 32.2552 7.5 32.7252 8.06604C33.195 8.63208 32.9997 9.48169 32.609 11.1809L32.0227 13.7296C31.1413 17.5629 27.9164 20.4132 24 21" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.25 7.5H6.44669C4.64538 7.5 3.74474 7.5 3.27486 8.06604C2.80499 8.63208 3.00036 9.48169 3.39113 11.1809L3.97722 13.7296C4.85871 17.5629 8.08368 20.4132 12 21" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18 25.5C22.5312 25.5 26.3475 18.5069 27.4946 8.98634C27.8118 6.35337 27.9705 5.0369 27.1302 4.01844C26.2901 3 24.9335 3 22.2201 3H13.7799C11.0666 3 9.71 3 8.86976 4.01844C8.02952 5.0369 8.18813 6.35337 8.50538 8.98634C9.6525 18.5069 13.4688 25.5 18 25.5Z" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const TRACKS = [
+  { id: 'Secondary', title: 'Secondary', description: 'For secondary school students', detail: '(SS1 -SS3)', border: 'border-indigo-800', dot: 'bg-indigo-800', iconSelected: 'text-indigo-500', Icon: SecondaryIcon },
+  { id: 'Tertiary', title: 'Tertiary', description: 'For tertiary institution students', detail: 'Undergraduates and Postgraduates', border: 'border-coral-500', dot: 'bg-coral-500', iconSelected: 'text-coral-500', Icon: TertiaryIcon },
+  { id: 'Professional', title: 'Professional', description: 'For industry professionals', detail: 'Career Advancement Track', border: 'border-green-500', dot: 'bg-green-500', iconSelected: 'text-green-500', Icon: ProfessionalIcon },
+] as const;
+
+const CUSTOMIZE_FIELDS = [
+  { id: 'department', label: 'Department', placeholder: 'Select Department', options: ['Science', 'Arts / Humanities', 'Commercial', 'Technology'] },
+  { id: 'level', label: 'Class / Level', placeholder: 'Select Class/Level', options: ['SS1', 'SS2', 'SS3', '100 Level', '200 Level', '300 Level', '400 Level', 'Professional'] },
+  { id: 'focusArea', label: 'Area of focus (optional)', placeholder: 'Select Focus', options: ['WAEC Prep', 'JAMB Prep', 'NECO Prep', 'Career Advancement', 'General Study'] },
+] as const;
+
+function SummaryCheck() {
+  return (
+    <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.667" fill="#C7D2FE" />
+      <path d="M5.333 8.333L7 10l3.333-3.333" stroke="#3730A3" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerAction, initialState);
@@ -94,10 +145,14 @@ export function RegisterForm() {
     else toast.error('Please select a track to continue.');
   };
 
+  const handleNextStep3 = () => {
+    if (values.department && values.level) setStep(4);
+    else toast.error('Please select your department and class/level to continue.');
+  };
+
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     if (state.success) {
-      setStep(4);
       toast.success('Account created! Redirecting to login...', { duration: 5000 });
       timer = setTimeout(() => router.push('/login'), 3000);
     }
@@ -134,41 +189,41 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {/* Dynamic Header */}
-      <div className="inline-flex w-full max-w-[466px] flex-col items-start gap-2 mb-8">
-        <div className="inline-flex items-center justify-start gap-3">
-          {step > 1 && step < 4 ? (
-            <button
-              type="button"
-              onClick={() => setStep(step - 1)}
-              className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
-              aria-label="Go back"
-            >
-              {renderBackArrow()}
-            </button>
-          ) : (
-            <Link
-              href="/"
-              className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
-              aria-label="Go back to landing page"
-            >
-              {renderBackArrow()}
-            </Link>
-          )}
-          <h1 className="flex flex-col justify-center text-[20px] lg:text-[28px] font-bold text-indigo-950 font-heading break-words">
-            {step === 1 && 'Create your account'}
-            {step === 2 && 'Select your track'}
-            {step === 3 && 'Customize your path'}
-            {step === 4 && 'Account Created!'}
-          </h1>
+      {/* Dynamic Header (steps 1-3; step 4 has its own centered layout) */}
+      {step < 4 && (
+        <div className="inline-flex w-full max-w-[466px] flex-col items-start gap-2 mb-8">
+          <div className="inline-flex items-center justify-start gap-3">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
+                aria-label="Go back"
+              >
+                {renderBackArrow()}
+              </button>
+            ) : (
+              <Link
+                href="/"
+                className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
+                aria-label="Go back to landing page"
+              >
+                {renderBackArrow()}
+              </Link>
+            )}
+            <h1 className="flex flex-col justify-center text-[20px] lg:text-[28px] font-bold text-indigo-950 font-heading break-words">
+              {step === 1 && 'Create your account'}
+              {step === 2 && 'Choose your learning track'}
+              {step === 3 && 'Customize your path'}
+            </h1>
+          </div>
+          <p className="flex flex-col justify-center self-stretch text-[14px] lg:text-[16px] font-normal text-indigo-950 break-words">
+            {step === 1 && 'Let’s get you started on your learning journey'}
+            {step === 2 && 'This helps us personalize your experience'}
+            {step === 3 && 'Choose your department, class and area of focus'}
+          </p>
         </div>
-        <p className="flex flex-col justify-center self-stretch text-[14px] lg:text-[16px] font-normal text-indigo-950 break-words">
-          {step === 1 && 'Let’s get you started on your learning journey'}
-          {step === 2 && 'This helps us personalize your experience'}
-          {step === 3 && 'Choose your department, class and area of focus'}
-          {step === 4 && 'You are all set to begin your journey.'}
-        </p>
-      </div>
+      )}
 
       {/* Form Content */}
       <form action={formAction} className="w-full relative">
@@ -246,72 +301,31 @@ export function RegisterForm() {
         {/* STEP 2: Track Selection */}
         {step === 2 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out flex flex-col gap-6">
-            
-            {/* Secondary Track */}
-            <button
-              type="button"
-              onClick={() => handleChange('track', 'Secondary')}
-              className={`w-full p-4 rounded-lg flex items-center gap-4 text-left transition-all duration-200 outline-none ${
-                values.track === 'Secondary'
-                  ? 'border-2 border-[#3730A3] bg-indigo-50/50 shadow-sm'
-                  : 'border-[0.5px] border-[#3730A3] bg-transparent hover:bg-indigo-50/30'
-              }`}
-            >
-              <svg className="w-8 h-8 shrink-0" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M8 4.50001C11.6907 4.49485 15.2527 5.83063 18 8.25V31.5C15.2527 29.0806 11.6907 27.7449 8 27.75C5.65698 27.75 4.48548 27.75 3.96789 27.4188C3.65715 27.2199 3.53019 27.0929 3.33129 26.7821C3 26.2646 3 25.3411 3 23.4943V9.60483C3 7.46315 3 6.39231 3.82311 5.52429C4.64622 4.65627 5.48885 4.61148 7.17408 4.5219C7.4475 4.50736 7.72287 4.50001 8 4.50001Z" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M28.0001 4.50001C24.3093 4.49485 20.7473 5.83063 18 8.25V31.5C20.7473 29.0806 24.3093 27.7449 28.0001 27.75C30.3431 27.75 31.5146 27.75 32.0321 27.4188C32.3429 27.2199 32.4698 27.0929 32.6687 26.7821C33 26.2646 33 25.3411 33 23.4943V9.60483C33 7.46315 33 6.39231 32.1769 5.52429C31.3537 4.65627 30.5112 4.61148 28.826 4.5219C28.5525 4.50736 28.2771 4.50001 28.0001 4.50001Z" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <div className="flex flex-col gap-2">
-                <span className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 leading-none">Secondary</span>
-                <span className="text-[14px] font-sans font-normal text-indigo-950 leading-none">For secondary school students</span>
-                <span className="text-[12px] font-sans font-normal text-[#6366F1] leading-none">(SS1 -SS3)</span>
-              </div>
-            </button>
-
-            {/* Tertiary Track */}
-            <button
-              type="button"
-              onClick={() => handleChange('track', 'Tertiary')}
-              className={`w-full p-4 rounded-lg flex items-center gap-4 text-left transition-all duration-200 outline-none ${
-                values.track === 'Tertiary'
-                  ? 'border-2 border-[#F97316] bg-orange-50/50 shadow-sm'
-                  : 'border-[0.5px] border-[#F97316] bg-transparent hover:bg-orange-50/30'
-              }`}
-            >
-              <svg className="w-8 h-8 shrink-0" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M33 13.5V22.5" stroke="#818CF8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M27 18V22.6004C27 24.2 27 24.9997 26.6055 25.6606L26.5974 25.6739C26.1991 26.3327 25.4764 26.7357 24.0309 27.5416C21.0967 29.1777 19.6296 29.9958 18.0163 30H17.9837C16.3704 29.9958 14.9033 29.1777 11.9691 27.5416C10.5236 26.7357 9.80087 26.3327 9.4026 25.6739L9.39458 25.6606C9 24.9997 9 24.2 9 22.6004V18" stroke="#818CF8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12.7821 7.83378L6.60967 10.8111C4.20322 11.9719 3 12.5522 3 13.4869C3 14.4215 4.20322 15.0019 6.60967 16.1626L12.897 19.1953C15.3912 20.3985 16.6383 21 17.9724 21C19.3066 21 20.5538 20.3985 23.048 19.1953L29.4579 16.1034C31.8211 14.9636 33.0027 14.3936 33 13.456C32.9973 12.5183 31.8219 11.9598 29.471 10.8429C27.3269 9.8241 25.3027 8.88774 23.1495 7.86276C20.536 6.61864 19.2292 5.99658 17.9029 6.00001C16.5768 6.00343 15.3119 6.61356 12.7821 7.83378Z" stroke="#818CF8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <div className="flex flex-col gap-2">
-                <span className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 leading-none">Tertiary</span>
-                <span className="text-[14px] font-sans font-normal text-indigo-950 leading-none">For tertiary institution students</span>
-                <span className="text-[12px] font-sans font-normal text-[#6366F1] leading-none">Undergraduates and Postgraduates</span>
-              </div>
-            </button>
-
-            {/* Professional Track */}
-            <button
-              type="button"
-              onClick={() => handleChange('track', 'Professional')}
-              className={`w-full p-4 rounded-lg flex items-center gap-4 text-left transition-all duration-200 outline-none ${
-                values.track === 'Professional'
-                  ? 'border-2 border-[#22C55E] bg-green-50/50 shadow-sm'
-                  : 'border-[0.5px] border-[#22C55E] bg-transparent hover:bg-green-50/30'
-              }`}
-            >
-              <svg className="w-8 h-8 shrink-0" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M18 25.5C15.4896 25.5 13.3046 27.3975 12.1765 30.1968C11.6377 31.5338 12.4108 33 13.4382 33H22.5618C23.5891 33 24.3623 31.5338 23.8235 30.1968C22.6955 27.3975 20.5104 25.5 18 25.5Z" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round"/>
-                <path d="M27.75 7.5H29.5533C31.3547 7.5 32.2552 7.5 32.7252 8.06604C33.195 8.63208 32.9997 9.48169 32.609 11.1809L32.0227 13.7296C31.1413 17.5629 27.9164 20.4132 24 21" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8.25 7.5H6.44669C4.64538 7.5 3.74474 7.5 3.27486 8.06604C2.80499 8.63208 3.00036 9.48169 3.39113 11.1809L3.97722 13.7296C4.85871 17.5629 8.08368 20.4132 12 21" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M18 25.5C22.5312 25.5 26.3475 18.5069 27.4946 8.98634C27.8118 6.35337 27.9705 5.0369 27.1302 4.01844C26.2901 3 24.9335 3 22.2201 3H13.7799C11.0666 3 9.71 3 8.86976 4.01844C8.02952 5.0369 8.18813 6.35337 8.50538 8.98634C9.6525 18.5069 13.4688 25.5 18 25.5Z" stroke="#818CF8" strokeWidth="2.25" strokeLinecap="round"/>
-              </svg>
-              <div className="flex flex-col gap-2">
-                <span className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 leading-none">Professional</span>
-                <span className="text-[14px] font-sans font-normal text-indigo-950 leading-none">For industry professionals</span>
-                <span className="text-[12px] font-sans font-normal text-[#6366F1] leading-none">Career Advancement Track</span>
-              </div>
-            </button>
+            {TRACKS.map((track) => {
+              const selected = values.track === track.id;
+              const { Icon } = track;
+              return (
+                <button
+                  key={track.id}
+                  type="button"
+                  onClick={() => handleChange('track', track.id)}
+                  aria-pressed={selected}
+                  className={`w-full p-4 rounded-lg border-[0.5px] flex items-center gap-4 text-left transition-all duration-200 outline-none ${
+                    selected ? 'border-transparent bg-indigo-200' : `bg-transparent ${track.border} hover:bg-indigo-50/40`
+                  }`}
+                >
+                  <span className={`shrink-0 ${selected ? track.iconSelected : 'text-indigo-500'}`}>
+                    <Icon />
+                  </span>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 leading-none">{track.title}</span>
+                    <span className="text-[14px] font-sans font-normal text-indigo-950 leading-none">{track.description}</span>
+                    <span className="text-[12px] font-sans font-normal text-indigo-500 leading-none">{track.detail}</span>
+                  </div>
+                  {selected && <span className={`ml-auto h-2.5 w-2.5 shrink-0 rounded-full ${track.dot}`} aria-hidden="true" />}
+                </button>
+              );
+            })}
 
             <button type="button" onClick={handleNextStep2} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-2 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors">
               Continue
@@ -322,54 +336,80 @@ export function RegisterForm() {
         {/* STEP 3: Customize Path */}
         {step === 3 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out space-y-6 lg:space-y-8">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="register-dept" className="text-[16px] font-heading font-bold text-indigo-950 break-words">Department</label>
-              <div className="relative w-full h-[54px] bg-[#E0E7FF] rounded-lg border border-[#C7D2FE] flex items-center px-3 lg:px-4 focus-within:ring-2 focus-within:ring-indigo-400">
-                <input id="register-dept" type="text" placeholder="Science" value={values.department} onChange={(e) => handleChange('department', e.target.value)} className="w-full h-full bg-transparent border-none text-[#818CF8] placeholder:text-[#818CF8] text-[12px] lg:text-[14px] font-sans font-normal outline-none focus:ring-0 pr-8" />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5">
-                  <div className="w-[10px] h-[5px] left-[5px] top-[7.5px] absolute outline outline-[1.5px] outline-[#818CF8] outline-offset-[-0.75px]" />
+            {CUSTOMIZE_FIELDS.map((field) => (
+              <div key={field.id} className="flex flex-col gap-2">
+                <label htmlFor={`register-${field.id}`} className="text-[16px] font-heading font-bold text-indigo-950 break-words">{field.label}</label>
+                <div className="relative">
+                  <select
+                    id={`register-${field.id}`}
+                    value={values[field.id]}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                    className="w-full h-[54px] px-3 pr-10 bg-indigo-100 rounded-lg border border-indigo-200 text-indigo-400 text-[12px] lg:text-[14px] font-sans appearance-none outline-none cursor-pointer focus:ring-2 focus:ring-indigo-400 transition-shadow"
+                  >
+                    <option value="" disabled>{field.placeholder}</option>
+                    {field.options.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-400" aria-hidden="true" />
                 </div>
               </div>
-            </div>
+            ))}
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="register-level" className="text-[16px] font-heading font-bold text-indigo-950 break-words">Class / Level</label>
-              <div className="relative w-full h-[54px] bg-[#E0E7FF] rounded-lg border border-[#C7D2FE] flex items-center px-3 lg:px-4 focus-within:ring-2 focus-within:ring-indigo-400">
-                <input id="register-level" type="text" placeholder="SS3" value={values.level} onChange={(e) => handleChange('level', e.target.value)} className="w-full h-full bg-transparent border-none text-[#818CF8] placeholder:text-[#818CF8] text-[12px] lg:text-[14px] font-sans font-normal outline-none focus:ring-0 pr-8" />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5">
-                  <div className="w-[10px] h-[5px] left-[5px] top-[7.5px] absolute outline outline-[1.5px] outline-[#818CF8] outline-offset-[-0.75px]" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="register-focus" className="text-[16px] font-heading font-bold text-indigo-950 break-words">Area of focus (optional)</label>
-              <div className="relative w-full h-[54px] bg-[#E0E7FF] rounded-lg border border-[#C7D2FE] flex items-center px-3 lg:px-4 focus-within:ring-2 focus-within:ring-indigo-400">
-                <input id="register-focus" type="text" placeholder="WAEC Prep" value={values.focusArea} onChange={(e) => handleChange('focusArea', e.target.value)} className="w-full h-full bg-transparent border-none text-[#818CF8] placeholder:text-[#818CF8] text-[12px] lg:text-[14px] font-sans font-normal outline-none focus:ring-0 pr-8" />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5">
-                  <div className="w-[10px] h-[5px] left-[5px] top-[7.5px] absolute outline outline-[1.5px] outline-[#818CF8] outline-offset-[-0.75px]" />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" disabled={isPending} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-[#F97316] text-[#EEF2FF] rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-[#EA580C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              {isPending ? (
-                <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Creating account...</>
-              ) : 'Continue'}
+            <button type="button" onClick={handleNextStep3} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors">
+              Continue
             </button>
           </div>
         )}
 
-        {/* STEP 4: Success Confirmation */}
+        {/* STEP 4: Review & Confirm */}
         {step === 4 && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-500 ease-out flex flex-col items-center justify-center text-center py-12">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-              <CheckCircle className="w-10 h-10 text-emerald-600" />
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out flex flex-col gap-6">
+            <div className="flex justify-center">
+              <svg className="h-24 w-24" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="80" cy="80" r="66.667" fill="#3730A3" />
+                <path d="M56 82L72 98L104 64" stroke="#F97316" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-            <h2 className="text-[24px] font-heading font-bold text-indigo-950 mb-4">Registration Successful!</h2>
-            <p className="text-[16px] text-indigo-800 font-sans max-w-[300px]">
-              Your personalized learning journey is ready. Please check your email to verify your account.
-            </p>
+
+            <div className="flex flex-col gap-1">
+              <h2 className="text-[20px] lg:text-[24px] font-heading font-bold text-indigo-950">
+                {values.name.trim() ? `You’re all set, ${values.name.trim().split(' ')[0]?.toUpperCase()}!` : 'You’re all set!'}
+              </h2>
+              <p className="text-[14px] lg:text-[16px] font-sans text-indigo-950">Your dashboard is ready.</p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <SummaryCheck />
+                <span className="text-[14px] font-sans text-indigo-950">Track: {values.track}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <SummaryCheck />
+                <span className="text-[14px] font-sans text-indigo-950">Department: {values.department}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <SummaryCheck />
+                <span className="text-[14px] font-sans text-indigo-950">Class: {values.level}</span>
+              </div>
+              {values.focusArea && (
+                <div className="flex items-center gap-2">
+                  <SummaryCheck />
+                  <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-4 mt-2">
+              <button type="submit" disabled={isPending} className="flex-1 flex items-center justify-center gap-2 h-[54px] lg:h-[56px] bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                {isPending ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Creating...</>
+                ) : 'Go to Dashboard'}
+              </button>
+              <button type="button" onClick={() => setStep(3)} disabled={isPending} className="flex-1 flex items-center justify-center h-[54px] lg:h-[56px] border border-indigo-800 text-indigo-800 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-indigo-50 transition-colors disabled:opacity-50">
+                Back
+              </button>
+            </div>
           </div>
         )}
       </form>

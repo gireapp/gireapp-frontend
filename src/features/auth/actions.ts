@@ -5,6 +5,9 @@ import { setSessionToken, clearSessionToken } from '@/lib/session';
 import {
   registerSchema,
   loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  onboardingSchema,
 } from '@gireapp/shared';
 import type { ApiResponse } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
@@ -19,6 +22,10 @@ export async function registerAction(
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     confirmPassword: formData.get('confirmPassword') as string,
+    track: formData.get('track') as string,
+    department: formData.get('department') as string,
+    level: formData.get('level') as string,
+    focusArea: formData.get('focusArea') as string,
   };
 
   const result = registerSchema.safeParse(raw);
@@ -106,4 +113,121 @@ export async function logoutAction() {
   } catch (error) {}
   await clearSessionToken();
   redirect('/');
+}
+
+export async function forgotPasswordAction(
+  _prevState: ApiResponse,
+  formData: FormData
+): Promise<ApiResponse> {
+  const raw = {
+    email: formData.get('email') as string,
+  };
+
+  const result = forgotPasswordSchema.safeParse(raw);
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    await serverApiClient(API_PATHS.AUTH.FORGOT_PASSWORD, {
+      method: 'POST',
+      body: JSON.stringify(result.data),
+    });
+
+    // Always return success to prevent email enumeration
+    return { success: true };
+  } catch (error) {
+    // Still return success to prevent email enumeration
+    return { success: true };
+  }
+}
+
+export async function resetPasswordAction(
+  _prevState: ApiResponse,
+  formData: FormData
+): Promise<ApiResponse> {
+  const raw = {
+    token: formData.get('token') as string,
+    password: formData.get('password') as string,
+    confirmPassword: formData.get('confirmPassword') as string,
+  };
+
+  const result = resetPasswordSchema.safeParse(raw);
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    await serverApiClient(API_PATHS.AUTH.RESET_PASSWORD, {
+      method: 'POST',
+      body: JSON.stringify(result.data),
+    });
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message, errors: error.fieldErrors };
+    }
+    return { success: false, error: 'Failed to reset password. Please try again.' };
+  }
+}
+
+export async function completeOnboardingAction(
+  _prevState: ApiResponse,
+  formData: FormData
+): Promise<ApiResponse> {
+  const raw = {
+    academicLevel: formData.get('academicLevel') as string,
+    department: formData.get('department') as string,
+    moodTheme: formData.get('moodTheme') as string,
+  };
+
+  const result = onboardingSchema.safeParse(raw);
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    const { data } = await serverApiClient<{ token?: string }>(API_PATHS.AUTH.ONBOARDING, {
+      method: 'POST',
+      body: JSON.stringify(result.data),
+    });
+
+    // If backend returns an updated token (with onboarding flag set), refresh the session
+    if (data.token) {
+      await setSessionToken(data.token);
+    }
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message, errors: error.fieldErrors };
+    }
+    return { success: false, error: 'Failed to save preferences. Please try again.' };
+  }
+}
+
+export async function verifyEmailAction(token: string): Promise<ApiResponse> {
+  try {
+    const { data } = await serverApiClient<{ message?: string }>(API_PATHS.AUTH.VERIFY_EMAIL, {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Verification failed. The link may be invalid or expired.' };
+  }
 }
