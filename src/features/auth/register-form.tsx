@@ -59,7 +59,7 @@ const TRACKS = [
 const CUSTOMIZE_FIELDS = [
   { id: 'department', label: 'Department', placeholder: 'Select Department', options: ['Science', 'Arts / Humanities', 'Commercial', 'Technology'] },
   { id: 'level', label: 'Class / Level', placeholder: 'Select Class/Level', options: ['SS1', 'SS2', 'SS3', '100 Level', '200 Level', '300 Level', '400 Level', 'Professional'] },
-  { id: 'focusArea', label: 'Area of focus (optional)', placeholder: 'Select Focus', options: ['WAEC Prep', 'JAMB Prep', 'NECO Prep', 'Career Advancement', 'General Study'] },
+  { id: 'focusArea', label: 'Area of focus', placeholder: 'Select Focus', options: ['WAEC Prep', 'JAMB Prep', 'NECO Prep', 'Career Advancement', 'General Study'] },
 ] as const;
 
 function SummaryCheck() {
@@ -147,8 +147,8 @@ export function RegisterForm() {
   };
 
   const handleNextStep3 = () => {
-    if (values.department && values.level) setStep(4);
-    else toast.error('Please select your department and class/level to continue.');
+    if (values.department && values.level && values.focusArea) setStep(4);
+    else toast.error('Please select your department, class/level and area of focus to continue.');
   };
 
   useEffect(() => {
@@ -394,12 +394,10 @@ export function RegisterForm() {
                 <SummaryCheck />
                 <span className="text-[14px] font-sans text-indigo-950">Class: {values.level}</span>
               </div>
-              {values.focusArea && (
-                <div className="flex items-center gap-2">
-                  <SummaryCheck />
-                  <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <SummaryCheck />
+                <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
+              </div>
             </div>
 
             <div className="flex gap-4 mt-2">
