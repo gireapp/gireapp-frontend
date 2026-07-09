@@ -366,8 +366,9 @@ export function RegisterForm() {
         {/* STEP 4: Review & Confirm */}
         {step === 4 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out flex flex-col gap-6">
-            <div className="flex justify-center">
-              <svg className="h-24 w-24" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <div className="relative flex justify-center">
+              <Image src="/confetti.svg" alt="" aria-hidden width={346} height={194} className="pointer-events-none absolute left-1/2 top-1/2 w-[288px] h-auto max-w-none -translate-x-1/2 -translate-y-1/2 select-none" />
+              <svg className="relative h-24 w-24" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="80" cy="80" r="66.667" fill="#3730A3" />
                 <path d="M56 82L72 98L104 64" stroke="#F97316" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
