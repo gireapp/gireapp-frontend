@@ -4,63 +4,82 @@
 // metadata, and theme support
 // ─────────────────────────────────────────────────
 
-import type { Metadata, Viewport } from 'next';
-import { Outfit, JetBrains_Mono } from 'next/font/google';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/components/shared/theme-provider';
-import { CookieConsent } from '@/components/shared/cookie-consent';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import {
+  Outfit,
+  JetBrains_Mono,
+  Inter,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
+import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/shared/theme-provider";
+import { CookieConsent } from "@/components/shared/cookie-consent";
+import "./globals.css";
 
 // ── Fonts ──
 
 const outfit = Outfit({
-  subsets: ['latin'],
-  variable: '--font-outfit',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
 });
 
 // ── Metadata (SEO) ──
 
 export const metadata: Metadata = {
   title: {
-    default: 'GIREAPP — Get It Right Edu App',
-    template: '%s | GIREAPP',
+    default: "GIREAPP — Get It Right Edu App",
+    template: "%s | GIREAPP",
   },
   description:
-    'Enabling Academic Excellence Across Africa. Personalised learning dashboards for Secondary, Tertiary, and Professional students with gamified assessments and mentorship.',
+    "Enabling Academic Excellence Across Africa. Personalised learning dashboards for Secondary, Tertiary, and Professional students with gamified assessments and mentorship.",
   keywords: [
-    'education',
-    'e-learning',
-    'Africa',
-    'LMS',
-    'academic excellence',
-    'GIREAPP',
-    'online courses',
-    'student portal',
-    'gamification',
-    'mentorship',
+    "education",
+    "e-learning",
+    "Africa",
+    "LMS",
+    "academic excellence",
+    "GIREAPP",
+    "online courses",
+    "student portal",
+    "gamification",
+    "mentorship",
   ],
-  authors: [{ name: 'GIREAPP Team' }],
-  creator: 'GIREAPP',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  authors: [{ name: "GIREAPP Team" }],
+  creator: "GIREAPP",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  ),
   openGraph: {
-    type: 'website',
-    locale: 'en_NG',
-    siteName: 'GIREAPP',
-    title: 'GIREAPP — Enabling Academic Excellence Across Africa',
+    type: "website",
+    locale: "en_NG",
+    siteName: "GIREAPP",
+    title: "GIREAPP — Enabling Academic Excellence Across Africa",
     description:
-      'Personalised learning paths with departmentalised dashboards, gamified assessments, and integrated mentorship.',
+      "Personalised learning paths with departmentalised dashboards, gamified assessments, and integrated mentorship.",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'GIREAPP — Get It Right Edu App',
-    description: 'Enabling Academic Excellence Across Africa',
+    card: "summary_large_image",
+    title: "GIREAPP — Get It Right Edu App",
+    description: "Enabling Academic Excellence Across Africa",
   },
   robots: {
     index: true,
@@ -70,10 +89,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#3730A3' },
-    { media: '(prefers-color-scheme: dark)', color: '#1E1B4B' },
+    { media: "(prefers-color-scheme: light)", color: "#3730A3" },
+    { media: "(prefers-color-scheme: dark)", color: "#1E1B4B" },
   ],
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 5,
 };
@@ -89,9 +108,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${outfit.variable} ${jetbrainsMono.variable} ${inter.variable} ${plusJakartaSans.variable}`}
     >
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen font-sans antialiased bg-background">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -116,7 +135,7 @@ export default function RootLayout({
             closeButton
             toastOptions={{
               duration: 5000,
-              className: 'font-sans',
+              className: "font-sans",
             }}
           />
         </ThemeProvider>
