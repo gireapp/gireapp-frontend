@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { SignJWT } from 'jose';
 import { setSessionToken, clearSessionToken } from '@/lib/session';
 import {
   registerSchema,
@@ -9,9 +10,35 @@ import {
   resetPasswordSchema,
   onboardingSchema,
 } from '@gireapp/shared';
-import type { ApiResponse } from '@gireapp/shared';
+import type { ApiResponse, AcademicLevel } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
 import { serverApiClient, ApiError } from '@/lib/api-client';
+
+const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
+  Secondary: 'SECONDARY',
+  Tertiary: 'TERTIARY',
+  Professional: 'PROFESSIONAL',
+};
+
+// DEV MOCK: mint a local session so the signup → dashboard flow can be demoed
+// without the backend. Active only when MOCK_AUTH=true (see .env.local).
+async function createMockSession(data: { email: string; track?: string; department?: string }) {
+  const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'fallback-dev-secret-change-me');
+  const token = await new SignJWT({
+    userId: `mock-${Date.now()}`,
+    role: 'STUDENT',
+    email: data.email,
+    academicLevel: TRACK_TO_LEVEL[data.track ?? ''] ?? 'SECONDARY',
+    department: data.department ?? null,
+    isOnboardingComplete: true,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(`mock-${data.email}`)
+    .setIssuedAt()
+    .setExpirationTime('24h')
+    .sign(secret);
+  await setSessionToken(token);
+}
 
 export async function registerAction(
   _prevState: ApiResponse,
