@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, ChevronDown } from 'lucide-react';
 import { registerAction } from '@/features/auth/actions';
@@ -372,7 +373,7 @@ export function RegisterForm() {
               </svg>
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 text-center">
               <h2 className="text-[20px] lg:text-[24px] font-heading font-bold text-indigo-950">
                 {values.name.trim() ? `You’re all set, ${values.name.trim().split(' ')[0]?.toUpperCase()}!` : 'You’re all set!'}
               </h2>
