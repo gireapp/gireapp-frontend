@@ -183,7 +183,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
         {course.modules.length === 0 ? (
           <p className="text-muted-foreground italic">Modules are being added to this course.</p>
         ) : (
-          <Accordion type="multiple" defaultValue={[course.modules[0]?.id]} className="w-full space-y-4">
+          <Accordion type="multiple" defaultValue={course.modules[0] ? [course.modules[0].id] : []} className="w-full space-y-4">
             {course.modules.map((module, index) => {
               const completedLessons = module.lessons.filter((l) => l.isCompleted).length;
               
