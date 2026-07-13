@@ -9,6 +9,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   onboardingSchema,
+  calculateAge,
 } from '@gireapp/shared';
 import type { ApiResponse, AcademicLevel } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
@@ -25,7 +26,13 @@ const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
 
 // DEV MOCK: mint a local session so the signup → dashboard flow can be demoed
 // without the backend. Active only when MOCK_AUTH=true (see .env.local).
-async function createMockSession(data: { email: string; track?: string; department?: string }) {
+async function createMockSession(data: {
+  email: string;
+  track?: string;
+  department?: string;
+  dateOfBirth: string;
+}) {
+  const isMinor = calculateAge(new Date(data.dateOfBirth)) < 18;
   const token = await new SignJWT({
     userId: `mock-${Date.now()}`,
     role: 'STUDENT',
@@ -33,6 +40,11 @@ async function createMockSession(data: { email: string; track?: string; departme
     academicLevel: TRACK_TO_LEVEL[data.track ?? ''] ?? 'SECONDARY',
     department: data.department ?? null,
     isOnboardingComplete: true,
+    isMinor,
+    // No email service (Resend) wired up yet, so a minor's guardian confirmation can
+    // never actually arrive in this mock path — it stays 'pending' to reflect that
+    // honestly rather than silently unlocking Mentorship.
+    guardianConsentStatus: isMinor ? 'pending' : 'not_required',
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(`mock-${data.email}`)
@@ -49,13 +61,17 @@ export async function registerAction(
   const field = (name: string) => (formData.get(name) as string | null) ?? '';
 
   // Free-text fields are sanitized before validation; passwords are excluded —
-  // altering them would silently change the credential. Email is left to Zod's
-  // strict email validation.
+  // altering them would silently change the credential. Email/guardianEmail/dateOfBirth
+  // are left to Zod's own format validation instead of sanitizeString, which would
+  // corrupt them (e.g. HTML-escaping the "@" is unnecessary and the date is a
+  // machine-produced <input type="date"> value, not free text).
   const raw = {
     name: sanitizeString(field('name')),
     email: field('email'),
     password: field('password'),
     confirmPassword: field('confirmPassword'),
+    dateOfBirth: field('dateOfBirth'),
+    guardianEmail: field('guardianEmail'),
     track: sanitizeString(field('track')),
     department: sanitizeString(field('department')),
     level: sanitizeString(field('level')),

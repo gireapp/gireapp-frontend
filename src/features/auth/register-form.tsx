@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Loader2, ChevronDown } from 'lucide-react';
 import { registerAction } from '@/features/auth/actions';
 import type { ApiResponse } from '@gireapp/shared';
+import { calculateAge } from '@gireapp/shared';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -16,8 +17,18 @@ const initialState: ApiResponse = { success: false };
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be under 100 characters');
 const emailSchema = z.string().min(1, 'Email is required').email('Please enter a valid email address').max(255, 'Email must be under 255 characters');
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password must be under 128 characters').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Must contain at least one uppercase letter, one lowercase letter, and one number');
+const dobSchema = z
+  .string()
+  .min(1, 'Date of birth is required')
+  .refine((v) => !Number.isNaN(Date.parse(v)), 'Please enter a valid date')
+  .refine((v) => new Date(v) <= new Date(), 'Date of birth cannot be in the future')
+  .refine((v) => calculateAge(new Date(v)) <= 120, 'Please enter a valid date of birth');
+const guardianEmailSchema = z.string().min(1, 'A guardian email is required for accounts under 18').email('Please enter a valid guardian email address');
 
-type FieldErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword', string>>;
+const MAX_DOB = new Date().toISOString().split('T')[0];
+const MIN_DOB = new Date(new Date().setFullYear(new Date().getFullYear() - 120)).toISOString().split('T')[0];
+
+type FieldErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword' | 'dateOfBirth' | 'guardianEmail', string>>;
 
 function SecondaryIcon() {
   return (
@@ -80,11 +91,15 @@ export function RegisterForm() {
 
   // Form state
   const [values, setValues] = useState({
-    name: '', email: '', password: '', confirmPassword: '',
+    name: '', email: '', password: '', confirmPassword: '', dateOfBirth: '', guardianEmail: '',
     track: '', department: '', level: '', focusArea: ''
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Under-18 accounts get full academic access immediately; only Mentorship is gated
+  // behind guardian confirmation later (see PRD §5.6). Never blocks registration itself.
+  const isMinor = values.dateOfBirth ? calculateAge(new Date(values.dateOfBirth)) < 18 : false;
 
   // Validate step 1 fields
   const validateField = useCallback((field: string, value: string) => {
@@ -105,10 +120,20 @@ export function RegisterForm() {
       case 'confirmPassword':
         if (value !== values.password) error = 'Passwords do not match';
         break;
+      case 'dateOfBirth':
+        if (!dobSchema.safeParse(value).success) error = dobSchema.safeParse(value).error?.errors[0]?.message;
+        break;
+      case 'guardianEmail':
+        if (values.dateOfBirth && calculateAge(new Date(values.dateOfBirth)) < 18) {
+          if (!guardianEmailSchema.safeParse(value).success) {
+            error = guardianEmailSchema.safeParse(value).error?.errors[0]?.message;
+          }
+        }
+        break;
     }
     setFieldErrors(prev => ({ ...prev, [field]: error }));
     return !error;
-  }, [touched.confirmPassword, values.confirmPassword, values.password]);
+  }, [touched.confirmPassword, values.confirmPassword, values.password, values.dateOfBirth]);
 
   const handleBlur = useCallback((field: string) => {
     setTouched(prev => ({ ...prev, [field]: true }));
@@ -128,13 +153,19 @@ export function RegisterForm() {
 
   const handleNextStep1 = () => {
     // Touch all fields to show errors if empty
-    setTouched({ name: true, email: true, password: true, confirmPassword: true });
+    setTouched(prev => ({ ...prev, name: true, email: true, password: true, confirmPassword: true, dateOfBirth: true, guardianEmail: true }));
     const nValid = validateField('name', values.name);
     const eValid = validateField('email', values.email);
     const pValid = validateField('password', values.password);
     const cpValid = validateField('confirmPassword', values.confirmPassword);
+    const dobValid = validateField('dateOfBirth', values.dateOfBirth);
+    const guardianValid = isMinor ? validateField('guardianEmail', values.guardianEmail) : true;
 
-    if (nValid && eValid && pValid && cpValid && values.name && values.email && values.password && values.confirmPassword) {
+    if (
+      nValid && eValid && pValid && cpValid && dobValid && guardianValid &&
+      values.name && values.email && values.password && values.confirmPassword && values.dateOfBirth &&
+      (!isMinor || values.guardianEmail)
+    ) {
       setStep(2);
     }
   };
@@ -233,6 +264,8 @@ export function RegisterForm() {
             <input type="hidden" name="confirmPassword" value={values.confirmPassword} />
           </>
         )}
+        <input type="hidden" name="dateOfBirth" value={values.dateOfBirth} />
+        <input type="hidden" name="guardianEmail" value={values.guardianEmail} />
         <input type="hidden" name="track" value={values.track} />
         <input type="hidden" name="department" value={values.department} />
         <input type="hidden" name="level" value={values.level} />
@@ -289,6 +322,23 @@ export function RegisterForm() {
               </div>
               {getError('confirmPassword') && <p className="text-sm text-destructive">{getError('confirmPassword')}</p>}
             </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="register-dob" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">Date of Birth</label>
+              <input id="register-dob" type="date" min={MIN_DOB} max={MAX_DOB} value={values.dateOfBirth} onChange={(e) => handleChange('dateOfBirth', e.target.value)} onBlur={() => handleBlur('dateOfBirth')} className={`w-full h-[54px] px-3 lg:px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 text-[12px] lg:text-[14px] font-sans font-normal focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('dateOfBirth') ? 'border-destructive' : ''}`} />
+              {getError('dateOfBirth') && <p className="text-sm text-destructive">{getError('dateOfBirth')}</p>}
+            </div>
+
+            {isMinor && (
+              <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <label htmlFor="register-guardian-email" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">Guardian&apos;s Email</label>
+                <p className="text-[12px] lg:text-[14px] font-sans text-indigo-800">
+                  Since you&apos;re under 18, we&apos;ll let your guardian know you&apos;re using GIREAPP. Your courses and dashboard are ready right away — this only affects the Mentorship feature until they confirm.
+                </p>
+                <input id="register-guardian-email" type="email" placeholder="guardian@example.com" value={values.guardianEmail} onChange={(e) => handleChange('guardianEmail', e.target.value)} onBlur={() => handleBlur('guardianEmail')} className={`w-full h-[54px] px-3 lg:px-4 bg-white rounded-lg border border-indigo-200 text-indigo-950 placeholder:text-indigo-400 text-[12px] lg:text-[14px] font-sans font-normal focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-shadow ${getError('guardianEmail') ? 'border-destructive' : ''}`} />
+                {getError('guardianEmail') && <p className="text-sm text-destructive">{getError('guardianEmail')}</p>}
+              </div>
+            )}
 
             <button type="button" onClick={handleNextStep1} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors">
               Continue
@@ -398,6 +448,12 @@ export function RegisterForm() {
                 <SummaryCheck />
                 <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
               </div>
+              {isMinor && values.guardianEmail && (
+                <div className="flex items-center gap-2">
+                  <SummaryCheck />
+                  <span className="text-[14px] font-sans text-indigo-950">Guardian email: {values.guardianEmail} (we&apos;ll ask them to confirm)</span>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 mt-2">
