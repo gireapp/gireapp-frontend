@@ -24,7 +24,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardSidebar user={session as any} />
+      <DashboardSidebar
+        user={{
+          name: session.email,
+          department: session.department,
+          academicLevel: session.academicLevel,
+        }}
+      />
 
       <main
         id="main-content"

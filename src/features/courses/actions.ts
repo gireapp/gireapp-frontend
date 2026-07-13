@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache';
 import type { ApiResponse } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
 import { serverApiClient, ApiError } from '@/lib/api-client';
+import { logActionError } from '@/lib/log';
 
 export async function enrollInCourseAction(courseId: string): Promise<ApiResponse> {
   try {
@@ -27,7 +28,7 @@ export async function enrollInCourseAction(courseId: string): Promise<ApiRespons
 
     return { success: true };
   } catch (error) {
-    console.error('[GIREAPP] Enrolment error:', error);
+    logActionError('Enrolment failed', error);
     if (error instanceof ApiError) {
       return { success: false, error: error.message };
     }
@@ -51,7 +52,7 @@ export async function completeLessonAction(courseId: string, lessonId: string): 
 
     return { success: true };
   } catch (error) {
-    console.error('[GIREAPP] Complete lesson error:', error);
+    logActionError('Complete lesson failed', error);
     if (error instanceof ApiError) {
       return { success: false, error: error.message };
     }

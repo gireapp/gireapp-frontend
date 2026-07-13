@@ -14,19 +14,20 @@ import { CompleteLessonButton } from '@/features/courses/complete-lesson-button'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export async function generateMetadata({ params }: { params: { lessonId: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ lessonId: string }> }) {
+  await params;
   return { title: `Lesson | GIREAPP` }; // Simplified since we'd need another API call to get just the title
 }
 
 export default async function LessonPlayerPage({
   params,
 }: {
-  params: { courseId: string; lessonId: string };
+  params: Promise<{ courseId: string; lessonId: string }>;
 }) {
   const session = await getSession();
   if (!session?.userId) redirect('/login');
 
-  const { courseId, lessonId } = params;
+  const { courseId, lessonId } = await params;
 
   // Retrieve token for fetch request
   const cookieStore = await cookies();

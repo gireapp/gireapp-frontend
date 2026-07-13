@@ -45,7 +45,8 @@ export function formatProgress(progress: number): string {
 }
 
 /** Generate user initials from name */
-export function getInitials(name: string): string {
+export function getInitials(name: string | undefined | null): string {
+  if (!name) return '?';
   return name
     .split(' ')
     .map((word) => word[0])
@@ -53,15 +54,6 @@ export function getInitials(name: string): string {
     .slice(0, 2)
     .join('')
     .toUpperCase();
-}
-
-/** Sanitize user input — strip potential XSS vectors */
-export function sanitizeInput(input: string): string {
-  return input
-    .replace(/[<>]/g, '') // Strip angle brackets
-    .replace(/javascript:/gi, '') // Strip JS protocol
-    .replace(/on\w+=/gi, '') // Strip event handlers
-    .trim();
 }
 
 /** Truncate text with ellipsis */

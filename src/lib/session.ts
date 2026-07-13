@@ -6,14 +6,7 @@
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
 import type { JwtPayload } from '@gireapp/shared';
-
-if (!process.env.AUTH_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('AUTH_SECRET environment variable is required in production');
-}
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || 'fallback-dev-secret-change-me'
-);
+import { JWT_SECRET } from '@/lib/auth-secret';
 
 export async function getSession(): Promise<JwtPayload | null> {
   const cookieStore = await cookies();
