@@ -69,7 +69,7 @@ export default async function VerifyEmailPage({
       <div className="space-y-2">
         <h1 className="text-h2 text-foreground">Email Verified!</h1>
         <p className="text-body-sm text-muted-foreground">
-          {(result.data as any)?.message ?? 'Your email has been verified. You can now log in.'}
+          {result.data?.message ?? 'Your email has been verified. You can now log in.'}
         </p>
       </div>
       <Link

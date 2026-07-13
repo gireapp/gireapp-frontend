@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
@@ -73,7 +72,6 @@ function SummaryCheck() {
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerAction, initialState);
-  const router = useRouter();
 
   // Multi-step state
   const [step, setStep] = useState(1);
@@ -152,16 +150,12 @@ export function RegisterForm() {
   };
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (state.success) {
-      toast.success('Account created! Redirecting to login...', { duration: 5000 });
-      timer = setTimeout(() => router.push('/login'), 3000);
-    }
+    // On success the server action sets the session and redirects to the dashboard,
+    // so only errors surface here.
     if (state.error) {
       toast.error(state.error);
     }
-    return () => { if (timer) clearTimeout(timer); };
-  }, [state, router]);
+  }, [state]);
 
   const renderBackArrow = () => (
     <svg className="w-full h-full" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -228,11 +222,17 @@ export function RegisterForm() {
 
       {/* Form Content */}
       <form action={formAction} className="w-full relative">
-        {/* Hidden inputs to pass data collected across steps to the final Server Action */}
+        {/* Hidden inputs to pass data collected across steps to the final Server Action.
+            The password fields are only mounted on the submit step (4) to keep them
+            out of the DOM for the rest of the flow. */}
         <input type="hidden" name="name" value={values.name} />
         <input type="hidden" name="email" value={values.email} />
-        <input type="hidden" name="password" value={values.password} />
-        <input type="hidden" name="confirmPassword" value={values.confirmPassword} />
+        {step === 4 && (
+          <>
+            <input type="hidden" name="password" value={values.password} />
+            <input type="hidden" name="confirmPassword" value={values.confirmPassword} />
+          </>
+        )}
         <input type="hidden" name="track" value={values.track} />
         <input type="hidden" name="department" value={values.department} />
         <input type="hidden" name="level" value={values.level} />

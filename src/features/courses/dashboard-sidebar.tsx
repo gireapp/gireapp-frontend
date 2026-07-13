@@ -8,6 +8,10 @@ import { cn, getInitials, formatNumber } from '@/lib/utils';
 import { logoutAction } from '@/features/auth/actions';
 import type { SessionUser } from '@gireapp/shared';
 
+/** The JWT payload lacks `name`/`points`, so the sidebar only requires what it renders. */
+export type SidebarUser = Pick<SessionUser, 'department' | 'academicLevel'> &
+  Partial<Pick<SessionUser, 'name' | 'points'>>;
+
 const SEGMENT_MAP: Record<string, string> = {
   SECONDARY: '/dashboard/secondary',
   TERTIARY: '/dashboard/tertiary',
@@ -25,7 +29,7 @@ function getNavItems(academicLevel: string | null) {
   ];
 }
 
-export function DashboardSidebar({ user }: { user: SessionUser }) {
+export function DashboardSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
 
@@ -49,7 +53,7 @@ export function DashboardSidebar({ user }: { user: SessionUser }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.department} • {formatNumber(user.points)} pts</p>
+              <p className="text-xs text-muted-foreground truncate">{user.department} • {formatNumber(user.points ?? 0)} pts</p>
             </div>
           </div>
         </div>

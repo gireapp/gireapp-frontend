@@ -10,7 +10,8 @@ import { revalidatePath } from 'next/cache';
 import type { ApiResponse, AcademicLevel } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
 import { serverApiClient, ApiError } from '@/lib/api-client';
-import { sanitizeInput } from '@/lib/utils';
+import { sanitizeString } from '@/lib/sanitize';
+import { logActionError } from '@/lib/log';
 
 export async function createCourseAction(
   _prevState: ApiResponse,
@@ -24,10 +25,10 @@ export async function createCourseAction(
       return { success: false, error: 'Unauthorized access.' };
     }
 
-    const title = sanitizeInput(formData.get('title') as string);
-    const description = sanitizeInput(formData.get('description') as string);
+    const title = sanitizeString((formData.get('title') as string | null) ?? '');
+    const description = sanitizeString((formData.get('description') as string | null) ?? '');
     const academicLevel = formData.get('academicLevel') as AcademicLevel;
-    const department = sanitizeInput(formData.get('department') as string);
+    const department = sanitizeString((formData.get('department') as string | null) ?? '');
     const thumbnailUrl = formData.get('thumbnailUrl') as string | null;
 
     if (!title || !description || !academicLevel || !department) {
@@ -53,7 +54,7 @@ export async function createCourseAction(
 
     return { success: true, data: { courseId: data.courseId } };
   } catch (error) {
-    console.error('[GIREAPP] Course creation error:', error);
+    logActionError('Course creation failed', error);
     if (error instanceof ApiError) {
       return { success: false, error: error.message };
     }

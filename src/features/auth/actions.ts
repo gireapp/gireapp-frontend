@@ -13,6 +13,9 @@ import {
 import type { ApiResponse, AcademicLevel } from '@gireapp/shared';
 import { API_PATHS } from '@gireapp/shared';
 import { serverApiClient, ApiError } from '@/lib/api-client';
+import { JWT_SECRET } from '@/lib/auth-secret';
+import { safeCallbackUrl } from '@/lib/callback-url';
+import { sanitizeString } from '@/lib/sanitize';
 
 const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
   Secondary: 'SECONDARY',
@@ -23,7 +26,6 @@ const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
 // DEV MOCK: mint a local session so the signup → dashboard flow can be demoed
 // without the backend. Active only when MOCK_AUTH=true (see .env.local).
 async function createMockSession(data: { email: string; track?: string; department?: string }) {
-  const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'fallback-dev-secret-change-me');
   const token = await new SignJWT({
     userId: `mock-${Date.now()}`,
     role: 'STUDENT',
@@ -36,7 +38,7 @@ async function createMockSession(data: { email: string; track?: string; departme
     .setSubject(`mock-${data.email}`)
     .setIssuedAt()
     .setExpirationTime('24h')
-    .sign(secret);
+    .sign(JWT_SECRET);
   await setSessionToken(token);
 }
 
@@ -44,15 +46,20 @@ export async function registerAction(
   _prevState: ApiResponse,
   formData: FormData
 ): Promise<ApiResponse> {
+  const field = (name: string) => (formData.get(name) as string | null) ?? '';
+
+  // Free-text fields are sanitized before validation; passwords are excluded —
+  // altering them would silently change the credential. Email is left to Zod's
+  // strict email validation.
   const raw = {
-    name: formData.get('name') as string,
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-    confirmPassword: formData.get('confirmPassword') as string,
-    track: formData.get('track') as string,
-    department: formData.get('department') as string,
-    level: formData.get('level') as string,
-    focusArea: formData.get('focusArea') as string,
+    name: sanitizeString(field('name')),
+    email: field('email'),
+    password: field('password'),
+    confirmPassword: field('confirmPassword'),
+    track: sanitizeString(field('track')),
+    department: sanitizeString(field('department')),
+    level: sanitizeString(field('level')),
+    focusArea: sanitizeString(field('focusArea')),
   };
 
   const result = registerSchema.safeParse(raw);
@@ -63,20 +70,28 @@ export async function registerAction(
     };
   }
 
+  if (process.env.MOCK_AUTH === 'true') {
+    await createMockSession(result.data);
+    redirect('/dashboard');
+  }
+
   try {
-    await serverApiClient(API_PATHS.AUTH.REGISTER, {
+    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(API_PATHS.AUTH.REGISTER, {
       method: 'POST',
       body: JSON.stringify(result.data),
     });
 
-    // Auto-login logic would go here if backend returns token.
-    return { success: true };
+    if (data.token) {
+      await setSessionToken(data.token);
+    }
   } catch (error) {
     if (error instanceof ApiError) {
       return { success: false, error: error.message, errors: error.fieldErrors };
     }
     return { success: false, error: 'Network error. Please try again.' };
   }
+
+  redirect('/dashboard');
 }
 
 export async function loginAction(
@@ -88,10 +103,7 @@ export async function loginAction(
     password: formData.get('password') as string,
   };
   
-  const rawCallbackUrl = formData.get('callbackUrl') as string | null;
-  const callbackUrl = (rawCallbackUrl && rawCallbackUrl.startsWith('/') && !rawCallbackUrl.startsWith('//'))
-    ? rawCallbackUrl
-    : '/dashboard';
+  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl') as string | null);
 
   const result = loginSchema.safeParse(raw);
   if (!result.success) {
@@ -102,7 +114,7 @@ export async function loginAction(
   }
 
   try {
-    const { data } = await serverApiClient<{ token?: string; user?: any }>(API_PATHS.AUTH.LOGIN, {
+    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(API_PATHS.AUTH.LOGIN, {
       method: 'POST',
       body: JSON.stringify(result.data),
     });
@@ -137,7 +149,14 @@ export async function loginAction(
 export async function logoutAction() {
   try {
     await serverApiClient(API_PATHS.AUTH.LOGOUT, { method: 'POST' });
-  } catch (error) {}
+  } catch (error) {
+    // The frontend cookie is cleared regardless, but a failed backend logout
+    // means the token stays valid until expiry — worth a trace in the logs.
+    console.error(
+      '[GIREAPP] Backend logout failed:',
+      error instanceof Error ? error.message : String(error)
+    );
+  }
   await clearSessionToken();
   redirect('/');
 }
@@ -243,7 +262,9 @@ export async function completeOnboardingAction(
   }
 }
 
-export async function verifyEmailAction(token: string): Promise<ApiResponse> {
+export async function verifyEmailAction(
+  token: string
+): Promise<ApiResponse<{ message?: string }>> {
   try {
     const { data } = await serverApiClient<{ message?: string }>(API_PATHS.AUTH.VERIFY_EMAIL, {
       method: 'POST',

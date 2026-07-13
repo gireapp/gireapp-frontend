@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import { loginAction } from '@/features/auth/actions';
+import { safeCallbackUrl } from '@/lib/callback-url';
 import type { ApiResponse } from '@gireapp/shared';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -28,10 +29,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   
   // Safely parse callbackUrl to prevent open redirects
-  const rawCallbackUrl = searchParams.get('callbackUrl');
-  const callbackUrl = (rawCallbackUrl && rawCallbackUrl.startsWith('/') && !rawCallbackUrl.startsWith('//')) 
-    ? rawCallbackUrl 
-    : '/dashboard';
+  const callbackUrl = safeCallbackUrl(searchParams.get('callbackUrl'));
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
