@@ -68,7 +68,7 @@ export default function LandingPage() {
                 className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in leading-relaxed font-normal"
                 style={{ animationDelay: '200ms' }}
               >
-                Your path to academic success shouldn't be a guessing game. GIREAPP gives you the exact courses, mentorship, and practice you need to excel at every stage.
+                Your path to academic success shouldn&apos;t be a guessing game. GIREAPP gives you the exact courses, mentorship, and practice you need to excel at every stage.
               </p>
 
               {/* CTAs */}
@@ -179,7 +179,7 @@ export default function LandingPage() {
           <div className="container max-w-7xl px-4 md:px-6 mx-auto">
             <div className="max-w-3xl space-y-4 mb-16">
               <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-                Everything you need. Nothing you don't.
+                Everything you need. Nothing you don&apos;t.
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
                 A seamless blend of structured curriculum, interactive assessments, and expert guidance.

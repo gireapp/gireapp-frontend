@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Error({
   error,
@@ -59,12 +60,12 @@ export default function Error({
             </svg>
             Try Again
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

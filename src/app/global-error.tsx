@@ -60,6 +60,9 @@ export default function GlobalError({
               </svg>
               Try Again
             </button>
+            {/* global-error replaces the root layout, so a full document load is
+                the reliable way out of a corrupted root — not client navigation. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/"
               className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

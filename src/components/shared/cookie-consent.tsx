@@ -41,7 +41,7 @@ export function CookieConsent() {
         <div className="flex-1 space-y-2 text-center md:text-left">
           <h3 className="font-semibold text-foreground text-lg">We value your privacy</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            We use cookies to enhance your learning experience, analyze site traffic, and support our gamification engine. By clicking "Accept", you consent to our use of cookies in accordance with NDPR and POPIA guidelines.
+            We use cookies to enhance your learning experience, analyze site traffic, and support our gamification engine. By clicking &quot;Accept&quot;, you consent to our use of cookies in accordance with NDPR and POPIA guidelines.
           </p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
