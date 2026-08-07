@@ -69,7 +69,7 @@ const TRACKS = [
 const CUSTOMIZE_FIELDS = [
   { id: 'department', label: 'Department', placeholder: 'Select Department', options: ['Science', 'Arts / Humanities', 'Commercial', 'Technology'] },
   { id: 'level', label: 'Class / Level', placeholder: 'Select Class/Level', options: ['SS1', 'SS2', 'SS3', '100 Level', '200 Level', '300 Level', '400 Level', 'Professional'] },
-  { id: 'focusArea', label: 'Area of focus', placeholder: 'Select Focus', options: ['WAEC Prep', 'JAMB Prep', 'NECO Prep', 'Career Advancement', 'General Study'] },
+  { id: 'focusArea', label: 'Area of focus (optional)', placeholder: 'Select Focus', options: ['WAEC Prep', 'JAMB Prep', 'NECO Prep', 'Career Advancement', 'General Study'] },
 ] as const;
 
 function SummaryCheck() {
@@ -176,8 +176,8 @@ export function RegisterForm() {
   };
 
   const handleNextStep3 = () => {
-    if (values.department && values.level && values.focusArea) setStep(4);
-    else toast.error('Please select your department, class/level and area of focus to continue.');
+    if (values.department && values.level) setStep(4);
+    else toast.error('Please select your department and class/level to continue.');
   };
 
   useEffect(() => {
@@ -244,7 +244,7 @@ export function RegisterForm() {
             </h1>
           </div>
           <p className="flex flex-col justify-center self-stretch text-[14px] lg:text-[16px] font-normal text-indigo-950 break-words">
-            {step === 1 && 'Let’s get you started on your learning journey'}
+            {step === 1 && 'Join GIREAPP and start your personalized learning journey'}
             {step === 2 && 'This helps us personalize your experience'}
             {step === 3 && 'Choose your department, class and area of focus'}
           </p>
@@ -341,7 +341,7 @@ export function RegisterForm() {
             )}
 
             <button type="button" onClick={handleNextStep1} className="w-full flex items-center justify-center gap-2 h-[54px] lg:h-[56px] mt-8 bg-coral-500 text-indigo-50 rounded-lg text-[16px] lg:text-[20px] font-heading font-bold hover:bg-coral-600 transition-colors">
-              Continue
+              Create Account
             </button>
             <p className="text-center text-[12px] lg:text-[14px] font-sans text-indigo-800 mt-3">
               Already have an account? <Link href="/login" className="text-coral-500 font-normal hover:underline ml-1">Log in</Link>
@@ -444,10 +444,12 @@ export function RegisterForm() {
                 <SummaryCheck />
                 <span className="text-[14px] font-sans text-indigo-950">Class: {values.level}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <SummaryCheck />
-                <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
-              </div>
+              {values.focusArea && (
+                <div className="flex items-center gap-2">
+                  <SummaryCheck />
+                  <span className="text-[14px] font-sans text-indigo-950">Area of focus: {values.focusArea}</span>
+                </div>
+              )}
               {isMinor && values.guardianEmail && (
                 <div className="flex items-center gap-2">
                   <SummaryCheck />

@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────
 
 import type { Metadata, Viewport } from 'next';
-import { Outfit, JetBrains_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { CookieConsent } from '@/components/shared/cookie-consent';
@@ -13,9 +13,15 @@ import './globals.css';
 
 // ── Fonts ──
 
-const outfit = Outfit({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-outfit',
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -89,7 +95,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider

@@ -97,8 +97,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-outfit)', ...fontFamily.sans],
-        heading: ['var(--font-outfit)', ...fontFamily.sans],
+        sans: ['var(--font-inter)', ...fontFamily.sans],
+        heading: ['var(--font-plus-jakarta-sans)', ...fontFamily.sans],
         mono: ['var(--font-jetbrains-mono)', ...fontFamily.mono],
       },
       fontSize: {

@@ -115,14 +115,9 @@ export function LoginForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <label htmlFor="login-password" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">
-            Password
-          </label>
-          <Link href="/forgot-password" className="text-[12px] lg:text-[14px] font-sans text-coral-500 font-normal hover:underline">
-            Forgot password?
-          </Link>
-        </div>
+        <label htmlFor="login-password" className="text-[16px] lg:text-[20px] font-heading font-bold text-indigo-950 break-words">
+          Password
+        </label>
         <div className="relative">
           <input
             id="login-password"
@@ -158,6 +153,9 @@ export function LoginForm() {
             {getError('password')}
           </p>
         )}
+        <Link href="/forgot-password" className="text-[12px] lg:text-[14px] font-sans text-coral-500 font-normal hover:underline">
+          Forgot password?
+        </Link>
       </div>
 
       {state.error && (
@@ -176,7 +174,7 @@ export function LoginForm() {
             Logging in...
           </>
         ) : (
-          'Log In'
+          'Log in'
         )}
       </button>
 
