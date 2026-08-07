@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import { redirect } from 'next/navigation';
-import { SignJWT } from 'jose';
-import { setSessionToken, clearSessionToken } from '@/lib/session';
+import { redirect } from "next/navigation";
+import { SignJWT } from "jose";
+import { setSessionToken, clearSessionToken } from "@/lib/session";
 import {
   registerSchema,
   loginSchema,
@@ -10,18 +10,18 @@ import {
   resetPasswordSchema,
   onboardingSchema,
   calculateAge,
-} from '@gireapp/shared';
-import type { ApiResponse, AcademicLevel } from '@gireapp/shared';
-import { API_PATHS } from '@gireapp/shared';
-import { serverApiClient, ApiError } from '@/lib/api-client';
-import { JWT_SECRET } from '@/lib/auth-secret';
-import { safeCallbackUrl } from '@/lib/callback-url';
-import { sanitizeString } from '@/lib/sanitize';
+} from "@gireapp/shared";
+import type { ApiResponse, AcademicLevel } from "@gireapp/shared";
+import { API_PATHS } from "@gireapp/shared";
+import { serverApiClient, ApiError } from "@/lib/api-client";
+import { JWT_SECRET } from "@/lib/auth-secret";
+import { safeCallbackUrl } from "@/lib/callback-url";
+import { sanitizeString } from "@/lib/sanitize";
 
 const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
-  Secondary: 'SECONDARY',
-  Tertiary: 'TERTIARY',
-  Professional: 'PROFESSIONAL',
+  Secondary: "SECONDARY",
+  Tertiary: "TERTIARY",
+  Professional: "PROFESSIONAL",
 };
 
 // DEV MOCK: mint a local session so the signup → dashboard flow can be demoed
@@ -35,30 +35,30 @@ async function createMockSession(data: {
   const isMinor = calculateAge(new Date(data.dateOfBirth)) < 18;
   const token = await new SignJWT({
     userId: `mock-${Date.now()}`,
-    role: 'STUDENT',
+    role: "STUDENT",
     email: data.email,
-    academicLevel: TRACK_TO_LEVEL[data.track ?? ''] ?? 'SECONDARY',
+    academicLevel: TRACK_TO_LEVEL[data.track ?? ""] ?? "SECONDARY",
     department: data.department ?? null,
     isOnboardingComplete: true,
     isMinor,
     // No email service (Resend) wired up yet, so a minor's guardian confirmation can
     // never actually arrive in this mock path — it stays 'pending' to reflect that
     // honestly rather than silently unlocking Mentorship.
-    guardianConsentStatus: isMinor ? 'pending' : 'not_required',
+    guardianConsentStatus: isMinor ? "pending" : "not_required",
   })
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setSubject(`mock-${data.email}`)
     .setIssuedAt()
-    .setExpirationTime('24h')
+    .setExpirationTime("24h")
     .sign(JWT_SECRET);
   await setSessionToken(token);
 }
 
 export async function registerAction(
   _prevState: ApiResponse,
-  formData: FormData
+  formData: FormData,
 ): Promise<ApiResponse> {
-  const field = (name: string) => (formData.get(name) as string | null) ?? '';
+  const field = (name: string) => (formData.get(name) as string | null) ?? "";
 
   // Free-text fields are sanitized before validation; passwords are excluded —
   // altering them would silently change the credential. Email/guardianEmail/dateOfBirth
@@ -66,16 +66,16 @@ export async function registerAction(
   // corrupt them (e.g. HTML-escaping the "@" is unnecessary and the date is a
   // machine-produced <input type="date"> value, not free text).
   const raw = {
-    name: sanitizeString(field('name')),
-    email: field('email'),
-    password: field('password'),
-    confirmPassword: field('confirmPassword'),
-    dateOfBirth: field('dateOfBirth'),
-    guardianEmail: field('guardianEmail'),
-    track: sanitizeString(field('track')),
-    department: sanitizeString(field('department')),
-    level: sanitizeString(field('level')),
-    focusArea: sanitizeString(field('focusArea')),
+    name: sanitizeString(field("name")),
+    email: field("email"),
+    password: field("password"),
+    confirmPassword: field("confirmPassword"),
+    dateOfBirth: field("dateOfBirth"),
+    guardianEmail: field("guardianEmail"),
+    track: sanitizeString(field("track")),
+    department: sanitizeString(field("department")),
+    level: sanitizeString(field("level")),
+    focusArea: sanitizeString(field("focusArea")),
   };
 
   const result = registerSchema.safeParse(raw);
@@ -86,40 +86,49 @@ export async function registerAction(
     };
   }
 
-  if (process.env.MOCK_AUTH === 'true') {
+  if (process.env.MOCK_AUTH === "true") {
     await createMockSession(result.data);
-    redirect('/dashboard');
+    redirect("/dashboard");
   }
 
   try {
-    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(API_PATHS.AUTH.REGISTER, {
-      method: 'POST',
-      body: JSON.stringify(result.data),
-    });
+    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(
+      API_PATHS.AUTH.REGISTER,
+      {
+        method: "POST",
+        body: JSON.stringify(result.data),
+      },
+    );
 
     if (data.token) {
       await setSessionToken(data.token);
     }
   } catch (error) {
     if (error instanceof ApiError) {
-      return { success: false, error: error.message, errors: error.fieldErrors };
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
     }
-    return { success: false, error: 'Network error. Please try again.' };
+    return { success: false, error: "Network error. Please try again." };
   }
 
-  redirect('/dashboard');
+  redirect("/dashboard");
 }
 
 export async function loginAction(
   _prevState: ApiResponse,
-  formData: FormData
+  formData: FormData,
 ): Promise<ApiResponse> {
   const raw = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
   };
-  
-  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl') as string | null);
+
+  const callbackUrl = safeCallbackUrl(
+    formData.get("callbackUrl") as string | null,
+  );
 
   const result = loginSchema.safeParse(raw);
   if (!result.success) {
@@ -130,13 +139,16 @@ export async function loginAction(
   }
 
   try {
-    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(API_PATHS.AUTH.LOGIN, {
-      method: 'POST',
-      body: JSON.stringify(result.data),
-    });
+    const { data } = await serverApiClient<{ token?: string; user?: unknown }>(
+      API_PATHS.AUTH.LOGIN,
+      {
+        method: "POST",
+        body: JSON.stringify(result.data),
+      },
+    );
 
     // We expect backend to set the HTTP-Only cookie, but if it returns a token in the body we can store it.
-    // Wait, the backend in auth.controller.ts uses res.cookie(). 
+    // Wait, the backend in auth.controller.ts uses res.cookie().
     // BUT since frontend and backend are on different domains/ports in dev, we might need to handle tokens manually if CORS credentials don't work easily.
     // Actually, backend sets HTTP-Only cookie. If they are on the same domain in production it works.
     // If backend doesn't return the token in JSON body, we can't set it via setSessionToken.
@@ -148,15 +160,19 @@ export async function loginAction(
     // For decoupled architecture, it's safer if backend returns token and Next.js sets it in its own cookies.
     // The previous frontend `actions.ts` expected `data.token`. So let's assume backend auth controller needs updating to return the token.
     // We will update backend auth controller later.
-    
+
     if (data.token) {
-       await setSessionToken(data.token);
+      await setSessionToken(data.token);
     }
   } catch (error) {
     if (error instanceof ApiError) {
-      return { success: false, error: error.message, errors: error.fieldErrors };
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
     }
-    return { success: false, error: 'Network error. Please try again.' };
+    return { success: false, error: "Network error. Please try again." };
   }
 
   redirect(callbackUrl);
@@ -164,25 +180,25 @@ export async function loginAction(
 
 export async function logoutAction() {
   try {
-    await serverApiClient(API_PATHS.AUTH.LOGOUT, { method: 'POST' });
+    await serverApiClient(API_PATHS.AUTH.LOGOUT, { method: "POST" });
   } catch (error) {
     // The frontend cookie is cleared regardless, but a failed backend logout
     // means the token stays valid until expiry — worth a trace in the logs.
     console.error(
-      '[GIREAPP] Backend logout failed:',
-      error instanceof Error ? error.message : String(error)
+      "[GIREAPP] Backend logout failed:",
+      error instanceof Error ? error.message : String(error),
     );
   }
   await clearSessionToken();
-  redirect('/');
+  redirect("/");
 }
 
 export async function forgotPasswordAction(
   _prevState: ApiResponse,
-  formData: FormData
+  formData: FormData,
 ): Promise<ApiResponse> {
   const raw = {
-    email: formData.get('email') as string,
+    email: formData.get("email") as string,
   };
 
   const result = forgotPasswordSchema.safeParse(raw);
@@ -195,26 +211,28 @@ export async function forgotPasswordAction(
 
   try {
     await serverApiClient(API_PATHS.AUTH.FORGOT_PASSWORD, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(result.data),
     });
 
     // Always return success to prevent email enumeration
     return { success: true };
   } catch (error) {
-    // Still return success to prevent email enumeration
+    // The caller must not learn whether the address exists, so the failure is
+    // logged server-side and the response stays indistinguishable from success.
+    console.error("[forgotPasswordAction] request failed:", error);
     return { success: true };
   }
 }
 
 export async function resetPasswordAction(
   _prevState: ApiResponse,
-  formData: FormData
+  formData: FormData,
 ): Promise<ApiResponse> {
   const raw = {
-    token: formData.get('token') as string,
-    password: formData.get('password') as string,
-    confirmPassword: formData.get('confirmPassword') as string,
+    token: formData.get("token") as string,
+    password: formData.get("password") as string,
+    confirmPassword: formData.get("confirmPassword") as string,
   };
 
   const result = resetPasswordSchema.safeParse(raw);
@@ -227,27 +245,34 @@ export async function resetPasswordAction(
 
   try {
     await serverApiClient(API_PATHS.AUTH.RESET_PASSWORD, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(result.data),
     });
 
     return { success: true };
   } catch (error) {
     if (error instanceof ApiError) {
-      return { success: false, error: error.message, errors: error.fieldErrors };
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
     }
-    return { success: false, error: 'Failed to reset password. Please try again.' };
+    return {
+      success: false,
+      error: "Failed to reset password. Please try again.",
+    };
   }
 }
 
 export async function completeOnboardingAction(
   _prevState: ApiResponse,
-  formData: FormData
+  formData: FormData,
 ): Promise<ApiResponse> {
   const raw = {
-    academicLevel: formData.get('academicLevel') as string,
-    department: formData.get('department') as string,
-    moodTheme: formData.get('moodTheme') as string,
+    academicLevel: formData.get("academicLevel") as string,
+    department: formData.get("department") as string,
+    moodTheme: formData.get("moodTheme") as string,
   };
 
   const result = onboardingSchema.safeParse(raw);
@@ -259,10 +284,13 @@ export async function completeOnboardingAction(
   }
 
   try {
-    const { data } = await serverApiClient<{ token?: string }>(API_PATHS.AUTH.ONBOARDING, {
-      method: 'POST',
-      body: JSON.stringify(result.data),
-    });
+    const { data } = await serverApiClient<{ token?: string }>(
+      API_PATHS.AUTH.ONBOARDING,
+      {
+        method: "POST",
+        body: JSON.stringify(result.data),
+      },
+    );
 
     // If backend returns an updated token (with onboarding flag set), refresh the session
     if (data.token) {
@@ -272,26 +300,39 @@ export async function completeOnboardingAction(
     return { success: true };
   } catch (error) {
     if (error instanceof ApiError) {
-      return { success: false, error: error.message, errors: error.fieldErrors };
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
     }
-    return { success: false, error: 'Failed to save preferences. Please try again.' };
+    return {
+      success: false,
+      error: "Failed to save preferences. Please try again.",
+    };
   }
 }
 
 export async function verifyEmailAction(
-  token: string
+  token: string,
 ): Promise<ApiResponse<{ message?: string }>> {
   try {
-    const { data } = await serverApiClient<{ message?: string }>(API_PATHS.AUTH.VERIFY_EMAIL, {
-      method: 'POST',
-      body: JSON.stringify({ token }),
-    });
+    const { data } = await serverApiClient<{ message?: string }>(
+      API_PATHS.AUTH.VERIFY_EMAIL,
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      },
+    );
 
     return { success: true, data };
   } catch (error) {
     if (error instanceof ApiError) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: 'Verification failed. The link may be invalid or expired.' };
+    return {
+      success: false,
+      error: "Verification failed. The link may be invalid or expired.",
+    };
   }
 }
