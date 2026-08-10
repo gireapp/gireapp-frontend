@@ -10,11 +10,14 @@
 const SQL_INJECTION_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|TRUNCATE|DECLARE|CAST)\b\s)/gi,
   /(--|;|\/\*|\*\/|xp_|sp_)/gi,
-  /(\b(OR|AND)\b\s+\d+\s*=\s*\d+)/gi,     // OR 1=1, AND 1=1
-  /(0x[0-9a-fA-F]+)/g,                       // Hex-encoded strings
-  /(\bCHAR\s*\(\d+\))/gi,                    // CHAR() encoding
-  /(WAITFOR\s+DELAY|BENCHMARK\s*\()/gi,      // Time-based injection
-  /(\bINFORMATION_SCHEMA\b)/gi,              // Schema enumeration
+  /(\b(OR|AND)\b\s+\d+\s*=\s*\d+)/gi, // OR 1=1, AND 1=1
+  // Word-bounded so it matches a standalone hex literal (`SELECT 0x414243`) and
+  // not "0x…" buried inside an ordinary token — randomly generated email aliases
+  // (e.g. Firefox Relay masks) routinely contain such a substring.
+  /\b0x[0-9a-fA-F]+\b/g, // Hex-encoded strings
+  /(\bCHAR\s*\(\d+\))/gi, // CHAR() encoding
+  /(WAITFOR\s+DELAY|BENCHMARK\s*\()/gi, // Time-based injection
+  /(\bINFORMATION_SCHEMA\b)/gi, // Schema enumeration
 ];
 
 /**
@@ -27,11 +30,11 @@ const XSS_PATTERNS = [
   /<object\b[^>]*>/gi,
   /<embed\b[^>]*>/gi,
   /<link\b[^>]*>/gi,
-  /on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi,  // onerror=, onclick=, etc.
+  /on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, // onerror=, onclick=, etc.
   /javascript\s*:/gi,
   /vbscript\s*:/gi,
   /data\s*:\s*text\/html/gi,
-  /expression\s*\(/gi,                          // CSS expression()
+  /expression\s*\(/gi, // CSS expression()
 ];
 
 /**
@@ -45,20 +48,20 @@ export function sanitizeString(input: string): string {
 
   // Strip SQL injection patterns
   for (const pattern of SQL_INJECTION_PATTERNS) {
-    sanitized = sanitized.replace(pattern, '');
+    sanitized = sanitized.replace(pattern, "");
   }
 
   // Strip XSS patterns
   for (const pattern of XSS_PATTERNS) {
-    sanitized = sanitized.replace(pattern, '');
+    sanitized = sanitized.replace(pattern, "");
   }
 
   // Escape remaining HTML entities that could be dangerous
   sanitized = sanitized
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
 
   return sanitized.trim();
 }
@@ -73,12 +76,12 @@ export function sanitizeRichText(input: string): string {
 
   // Strip SQL injection patterns
   for (const pattern of SQL_INJECTION_PATTERNS) {
-    sanitized = sanitized.replace(pattern, '');
+    sanitized = sanitized.replace(pattern, "");
   }
 
   // Strip only dangerous XSS patterns (keep markdown-safe HTML like <em>, <strong>)
   for (const pattern of XSS_PATTERNS) {
-    sanitized = sanitized.replace(pattern, '');
+    sanitized = sanitized.replace(pattern, "");
   }
 
   return sanitized.trim();
@@ -91,22 +94,24 @@ export function sanitizeRichText(input: string): string {
  */
 export function sanitizeObject<T>(
   obj: T,
-  richTextFields: string[] = ['content', 'explanation', 'message']
+  richTextFields: string[] = ["content", "explanation", "message"],
 ): T {
   if (obj === null || obj === undefined) return obj;
 
-  if (typeof obj === 'string') {
+  if (typeof obj === "string") {
     return sanitizeString(obj) as unknown as T;
   }
 
   if (Array.isArray(obj)) {
-    return obj.map((item) => sanitizeObject(item, richTextFields)) as unknown as T;
+    return obj.map((item) =>
+      sanitizeObject(item, richTextFields),
+    ) as unknown as T;
   }
 
-  if (typeof obj === 'object') {
+  if (typeof obj === "object") {
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      if (typeof value === 'string' && richTextFields.includes(key)) {
+      if (typeof value === "string" && richTextFields.includes(key)) {
         sanitized[key] = sanitizeRichText(value);
       } else {
         sanitized[key] = sanitizeObject(value, richTextFields);
@@ -122,26 +127,29 @@ export function sanitizeObject<T>(
  * Validate that a request body doesn't contain common attack payloads.
  * Returns an array of detected threat types (empty = safe).
  */
+/**
+ * `RegExp.test()` on a /g/ pattern advances `lastIndex` and leaves it there, so
+ * these shared module-level patterns carry state between calls. Resetting before
+ * every test is what makes detection deterministic — previously a match left the
+ * index dirty (the old reset only ran when the test *failed*), and the next call
+ * scanned from that offset, so identical input alternated between flagged and clean.
+ */
+function matchesAnyPattern(patterns: RegExp[], input: string): boolean {
+  return patterns.some((pattern) => {
+    pattern.lastIndex = 0;
+    return pattern.test(input);
+  });
+}
+
 export function detectThreats(input: string): string[] {
   const threats: string[] = [];
 
-  // Check for SQL injection
-  for (const pattern of SQL_INJECTION_PATTERNS) {
-    if (pattern.test(input)) {
-      threats.push('sql_injection');
-      break;
-    }
-    // Reset lastIndex for global patterns
-    pattern.lastIndex = 0;
+  if (matchesAnyPattern(SQL_INJECTION_PATTERNS, input)) {
+    threats.push("sql_injection");
   }
 
-  // Check for XSS
-  for (const pattern of XSS_PATTERNS) {
-    if (pattern.test(input)) {
-      threats.push('xss');
-      break;
-    }
-    pattern.lastIndex = 0;
+  if (matchesAnyPattern(XSS_PATTERNS, input)) {
+    threats.push("xss");
   }
 
   return threats;

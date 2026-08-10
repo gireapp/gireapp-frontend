@@ -282,7 +282,7 @@ describe("RegisterForm — step 3 department options follow the track", () => {
     await user.selectOptions(screen.getByLabelText("Class / Level"), "SS3");
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(await screen.findByText(/You’re all set/)).toBeInTheDocument();
+    expect(await screen.findByText(/Almost there/)).toBeInTheDocument();
   });
 });
 
@@ -296,15 +296,16 @@ describe("RegisterForm — step 4 summary", () => {
     );
     await user.selectOptions(screen.getByLabelText("Class / Level"), "SS3");
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    await screen.findByText(/You’re all set/);
+    await screen.findByText(/Almost there/);
   }
 
-  it("greets the user by first name in caps", async () => {
+  it("greets the user by first name in caps without claiming the account exists", async () => {
     const user = userEvent.setup({ delay: null });
     render(<RegisterForm />);
     await reachSummary(user);
 
-    expect(screen.getByText("You’re all set, TOBI!")).toBeInTheDocument();
+    expect(screen.getByText("Almost there, TOBI")).toBeInTheDocument();
+    expect(screen.queryByText(/all set/i)).not.toBeInTheDocument();
   });
 
   it("summarises the chosen track and department", async () => {
@@ -325,14 +326,14 @@ describe("RegisterForm — step 4 summary", () => {
     expect(screen.queryByText(/^Area of focus:/)).not.toBeInTheDocument();
   });
 
-  it("uses the design's Edit and Go to dashboard labels", async () => {
+  it("uses the design's Edit and Create account labels", async () => {
     const user = userEvent.setup({ delay: null });
     render(<RegisterForm />);
     await reachSummary(user);
 
     expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Go to dashboard" }),
+      screen.getByRole("button", { name: "Create account" }),
     ).toBeInTheDocument();
   });
 
@@ -356,7 +357,7 @@ describe("RegisterForm — step 4 summary", () => {
     render(<RegisterForm />);
     await reachSummary(user);
 
-    await user.click(screen.getByRole("button", { name: "Go to dashboard" }));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => expect(registerActionMock).toHaveBeenCalled());
     const formData = registerActionMock.mock.calls[0]?.[1] as FormData;

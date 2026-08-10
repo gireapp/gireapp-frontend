@@ -366,15 +366,15 @@ export async function resendVerificationAction(
 
 export async function verifyEmailAction(
   token: string,
-): Promise<ApiResponse<{ message?: string }>> {
+): Promise<ApiResponse<{ message?: string; name?: string }>> {
   try {
-    const { data } = await serverApiClient<{ message?: string }>(
-      API_PATHS.AUTH.VERIFY_EMAIL,
-      {
-        method: "POST",
-        body: JSON.stringify({ token }),
-      },
-    );
+    const { data } = await serverApiClient<{
+      message?: string;
+      name?: string;
+    }>(API_PATHS.AUTH.VERIFY_EMAIL, {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
 
     // The address has served its purpose once the link is opened.
     await clearPendingVerificationEmail();
