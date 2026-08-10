@@ -1,18 +1,32 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { redirectMock, setSessionTokenMock, clearSessionTokenMock, apiMock } =
-  vi.hoisted(() => ({
-    redirectMock: vi.fn(),
-    setSessionTokenMock: vi.fn(),
-    clearSessionTokenMock: vi.fn(),
-    apiMock: vi.fn(),
-  }));
+const {
+  redirectMock,
+  setSessionTokenMock,
+  clearSessionTokenMock,
+  apiMock,
+  setPendingEmailMock,
+  clearPendingEmailMock,
+} = vi.hoisted(() => ({
+  redirectMock: vi.fn(),
+  setSessionTokenMock: vi.fn(),
+  clearSessionTokenMock: vi.fn(),
+  apiMock: vi.fn(),
+  setPendingEmailMock: vi.fn(),
+  clearPendingEmailMock: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
 vi.mock("@/lib/session", () => ({
   setSessionToken: setSessionTokenMock,
   clearSessionToken: clearSessionTokenMock,
+}));
+
+// Backed by next/headers cookies(), which has no request context under Vitest.
+vi.mock("@/lib/pending-verification", () => ({
+  setPendingVerificationEmail: setPendingEmailMock,
+  clearPendingVerificationEmail: clearPendingEmailMock,
 }));
 
 // ApiError must stay the real class so `instanceof` checks in the actions hold.
@@ -29,8 +43,10 @@ import {
   resetPasswordAction,
   completeOnboardingAction,
   verifyEmailAction,
+  resendVerificationAction,
 } from "@/features/auth/actions";
 import { ApiError } from "@/lib/api-client";
+import { API_PATHS } from "@gireapp/shared";
 
 const REDIRECT_PREFIX = "NEXT_REDIRECT:";
 
@@ -129,7 +145,7 @@ describe("registerAction", () => {
       }),
     ).catch((e: unknown) => e);
 
-    expect(redirectedTo(error)).toBe("/dashboard");
+    expect(redirectedTo(error)).toBe("/check-email");
     const body = JSON.parse(apiMock.mock.calls[0]?.[1].body as string);
     expect(body.guardianEmail).toBe("parent@example.com");
   });
@@ -148,14 +164,32 @@ describe("registerAction", () => {
     expect(redirectedTo(error)).toBe("/dashboard");
   });
 
-  it("does not set a session when the backend returns no token", async () => {
+  it("sends the user to check their inbox when the backend returns no token", async () => {
     apiMock.mockResolvedValue({ data: {}, status: 201 });
 
-    await registerAction(INITIAL, formData(VALID_REGISTRATION)).catch(
-      () => undefined,
-    );
+    const error = await registerAction(
+      INITIAL,
+      formData(VALID_REGISTRATION),
+    ).catch((e: unknown) => e);
 
+    // No token means email verification is still pending — /dashboard would
+    // only bounce off the middleware.
     expect(setSessionTokenMock).not.toHaveBeenCalled();
+    expect(redirectedTo(error)).toBe("/check-email");
+    expect(setPendingEmailMock).toHaveBeenCalledWith("tobi@example.com");
+  });
+
+  it("goes straight to the dashboard when the backend skips verification", async () => {
+    apiMock.mockResolvedValue({ data: { token: "jwt-skip" }, status: 201 });
+
+    const error = await registerAction(
+      INITIAL,
+      formData(VALID_REGISTRATION),
+    ).catch((e: unknown) => e);
+
+    expect(setSessionTokenMock).toHaveBeenCalledWith("jwt-skip");
+    expect(redirectedTo(error)).toBe("/dashboard");
+    expect(setPendingEmailMock).not.toHaveBeenCalled();
   });
 
   it("surfaces backend field errors from an ApiError", async () => {
@@ -251,6 +285,24 @@ describe("loginAction", () => {
     });
     expect(setSessionTokenMock).not.toHaveBeenCalled();
   });
+
+  it("flags an unverified email so the form can offer a resend", async () => {
+    apiMock.mockRejectedValue(
+      new ApiError("Please verify your email address.", 403),
+    );
+
+    const result = await loginAction(INITIAL, formData(CREDENTIALS));
+
+    expect(result.data?.emailUnverified).toBe(true);
+  });
+
+  it("does not flag unverified email for other failures", async () => {
+    apiMock.mockRejectedValue(new ApiError("Invalid credentials", 401));
+
+    const result = await loginAction(INITIAL, formData(CREDENTIALS));
+
+    expect(result.data?.emailUnverified).toBe(false);
+  });
 });
 
 describe("logoutAction", () => {
@@ -303,6 +355,49 @@ describe("forgotPasswordAction", () => {
     apiMock.mockRejectedValue(new ApiError("No such user", 404));
 
     const result = await forgotPasswordAction(
+      INITIAL,
+      formData({ email: "ghost@example.com" }),
+    );
+
+    expect(result).toEqual({ success: true });
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+});
+
+describe("resendVerificationAction", () => {
+  it("rejects an invalid email before calling the API", async () => {
+    const result = await resendVerificationAction(
+      INITIAL,
+      formData({ email: "nope" }),
+    );
+
+    expect(result.errors?.email).toBeDefined();
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
+  it("posts the lower-cased email to the resend endpoint", async () => {
+    await resendVerificationAction(
+      INITIAL,
+      formData({ email: "Tobi@Example.COM" }),
+    );
+
+    expect(apiMock).toHaveBeenCalledWith(
+      API_PATHS.AUTH.RESEND_VERIFICATION,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "tobi@example.com" }),
+      }),
+    );
+  });
+
+  it("reports success even when the backend fails, to prevent email enumeration", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    apiMock.mockRejectedValue(new ApiError("No such user", 404));
+
+    const result = await resendVerificationAction(
       INITIAL,
       formData({ email: "ghost@example.com" }),
     );

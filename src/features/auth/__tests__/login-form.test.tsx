@@ -1,18 +1,28 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const { loginActionMock, pushMock, refreshMock, searchParams, toastMock } =
-  vi.hoisted(() => ({
-    loginActionMock: vi.fn(),
-    pushMock: vi.fn(),
-    refreshMock: vi.fn(),
-    searchParams: new URLSearchParams(),
-    toastMock: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
-  }));
+const {
+  loginActionMock,
+  resendVerificationActionMock,
+  pushMock,
+  refreshMock,
+  searchParams,
+  toastMock,
+} = vi.hoisted(() => ({
+  loginActionMock: vi.fn(),
+  resendVerificationActionMock: vi.fn(),
+  pushMock: vi.fn(),
+  refreshMock: vi.fn(),
+  searchParams: new URLSearchParams(),
+  toastMock: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
 
-vi.mock("@/features/auth/actions", () => ({ loginAction: loginActionMock }));
+vi.mock("@/features/auth/actions", () => ({
+  loginAction: loginActionMock,
+  resendVerificationAction: resendVerificationActionMock,
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, refresh: refreshMock }),
@@ -33,6 +43,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   resetParams();
   loginActionMock.mockResolvedValue({ success: false });
+  resendVerificationActionMock.mockResolvedValue({ success: false });
 });
 
 describe("LoginForm — rendering", () => {
@@ -228,5 +239,179 @@ describe("LoginForm — expired session notice", () => {
     render(<LoginForm />);
 
     expect(toastMock.info).not.toHaveBeenCalled();
+  });
+});
+
+describe("LoginForm — transient server messages", () => {
+  const DISMISS_MS = 6000;
+
+  // `shouldAdvanceTime` keeps the fake clock ticking with real time, which is
+  // what lets RTL's waitFor/findBy polling resolve instead of deadlocking;
+  // handing userEvent the same clock keeps its internal delays in step.
+  function setupWithFakeTimers() {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    return userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  }
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("clears the login error once the timeout elapses", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Please verify your email address before logging in.",
+    });
+    const user = setupWithFakeTimers();
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("Email Address"), "tobi@example.com");
+    await user.type(screen.getByLabelText("Password"), "Passw0rdd");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    const message = await screen.findByText(
+      "Please verify your email address before logging in.",
+    );
+    expect(message).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(DISMISS_MS);
+    });
+
+    expect(
+      screen.queryByText("Please verify your email address before logging in."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("drops the destructive field styling along with the error", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Invalid email or password.",
+    });
+    const user = setupWithFakeTimers();
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("Email Address"), "tobi@example.com");
+    await user.type(screen.getByLabelText("Password"), "Passw0rdd");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    const email = screen.getByLabelText("Email Address");
+    await waitFor(() => expect(email).toHaveAttribute("aria-invalid", "true"));
+
+    await act(async () => {
+      vi.advanceTimersByTime(DISMISS_MS);
+    });
+
+    expect(email).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("clears the resend confirmation once the timeout elapses", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Please verify your email address before logging in.",
+      data: { emailUnverified: true },
+    });
+    resendVerificationActionMock.mockResolvedValue({ success: true });
+    const user = setupWithFakeTimers();
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("Email Address"), "tobi@example.com");
+    await user.type(screen.getByLabelText("Password"), "Passw0rdd");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    const resendButton = await screen.findByRole("button", {
+      name: "Resend verification email",
+    });
+    await user.click(resendButton);
+
+    const notice = await screen.findByText(
+      "If that account exists and is unverified, a new link is on its way.",
+    );
+    expect(notice).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(DISMISS_MS);
+    });
+
+    expect(
+      screen.queryByText(
+        "If that account exists and is unverified, a new link is on its way.",
+      ),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("LoginForm — unverified email recovery", () => {
+  const RESEND_LABEL = "Resend verification email";
+
+  async function submitLogin() {
+    const user = userEvent.setup({ delay: null });
+    await user.type(screen.getByLabelText("Email Address"), "tobi@example.com");
+    await user.type(screen.getByLabelText("Password"), "Passw0rdd");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+    return user;
+  }
+
+  it("offers a resend link once login reports the email is unverified", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Please verify your email address before logging in.",
+      data: { emailUnverified: true },
+    });
+    render(<LoginForm />);
+
+    await submitLogin();
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: RESEND_LABEL }),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("hides the resend link for ordinary credential failures", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Invalid email or password.",
+      data: { emailUnverified: false },
+    });
+    render(<LoginForm />);
+
+    await submitLogin();
+
+    await waitFor(() => expect(toastMock.error).toHaveBeenCalled());
+    expect(
+      screen.queryByRole("button", { name: RESEND_LABEL }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("submits the email to the resend action and confirms it was sent", async () => {
+    loginActionMock.mockResolvedValue({
+      success: false,
+      error: "Please verify your email address before logging in.",
+      data: { emailUnverified: true },
+    });
+    resendVerificationActionMock.mockResolvedValue({ success: true });
+    render(<LoginForm />);
+
+    const user = await submitLogin();
+    const resendButton = await screen.findByRole("button", {
+      name: RESEND_LABEL,
+    });
+    await user.click(resendButton);
+
+    await waitFor(() =>
+      expect(resendVerificationActionMock).toHaveBeenCalled(),
+    );
+
+    const submittedForm = resendVerificationActionMock.mock.calls[0]?.[1] as
+      FormData | undefined;
+    expect(submittedForm?.get("email")).toBe("tobi@example.com");
+
+    await waitFor(() =>
+      expect(toastMock.success).toHaveBeenCalledWith(
+        "Verification email sent. Please check your inbox.",
+      ),
+    );
   });
 });

@@ -4,10 +4,15 @@ import { redirect } from "next/navigation";
 import { SignJWT } from "jose";
 import { setSessionToken, clearSessionToken } from "@/lib/session";
 import {
+  setPendingVerificationEmail,
+  clearPendingVerificationEmail,
+} from "@/lib/pending-verification";
+import {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  resendVerificationSchema,
   onboardingSchema,
   calculateAge,
 } from "@gireapp/shared";
@@ -17,6 +22,10 @@ import { serverApiClient, ApiError } from "@/lib/api-client";
 import { JWT_SECRET } from "@/lib/auth-secret";
 import { safeCallbackUrl } from "@/lib/callback-url";
 import { sanitizeString } from "@/lib/sanitize";
+
+/** Login answers 403 in exactly one case: the account exists but is unverified.
+ *  Keyed on the status rather than the message so copy edits can't break it. */
+const HTTP_EMAIL_UNVERIFIED = 403;
 
 const TRACK_TO_LEVEL: Record<string, AcademicLevel> = {
   Secondary: "SECONDARY",
@@ -91,6 +100,8 @@ export async function registerAction(
     redirect("/dashboard");
   }
 
+  let sessionToken: string | undefined;
+
   try {
     const { data } = await serverApiClient<{ token?: string; user?: unknown }>(
       API_PATHS.AUTH.REGISTER,
@@ -100,9 +111,7 @@ export async function registerAction(
       },
     );
 
-    if (data.token) {
-      await setSessionToken(data.token);
-    }
+    sessionToken = data.token;
   } catch (error) {
     if (error instanceof ApiError) {
       return {
@@ -114,13 +123,25 @@ export async function registerAction(
     return { success: false, error: "Network error. Please try again." };
   }
 
-  redirect("/dashboard");
+  // redirect() signals by throwing, so it has to stay outside the try above or
+  // the catch would swallow it and report a network failure instead.
+
+  // A token only comes back when the backend is configured to skip verification
+  // (SKIP_EMAIL_VERIFICATION); otherwise there is no session until the emailed
+  // link is opened, and sending the user to /dashboard just bounces off middleware.
+  if (sessionToken) {
+    await setSessionToken(sessionToken);
+    redirect("/dashboard");
+  }
+
+  await setPendingVerificationEmail(result.data.email);
+  redirect("/check-email");
 }
 
 export async function loginAction(
-  _prevState: ApiResponse,
+  _prevState: ApiResponse<{ emailUnverified?: boolean }>,
   formData: FormData,
-): Promise<ApiResponse> {
+): Promise<ApiResponse<{ emailUnverified?: boolean }>> {
   const raw = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -170,6 +191,7 @@ export async function loginAction(
         success: false,
         error: error.message,
         errors: error.fieldErrors,
+        data: { emailUnverified: error.status === HTTP_EMAIL_UNVERIFIED },
       };
     }
     return { success: false, error: "Network error. Please try again." };
@@ -313,6 +335,35 @@ export async function completeOnboardingAction(
   }
 }
 
+export async function resendVerificationAction(
+  _prevState: ApiResponse,
+  formData: FormData,
+): Promise<ApiResponse> {
+  const result = resendVerificationSchema.safeParse({
+    email: formData.get("email") as string,
+  });
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    await serverApiClient(API_PATHS.AUTH.RESEND_VERIFICATION, {
+      method: "POST",
+      body: JSON.stringify(result.data),
+    });
+  } catch (error) {
+    // Same contract as forgotPasswordAction: the caller must not learn whether
+    // the address exists or is already verified, so failures stay server-side.
+    console.error("[resendVerificationAction] request failed:", error);
+  }
+
+  return { success: true };
+}
+
 export async function verifyEmailAction(
   token: string,
 ): Promise<ApiResponse<{ message?: string }>> {
@@ -324,6 +375,9 @@ export async function verifyEmailAction(
         body: JSON.stringify({ token }),
       },
     );
+
+    // The address has served its purpose once the link is opened.
+    await clearPendingVerificationEmail();
 
     return { success: true, data };
   } catch (error) {

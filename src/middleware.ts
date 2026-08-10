@@ -11,6 +11,10 @@ const publicRoutes = [
   "/register",
   "/forgot-password",
   "/reset-password",
+  // Both are reached by a signed-out user: /verify-email from the emailed link,
+  // /check-email straight after registering (no session exists until verified).
+  "/verify-email",
+  "/check-email",
 ];
 
 // Dashboard segments gated by academic level
