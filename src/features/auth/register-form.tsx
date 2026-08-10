@@ -8,7 +8,7 @@ import { Loader2, ChevronDown } from "lucide-react";
 import { registerAction } from "@/features/auth/actions";
 import { AuthPageHeader } from "@/components/shared/auth-page-header";
 import type { ApiResponse } from "@gireapp/shared";
-import { calculateAge } from "@gireapp/shared";
+import { calculateAge, DEPARTMENTS } from "@gireapp/shared";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -169,6 +169,7 @@ function ProfessionalIcon() {
 const TRACKS = [
   {
     id: "Secondary",
+    academicLevel: "SECONDARY",
     title: "Secondary",
     description: "For secondary school students",
     detail: "(SS1 -SS3)",
@@ -179,6 +180,7 @@ const TRACKS = [
   },
   {
     id: "Tertiary",
+    academicLevel: "TERTIARY",
     title: "Tertiary",
     description: "For tertiary institution students",
     detail: "Undergraduates and Postgraduates",
@@ -189,6 +191,7 @@ const TRACKS = [
   },
   {
     id: "Professional",
+    academicLevel: "PROFESSIONAL",
     title: "Professional",
     description: "For industry professionals",
     detail: "Career Advancement Track",
@@ -215,41 +218,61 @@ const STEP_HEADINGS: Record<number, { title: string; subtitle: string }> = {
   },
 };
 
-const CUSTOMIZE_FIELDS = [
-  {
-    id: "department",
-    label: "Department",
-    placeholder: "Select Department",
-    options: ["Science", "Arts / Humanities", "Commercial", "Technology"],
-  },
-  {
-    id: "level",
-    label: "Class / Level",
-    placeholder: "Select Class/Level",
-    options: [
-      "SS1",
-      "SS2",
-      "SS3",
-      "100 Level",
-      "200 Level",
-      "300 Level",
-      "400 Level",
-      "Professional",
-    ],
-  },
-  {
-    id: "focusArea",
-    label: "Area of focus (optional)",
-    placeholder: "Select Focus",
-    options: [
-      "WAEC Prep",
-      "JAMB Prep",
-      "NECO Prep",
-      "Career Advancement",
-      "General Study",
-    ],
-  },
+type CustomizeField = {
+  id: "department" | "level" | "focusArea";
+  label: string;
+  placeholder: string;
+  options: readonly string[];
+};
+
+const CLASS_LEVEL_OPTIONS = [
+  "SS1",
+  "SS2",
+  "SS3",
+  "100 Level",
+  "200 Level",
+  "300 Level",
+  "400 Level",
+  "Professional",
 ] as const;
+
+const FOCUS_AREA_OPTIONS = [
+  "WAEC Prep",
+  "JAMB Prep",
+  "NECO Prep",
+  "Career Advancement",
+  "General Study",
+] as const;
+
+/**
+ * Department options come from the shared DEPARTMENTS map, keyed by the track
+ * picked in step 2, so registration cannot store a department that
+ * onboardingSchema would later reject as mismatched.
+ */
+function customizeFieldsFor(track: string): CustomizeField[] {
+  const academicLevel = TRACKS.find((t) => t.id === track)?.academicLevel;
+
+  return [
+    {
+      id: "department",
+      label: "Department",
+      placeholder: "Select Department",
+      options: academicLevel ? DEPARTMENTS[academicLevel] : [],
+    },
+    {
+      id: "level",
+      label: "Class / Level",
+      placeholder: "Select Class/Level",
+      options: CLASS_LEVEL_OPTIONS,
+    },
+    {
+      id: "focusArea",
+      label: "Area of focus (optional)",
+      placeholder: "Select Focus",
+      options: FOCUS_AREA_OPTIONS,
+    },
+  ];
+}
 
 function SummaryCheck() {
   return (
@@ -372,6 +395,12 @@ export function RegisterForm() {
   const handleChange = (field: string, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     if (touched[field]) validateField(field, value);
+  };
+
+  // Department options are scoped to the track, so a previously chosen
+  // department would no longer be offered once the track changes.
+  const handleSelectTrack = (track: string) => {
+    setValues((prev) => ({ ...prev, track, department: "" }));
   };
 
   const getError = (field: keyof FieldErrors) => {
@@ -753,7 +782,7 @@ export function RegisterForm() {
                 <button
                   key={track.id}
                   type="button"
-                  onClick={() => handleChange("track", track.id)}
+                  onClick={() => handleSelectTrack(track.id)}
                   aria-pressed={selected}
                   className={`w-full p-4 rounded-lg border-[0.5px] flex items-center gap-4 text-left transition-all duration-200 outline-none ${
                     selected
@@ -800,7 +829,7 @@ export function RegisterForm() {
         {/* STEP 3: Customize Path */}
         {step === 3 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 ease-out space-y-6 lg:space-y-8">
-            {CUSTOMIZE_FIELDS.map((field) => (
+            {customizeFieldsFor(values.track).map((field) => (
               <div key={field.id} className="flex flex-col gap-2">
                 <label
                   htmlFor={`register-${field.id}`}

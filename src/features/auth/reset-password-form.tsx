@@ -156,7 +156,9 @@ export function ResetPasswordForm() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className={toggleClassName}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={
+              showPassword ? "Hide new password" : "Show new password"
+            }
           >
             <EyeIcon crossed={showPassword} />
           </button>
@@ -194,7 +196,9 @@ export function ResetPasswordForm() {
             type="button"
             onClick={() => setShowConfirm(!showConfirm)}
             className={toggleClassName}
-            aria-label={showConfirm ? "Hide password" : "Show password"}
+            aria-label={
+              showConfirm ? "Hide confirm password" : "Show confirm password"
+            }
           >
             <EyeIcon crossed={showConfirm} />
           </button>
