@@ -530,12 +530,9 @@ export function RegisterForm() {
         <input type="hidden" name="level" value={values.level} />
         <input type="hidden" name="focusArea" value={values.focusArea} />
 
-        {/* Global error */}
-        {state.error && !state.success && (
-          <p className="text-sm text-destructive text-center mb-4" role="alert">
-            {state.error}
-          </p>
-        )}
+        {/* Submission errors surface only as a toast. An inline banner here sits
+            above whichever step is showing, and submission is only reachable from
+            step 4 — so it landed on the "You're all set!" screen and contradicted it. */}
 
         {/* STEP 1: Basic Info */}
         {step === 1 && (
