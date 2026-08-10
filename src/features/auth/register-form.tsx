@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2, ChevronDown } from "lucide-react";
 import { registerAction } from "@/features/auth/actions";
+import { AuthPageHeader } from "@/components/shared/auth-page-header";
 import type { ApiResponse } from "@gireapp/shared";
 import { calculateAge } from "@gireapp/shared";
 import { toast } from "sonner";
@@ -197,6 +198,22 @@ const TRACKS = [
     Icon: ProfessionalIcon,
   },
 ] as const;
+
+// Steps 1-3 share the back-arrow header; step 4 renders its own centered layout.
+const STEP_HEADINGS: Record<number, { title: string; subtitle: string }> = {
+  1: {
+    title: "Create your account",
+    subtitle: "Join GIREAPP and start your personalized learning journey",
+  },
+  2: {
+    title: "Choose your learning track",
+    subtitle: "This helps us personalize your experience",
+  },
+  3: {
+    title: "Customize your path",
+    subtitle: "Choose your department, class and area of focus",
+  },
+};
 
 const CUSTOMIZE_FIELDS = [
   {
@@ -420,30 +437,8 @@ export function RegisterForm() {
     }
   }, [state]);
 
-  const renderBackArrow = () => (
-    <svg
-      className="w-full h-full"
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M9.1665 20.0034H31.6665"
-        stroke="#6366F1"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M18.3334 30.0033C18.3334 30.0033 8.33351 22.6383 8.3335 20.0031C8.33348 17.3679 18.3335 10.0032 18.3335 10.0032"
-        stroke="#6366F1"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  // Step 4 renders its own centered layout, so it has no entry here.
+  const heading = STEP_HEADINGS[step];
 
   return (
     <div className="flex w-full flex-col">
@@ -467,40 +462,15 @@ export function RegisterForm() {
       </div>
 
       {/* Dynamic Header (steps 1-3; step 4 has its own centered layout) */}
-      {step < 4 && (
-        <div className="inline-flex w-full max-w-[466px] flex-col items-start gap-2 mb-8">
-          <div className="inline-flex items-center justify-start gap-3">
-            {step > 1 ? (
-              <button
-                type="button"
-                onClick={() => setStep(step - 1)}
-                className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
-                aria-label="Go back"
-              >
-                {renderBackArrow()}
-              </button>
-            ) : (
-              <Link
-                href="/"
-                className="relative h-6 w-6 lg:h-10 lg:w-10 shrink-0 hover:bg-indigo-50/50 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
-                aria-label="Go back to landing page"
-              >
-                {renderBackArrow()}
-              </Link>
-            )}
-            <h1 className="flex flex-col justify-center text-[20px] lg:text-[28px] font-bold text-indigo-950 font-heading break-words">
-              {step === 1 && "Create your account"}
-              {step === 2 && "Choose your learning track"}
-              {step === 3 && "Customize your path"}
-            </h1>
-          </div>
-          <p className="flex flex-col justify-center self-stretch text-[14px] lg:text-[16px] font-normal text-indigo-950 break-words">
-            {step === 1 &&
-              "Join GIREAPP and start your personalized learning journey"}
-            {step === 2 && "This helps us personalize your experience"}
-            {step === 3 && "Choose your department, class and area of focus"}
-          </p>
-        </div>
+      {heading && (
+        <AuthPageHeader
+          title={heading.title}
+          subtitle={heading.subtitle}
+          className="mb-8"
+          {...(step > 1
+            ? { onBack: () => setStep(step - 1), backLabel: "Go back" }
+            : { backHref: "/", backLabel: "Go back to landing page" })}
+        />
       )}
 
       {/* Form Content */}
