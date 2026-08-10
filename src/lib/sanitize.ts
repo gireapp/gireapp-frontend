@@ -4,8 +4,10 @@
 // ─────────────────────────────────────────────────
 
 /**
- * SQL injection patterns to strip from user input.
- * Matches common attack vectors: UNION SELECT, DROP TABLE, etc.
+ * SQL injection patterns used for threat *detection* only (see `detectThreats`).
+ * Never used to rewrite input: the backend parameterises every query, so there is
+ * no injection risk to strip here, and removing these tokens silently mangles
+ * legitimate content — "Union Ekpo" became "Ekpo", "Cast Iron" became "Iron".
  */
 const SQL_INJECTION_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|TRUNCATE|DECLARE|CAST)\b\s)/gi,
@@ -39,17 +41,14 @@ const XSS_PATTERNS = [
 
 /**
  * Sanitise a single string value:
- * 1. Strip SQL injection patterns
+ * 1. Strip XSS patterns
  * 2. Escape XSS-relevant HTML entities
  * 3. Trim whitespace
+ *
+ * SQL keywords are deliberately left intact — see `SQL_INJECTION_PATTERNS`.
  */
 export function sanitizeString(input: string): string {
   let sanitized = input;
-
-  // Strip SQL injection patterns
-  for (const pattern of SQL_INJECTION_PATTERNS) {
-    sanitized = sanitized.replace(pattern, "");
-  }
 
   // Strip XSS patterns
   for (const pattern of XSS_PATTERNS) {
@@ -69,15 +68,11 @@ export function sanitizeString(input: string): string {
 /**
  * Sanitise a string but preserve basic markdown formatting.
  * Used for rich-text fields like lesson content and quiz explanations.
- * Strips XSS but keeps markdown-safe characters.
+ * Strips XSS but keeps markdown-safe characters — and, like `sanitizeString`,
+ * leaves SQL keywords alone so lesson prose about databases survives intact.
  */
 export function sanitizeRichText(input: string): string {
   let sanitized = input;
-
-  // Strip SQL injection patterns
-  for (const pattern of SQL_INJECTION_PATTERNS) {
-    sanitized = sanitized.replace(pattern, "");
-  }
 
   // Strip only dangerous XSS patterns (keep markdown-safe HTML like <em>, <strong>)
   for (const pattern of XSS_PATTERNS) {
