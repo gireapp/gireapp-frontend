@@ -1,21 +1,24 @@
-import type { Metadata } from 'next';
-import { SegmentDashboard } from '@/features/courses/segment-dashboard';
+import type { Metadata } from "next";
+import { getSession } from "@/lib/session";
+import { getDashboardOverview } from "@/features/dashboard/actions";
+import { DashboardHome } from "@/features/dashboard/dashboard-home";
 
 export const metadata: Metadata = {
-  title: 'Tertiary Dashboard',
-  description: 'Your personalised GIREAPP dashboard for university students.',
+  title: "Dashboard",
+  description: "Your personalised GIREAPP dashboard.",
 };
 
-export default function TertiaryDashboard() {
+export default async function TertiaryDashboard() {
+  const [session, overview] = await Promise.all([
+    getSession(),
+    getDashboardOverview(),
+  ]);
+
   return (
-    <SegmentDashboard
-      config={{
-        level: 'TERTIARY',
-        title: 'Tertiary Dashboard',
-        subtitle: 'Undergraduate & Postgraduate — research, thesis support, and career growth.',
-        accentColor: 'coral',
-        badgeBg: 'bg-coral-100 text-coral-700 dark:bg-coral-900/30 dark:text-coral-300',
-      }}
+    <DashboardHome
+      name={overview?.profile.name ?? session?.email ?? "there"}
+      department={overview?.profile.department ?? session?.department ?? null}
+      overview={overview}
     />
   );
 }
