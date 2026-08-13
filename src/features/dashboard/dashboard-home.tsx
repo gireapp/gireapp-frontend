@@ -8,7 +8,12 @@ import {
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
-import type { DashboardOverview, CourseCard } from "@gireapp/shared";
+import type {
+  DashboardOverview,
+  DashboardStats,
+  CourseCard,
+  NextQuiz,
+} from "@gireapp/shared";
 import { formatNumber } from "@/lib/utils";
 import { DashboardTopbar } from "@/features/dashboard/dashboard-topbar";
 
@@ -21,22 +26,15 @@ const PRIMARY_BUTTON_CLASSNAME =
   "inline-flex h-12 items-center justify-center gap-1 rounded-lg px-3 font-sans text-[14px] text-indigo-50 transition-colors";
 
 /**
- * Figures the design shows that `DashboardOverview` does not carry yet. Each is
- * optional so the UI renders correctly today and needs only a wider mapping —
- * not a rewrite — once the backend supplies them.
+ * The two figures the design shows that the backend still cannot supply:
+ * a weekly goal has no model, and badges are awarded on score thresholds rather
+ * than a quiz count. Both stay optional so the UI degrades cleanly without them.
  */
 export type DashboardExtras = {
-  /** Points earned this week, for the "+240 this week" stat hint. */
-  weeklyPoints?: number;
   /** 0–1 share of the weekly goal met, for the hero progress bar. */
   weeklyGoalProgress?: number;
-  /** Mean quiz score as a percentage. */
-  averageScore?: number;
-  /** Pre-formatted standing, e.g. "Top 10%". */
-  rank?: string;
   /** Quizzes remaining before the next badge unlocks. */
   quizzesToNextBadge?: number;
-  nextQuiz?: { id: string; title: string; dueDate: string | null };
 };
 
 function findResumeCourse(courses: CourseCard[]): CourseCard | null {
@@ -61,9 +59,8 @@ export function DashboardHome({
   const resume = findResumeCourse(courses);
   const points = overview?.totalPoints ?? 0;
   const badges = overview?.badgeCount ?? 0;
-  const quizzes =
-    overview?.recentActivity.filter((a) => a.type.startsWith("quiz_")).length ??
-    0;
+  const stats = overview?.stats ?? null;
+  const nextQuiz = overview?.nextQuiz ?? null;
 
   const hasStarted = points > 0 || badges > 0 || resume !== null;
 
@@ -97,7 +94,7 @@ export function DashboardHome({
             <ProgressCard
               points={points}
               badges={badges}
-              quizzes={quizzes}
+              stats={stats}
               hasStarted={hasStarted}
               extras={extras}
             />
@@ -117,10 +114,10 @@ export function DashboardHome({
             <RecommendedSubjects courses={courses} />
           </section>
 
-          {extras.nextQuiz && (
+          {nextQuiz && (
             <section className="flex flex-col gap-6">
               <h2 className={SECTION_TITLE_CLASSNAME}>Up Next</h2>
-              <UpNextCard quiz={extras.nextQuiz} />
+              <UpNextCard quiz={nextQuiz} />
             </section>
           )}
         </div>
@@ -275,28 +272,33 @@ function ResumeCard({ resume }: { resume: CourseCard | null }) {
 function ProgressCard({
   points,
   badges,
-  quizzes,
+  stats,
   hasStarted,
   extras,
 }: {
   points: number;
   badges: number;
-  quizzes: number;
+  stats: DashboardStats | null;
   hasStarted: boolean;
   extras: DashboardExtras;
 }) {
-  const stats = [
+  const quizzes = stats?.quizzesTaken ?? 0;
+  const weeklyPoints = stats?.weeklyPoints ?? 0;
+  const averageScore = stats?.averageScore ?? null;
+  const rankPercentile = stats?.rankPercentile ?? null;
+
+  const tiles = [
     {
       icon: Trophy,
       label: "Learning points",
       value: formatNumber(points),
       hint:
-        extras.weeklyPoints !== undefined
-          ? `+${formatNumber(extras.weeklyPoints)} this week`
+        weeklyPoints > 0
+          ? `+${formatNumber(weeklyPoints)} this week`
           : hasStarted
             ? "Keep it up"
             : "Keep learning",
-      positive: extras.weeklyPoints !== undefined,
+      positive: weeklyPoints > 0,
     },
     {
       icon: Award,
@@ -315,18 +317,18 @@ function ProgressCard({
       label: "Quizzes taken",
       value: formatNumber(quizzes),
       hint:
-        extras.averageScore !== undefined
-          ? `${extras.averageScore}% average score`
+        averageScore !== null
+          ? `${averageScore}% average score`
           : quizzes > 0
             ? "Keep testing yourself"
             : "Take your first quiz",
-      positive: extras.averageScore !== undefined,
+      positive: averageScore !== null,
     },
     {
       icon: Sparkles,
       label: "Rank",
-      value: extras.rank ?? "-",
-      hint: extras.rank ? "in your track" : "Get started to rank",
+      value: rankPercentile !== null ? `Top ${rankPercentile}%` : "-",
+      hint: rankPercentile !== null ? "in your track" : "Get started to rank",
       positive: false,
     },
   ];
@@ -335,8 +337,8 @@ function ProgressCard({
     <div
       className={`${CARD_CLASSNAME} grid grid-cols-1 gap-6 px-6 py-3 sm:grid-cols-2`}
     >
-      {stats.map((stat) => (
-        <StatTile key={stat.label} {...stat} />
+      {tiles.map((tile) => (
+        <StatTile key={tile.label} {...tile} />
       ))}
     </div>
   );
@@ -429,11 +431,7 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
   );
 }
 
-function UpNextCard({
-  quiz,
-}: {
-  quiz: NonNullable<DashboardExtras["nextQuiz"]>;
-}) {
+function UpNextCard({ quiz }: { quiz: NextQuiz }) {
   return (
     <div className={`${CARD_CLASSNAME} flex items-center gap-2 p-2`}>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200">

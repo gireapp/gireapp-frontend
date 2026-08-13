@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type {
   DashboardOverview,
+  DashboardStats,
   CourseCard,
   SessionUser,
 } from "@gireapp/shared";
@@ -34,6 +35,13 @@ const physics: CourseCard = {
   estimatedMinutes: 240,
 };
 
+const emptyStats: DashboardStats = {
+  quizzesTaken: 0,
+  averageScore: null,
+  weeklyPoints: 0,
+  rankPercentile: null,
+};
+
 function overview(patch: Partial<DashboardOverview> = {}): DashboardOverview {
   return {
     profile,
@@ -48,6 +56,8 @@ function overview(patch: Partial<DashboardOverview> = {}): DashboardOverview {
         timestamp: "2026-08-01T10:00:00.000Z",
       },
     ],
+    stats: emptyStats,
+    nextQuiz: null,
     ...patch,
   };
 }
@@ -102,17 +112,20 @@ describe("DashboardHome — new learner", () => {
 });
 
 describe("DashboardHome — returning learner", () => {
-  const extras = {
-    weeklyPoints: 240,
-    weeklyGoalProgress: 0.4,
+  const extras = { weeklyGoalProgress: 0.4, quizzesToNextBadge: 2 };
+
+  const activeStats: DashboardStats = {
+    quizzesTaken: 18,
     averageScore: 80,
-    rank: "Top 10%",
-    quizzesToNextBadge: 2,
-    nextQuiz: {
-      id: "quiz-9",
-      title: "Physics: Quiz 9",
-      dueDate: "05/07/2026",
-    },
+    weeklyPoints: 240,
+    rankPercentile: 10,
+  };
+
+  const nextQuiz = {
+    id: "quiz-9",
+    courseId: "course-physics",
+    title: "Physics: Quiz 9",
+    dueDate: "05/07/2026",
   };
 
   it("greets the user above the card and switches the headline", () => {
@@ -159,7 +172,7 @@ describe("DashboardHome — returning learner", () => {
   });
 
   it("shows the enriched stat hints", () => {
-    renderHome({ overview: overview(), extras });
+    renderHome({ overview: overview({ stats: activeStats }), extras });
 
     expect(screen.getByText("+240 this week")).toBeInTheDocument();
     expect(screen.getByText("Next badge: 2 quizzes")).toBeInTheDocument();
@@ -168,8 +181,14 @@ describe("DashboardHome — returning learner", () => {
     expect(screen.getByText("in your track")).toBeInTheDocument();
   });
 
+  it("counts quizzes from stats rather than the truncated activity list", () => {
+    renderHome({ overview: overview({ stats: activeStats }) });
+
+    expect(screen.getByText("18")).toBeInTheDocument();
+  });
+
   it("shows Up Next only when a quiz is scheduled", () => {
-    renderHome({ overview: overview(), extras });
+    renderHome({ overview: overview({ nextQuiz }) });
 
     expect(screen.getByText("Up Next")).toBeInTheDocument();
     expect(screen.getByText("Physics: Quiz 9")).toBeInTheDocument();
