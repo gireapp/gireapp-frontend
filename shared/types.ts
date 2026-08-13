@@ -5,30 +5,44 @@
 // ─────────────────────────────────────────────────
 
 /** Academic level segments — maps to user onboarding selection */
-export const ACADEMIC_LEVELS = ['SECONDARY', 'TERTIARY', 'PROFESSIONAL'] as const;
+export const ACADEMIC_LEVELS = [
+  "SECONDARY",
+  "TERTIARY",
+  "PROFESSIONAL",
+] as const;
 export type AcademicLevel = (typeof ACADEMIC_LEVELS)[number];
 
 /** User roles for RBAC */
-export const ROLES = ['STUDENT', 'TUTOR', 'ADMIN'] as const;
+export const ROLES = ["STUDENT", "TUTOR", "ADMIN"] as const;
 export type Role = (typeof ROLES)[number];
 
 /** Content types supported in lessons */
-export const CONTENT_TYPES = ['TEXT', 'PDF', 'MARKDOWN', 'VIDEO'] as const;
+export const CONTENT_TYPES = ["TEXT", "PDF", "MARKDOWN", "VIDEO"] as const;
 export type ContentType = (typeof CONTENT_TYPES)[number];
 
 /** Gamification badge tiers */
-export const BADGE_TYPES = ['BRONZE', 'SILVER', 'GOLD', 'CURRENT_MASTER'] as const;
+export const BADGE_TYPES = [
+  "BRONZE",
+  "SILVER",
+  "GOLD",
+  "CURRENT_MASTER",
+] as const;
 export type BadgeType = (typeof BADGE_TYPES)[number];
 
 /** Mood themes for UI personalization */
-export const MOOD_THEMES = ['calm', 'focused', 'energized', 'relaxed'] as const;
+export const MOOD_THEMES = ["calm", "focused", "energized", "relaxed"] as const;
 export type MoodTheme = (typeof MOOD_THEMES)[number];
 
 /** Department options per academic level */
 export const DEPARTMENTS: Record<AcademicLevel, readonly string[]> = {
-  SECONDARY: ['Science', 'Business', 'Arts'] as const,
-  TERTIARY: ['Undergraduate', 'Postgraduate'] as const,
-  PROFESSIONAL: ['Data Analytics', 'Project Management', 'Digital Marketing', 'Software Engineering'] as const,
+  SECONDARY: ["Science", "Business", "Arts"] as const,
+  TERTIARY: ["Undergraduate", "Postgraduate"] as const,
+  PROFESSIONAL: [
+    "Data Analytics",
+    "Project Management",
+    "Digital Marketing",
+    "Software Engineering",
+  ] as const,
 } as const;
 
 /**
@@ -37,7 +51,11 @@ export const DEPARTMENTS: Record<AcademicLevel, readonly string[]> = {
  * Mentorship endpoints return 403 until confirmed. 'confirmed' — guardian clicked the
  * one-click link. Academic access (courses/assessments/gamification) is never gated by this.
  */
-export const GUARDIAN_CONSENT_STATUSES = ['not_required', 'pending', 'confirmed'] as const;
+export const GUARDIAN_CONSENT_STATUSES = [
+  "not_required",
+  "pending",
+  "confirmed",
+] as const;
 export type GuardianConsentStatus = (typeof GUARDIAN_CONSENT_STATUSES)[number];
 
 // ── Session / Auth Types ──
@@ -94,12 +112,38 @@ export interface PaginatedResponse<T> {
 
 // ── Dashboard Types ──
 
+export interface DashboardStats {
+  /** Every attempt ever, not the truncated `recentActivity` slice. */
+  quizzesTaken: number;
+  /** Mean score across all attempts, 0–100. `null` until the first attempt. */
+  averageScore: number | null;
+  /** Points earned in the last 7 days, derived from attempts in that window. */
+  weeklyPoints: number;
+  /**
+   * Standing among learners at the same academic level, as a percentage —
+   * 10 means "top 10%". `null` when the learner has no points or has too few
+   * peers for a ranking to mean anything.
+   */
+  rankPercentile: number | null;
+}
+
+/** The next quiz in an enrolled course that the learner hasn't attempted. */
+export interface NextQuiz {
+  id: string;
+  courseId: string;
+  title: string;
+  /** Always null for now — quizzes carry no due date in the schema. */
+  dueDate: string | null;
+}
+
 export interface DashboardOverview {
   profile: SessionUser;
   totalPoints: number;
   badgeCount: number;
   activeCourses: CourseCard[];
   recentActivity: ActivityItem[];
+  stats: DashboardStats;
+  nextQuiz: NextQuiz | null;
 }
 
 export interface CourseCard {
@@ -115,7 +159,12 @@ export interface CourseCard {
 
 export interface ActivityItem {
   id: string;
-  type: 'lesson_completed' | 'quiz_passed' | 'quiz_failed' | 'badge_earned' | 'course_enrolled';
+  type:
+    | "lesson_completed"
+    | "quiz_passed"
+    | "quiz_failed"
+    | "badge_earned"
+    | "course_enrolled";
   title: string;
   timestamp: string; // ISO string for serialization safety
   metadata?: Record<string, string | number>;
