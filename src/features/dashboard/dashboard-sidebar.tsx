@@ -63,8 +63,10 @@ function isActive(pathname: string, href: string, isHome: boolean): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** Rows hug their label in the design, so the active pill wraps the text rather
+ *  than spanning the rail. `whitespace-nowrap` keeps "Contact Support" on one line. */
 const ROW_CLASSNAME =
-  "flex h-12 items-center gap-3 rounded-lg px-3 font-sans text-[16px] transition-colors";
+  "flex h-12 w-fit items-center gap-3 whitespace-nowrap rounded-lg px-3 font-sans text-[16px] transition-colors";
 
 function NavRow({ item, active }: { item: NavItem; active: boolean }) {
   const Icon = item.icon;
@@ -81,7 +83,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
       )}
     >
       <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
-      <span className="truncate">{item.label}</span>
+      <span>{item.label}</span>
     </Link>
   );
 }
@@ -101,7 +103,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-indigo-800 pl-8 pr-9 pt-[75px] lg:flex"
+      className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-indigo-800 pl-8 pr-2 pt-[75px] lg:flex"
       aria-label="Dashboard navigation"
     >
       <Link href={homeHref ?? "/dashboard"} className="flex items-center gap-8">
