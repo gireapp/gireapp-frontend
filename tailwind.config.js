@@ -195,6 +195,8 @@ module.exports = {
         shimmer: "shimmer 2s linear infinite",
         "confetti-fall": "confetti-fall 2s ease-in forwards",
         "badge-pop": "badge-pop 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+        // FE-DASH-010: skeletons pulse on a 1.5s cycle, not Tailwind's 2s default.
+        "pulse-skeleton": "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
