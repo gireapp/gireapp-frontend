@@ -22,6 +22,11 @@ const SECTION_TITLE_CLASSNAME =
   "font-heading text-[20px] font-bold text-indigo-950";
 const VIEW_ALL_CLASSNAME =
   "font-sans text-[16px] text-indigo-400 hover:underline";
+/** The guidance CTA stays 32px tall at every width (Figma 263×32), unlike
+ *  the hero and resume buttons which grow to 48px on desktop. */
+const COMPACT_BUTTON_CLASSNAME =
+  "inline-flex h-8 items-center justify-center gap-1 rounded-lg px-3 font-sans text-[12px] text-indigo-50 transition-colors md:text-[14px]";
+
 /** Mobile buttons are 160×32 in the design; desktop 316×48. */
 const PRIMARY_BUTTON_CLASSNAME =
   "inline-flex h-8 items-center justify-center gap-1 rounded-lg px-3 font-sans text-[12px] text-indigo-50 transition-colors md:h-12 md:text-[14px]";
@@ -66,8 +71,8 @@ export function DashboardHome({
   const hasStarted = points > 0 || badges > 0 || resume !== null;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-8 md:gap-[57px]">
-      <DashboardTopbar name={name} department={department} />
+    <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-8">
+      <DashboardTopbar name={name} department={department} points={points} />
 
       {/* Mobile stacks welcome → progress → resume → recommended → guidance,
           which interleaves the two desktop columns. `display: contents` drops
@@ -113,7 +118,7 @@ export function DashboardHome({
         <div className="contents xl:flex xl:w-[443px] xl:shrink-0 xl:flex-col xl:gap-8">
           <ResumeCard className="order-4 xl:order-none" resume={resume} />
 
-          <section className="order-5 flex flex-col gap-4 xl:order-none xl:gap-8">
+          <section className="order-5 flex flex-col gap-4 xl:order-none xl:gap-6">
             <SectionHeader
               title="Recommended Subjects"
               href="/dashboard/courses"
@@ -258,6 +263,14 @@ function ResumeCard({
           : "Start your first lesson and it will appear here"}
       </p>
 
+      {resume && (
+        <p className="font-sans text-[12px] text-indigo-800">
+          {resume.moduleCount} {resume.moduleCount === 1 ? "module" : "modules"}
+          {" · "}
+          {resume.lessonCount} {resume.lessonCount === 1 ? "lesson" : "lessons"}
+        </p>
+      )}
+
       {percent !== null && (
         <div className="flex items-center gap-3">
           <div
@@ -355,7 +368,7 @@ function ProgressCard({
 
   return (
     <div
-      className={`${CARD_CLASSNAME} grid grid-cols-2 gap-2 p-2 md:gap-6 md:px-6 md:py-3`}
+      className={`${CARD_CLASSNAME} grid grid-cols-2 gap-2 p-2 md:gap-x-[92px] md:gap-y-6 md:px-6 md:py-3`}
     >
       {tiles.map((tile) => (
         <StatTile key={tile.label} {...tile} />
@@ -410,10 +423,18 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
       <div
         className={`${CARD_CLASSNAME} flex min-h-[200px] items-center justify-center p-8 md:min-h-[392px]`}
       >
-        <p className="max-w-[280px] text-center font-sans text-[14px] text-indigo-400">
-          Subjects picked for you will appear here once your department is set
-          up.
-        </p>
+        <div className="flex flex-col items-center gap-4">
+          <p className="max-w-[280px] text-center font-sans text-[14px] text-indigo-400">
+            Subjects picked for you will appear here once your department is set
+            up.
+          </p>
+          <Link
+            href="/dashboard/courses"
+            className={`${COMPACT_BUTTON_CLASSNAME} bg-indigo-800 px-6 hover:bg-indigo-900`}
+          >
+            Browse Courses
+          </Link>
+        </div>
       </div>
     );
   }
@@ -422,16 +443,17 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
     <ul
       className={`${CARD_CLASSNAME} flex min-h-[200px] flex-col gap-2 p-2 md:min-h-[392px]`}
     >
+      {/* Figma row: 427×120, 8px inline / 16px block padding, 40px icon. */}
       {courses.slice(0, 4).map((course) => (
         <li
           key={course.id}
-          className="flex items-center gap-3 rounded-lg bg-indigo-50 p-3"
+          className="flex items-center gap-3 rounded-lg bg-indigo-50 p-3 md:min-h-[120px] md:gap-3 md:px-2 md:py-4"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-200">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200">
             <BookOpen className="h-6 w-6 text-indigo-800" aria-hidden="true" />
           </span>
 
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="flex min-w-0 flex-1 flex-col gap-3">
             <span className="truncate font-heading text-[16px] font-medium text-indigo-950">
               {course.title}
             </span>
@@ -439,13 +461,14 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
               {course.description}
             </span>
             <span className="font-sans text-[10px] text-indigo-800">
-              {course.lessonCount} lessons
+              {course.lessonCount}{" "}
+              {course.lessonCount === 1 ? "lesson" : "lessons"}
             </span>
           </span>
 
           <Link
             href={`/dashboard/courses/${course.id}`}
-            className="shrink-0 rounded-lg border border-indigo-800/50 px-3 py-2 font-sans text-[12px] text-indigo-800 transition-colors hover:bg-indigo-100"
+            className="flex h-8 w-[85px] shrink-0 items-center justify-center rounded-lg border border-indigo-800/50 font-sans text-[12px] text-indigo-800 transition-colors hover:bg-indigo-100"
           >
             Explore
           </Link>
@@ -487,7 +510,7 @@ function UpNextCard({ quiz }: { quiz: NextQuiz }) {
 function NeedGuidanceCard({ className }: { className?: string }) {
   return (
     <section
-      className={`flex min-h-[185px] items-center gap-6 rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-8 ${className ?? ""}`}
+      className={`flex min-h-[185px] items-center gap-6 rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-4 ${className ?? ""}`}
     >
       <div className="flex flex-col gap-2">
         <h2 className="font-heading text-[16px] font-bold text-indigo-950">
@@ -499,7 +522,7 @@ function NeedGuidanceCard({ className }: { className?: string }) {
         </p>
         <Link
           href="/dashboard/mentors"
-          className={`${PRIMARY_BUTTON_CLASSNAME} mt-2 w-full max-w-[160px] bg-coral-500 hover:bg-coral-600 md:max-w-[263px]`}
+          className={`${COMPACT_BUTTON_CLASSNAME} mt-2 w-full max-w-[160px] bg-coral-500 hover:bg-coral-600 md:max-w-[263px]`}
         >
           Find a mentor
         </Link>

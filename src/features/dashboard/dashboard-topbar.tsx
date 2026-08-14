@@ -1,16 +1,19 @@
 "use client";
 
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Search, Bell, ChevronDown, Trophy } from "lucide-react";
 import { GireappLogo } from "@/components/shared/gireapp-logo";
-import { getInitials } from "@/lib/utils";
+import { getInitials, formatNumber } from "@/lib/utils";
 
 export function DashboardTopbar({
   name,
   department,
+  points = 0,
   notificationCount = 0,
 }: {
   name: string;
   department: string | null;
+  /** FE-DASH-007: total points belong in the header, beside the identity. */
+  points?: number;
   notificationCount?: number;
 }) {
   return (
@@ -35,6 +38,17 @@ export function DashboardTopbar({
       </label>
 
       <div className="flex shrink-0 items-center gap-3 md:gap-4">
+        <span
+          className="flex h-8 items-center gap-1.5 rounded-full bg-indigo-100 px-3"
+          title={`${formatNumber(points)} learning points`}
+        >
+          <Trophy className="h-4 w-4 text-indigo-800" aria-hidden="true" />
+          <span className="font-heading text-[13px] font-bold text-indigo-800">
+            {formatNumber(points)}
+          </span>
+          <span className="sr-only">learning points</span>
+        </span>
+
         <button
           type="button"
           className="relative flex h-10 w-10 items-center justify-center rounded-full text-indigo-800 transition-colors hover:bg-indigo-100"

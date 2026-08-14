@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import type {
   DashboardOverview,
   DashboardStats,
@@ -204,5 +204,44 @@ describe("DashboardHome — returning learner", () => {
     expect(screen.queryByText("+240 this week")).not.toBeInTheDocument();
     expect(screen.getByText("Keep it up")).toBeInTheDocument();
     expect(screen.getByText("Get started to rank")).toBeInTheDocument();
+  });
+});
+
+describe("DashboardHome — M3 acceptance criteria", () => {
+  /** Counts also appear in the subject list, so assertions scope to this card. */
+  const resumeCard = () =>
+    screen.getByText("Continue Learning").closest("section") as HTMLElement;
+
+  it("shows total points in the header (FE-DASH-007)", () => {
+    renderHome({ overview: overview({ totalPoints: 1250 }) });
+
+    // The figure also appears in the Learning points tile, so scope to the
+    // header pill via its screen-reader label.
+    const pill = screen.getByText("learning points").parentElement;
+    expect(within(pill as HTMLElement).getByText("1,250")).toBeInTheDocument();
+  });
+
+  it("shows module and lesson counts on the active course card (FE-DASH-008)", () => {
+    renderHome({ overview: overview() });
+
+    const card = resumeCard();
+    expect(within(card).getByText(/3 modules/)).toBeInTheDocument();
+    expect(within(card).getByText(/12 lessons/)).toBeInTheDocument();
+  });
+
+  it("singularises a one-module, one-lesson course", () => {
+    const single = { ...physics, moduleCount: 1, lessonCount: 1 };
+    renderHome({ overview: overview({ activeCourses: [single] }) });
+
+    const card = resumeCard();
+    expect(within(card).getByText(/1 module\b/)).toBeInTheDocument();
+    expect(within(card).getByText(/1 lesson\b/)).toBeInTheDocument();
+  });
+
+  it("offers a Browse Courses route out of the empty state (FE-DASH-008)", () => {
+    renderHome({ overview: overview({ activeCourses: [] }) });
+
+    const cta = screen.getByRole("link", { name: "Browse Courses" });
+    expect(cta).toHaveAttribute("href", "/dashboard/courses");
   });
 });
