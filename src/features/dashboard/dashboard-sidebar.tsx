@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, GraduationCap } from "lucide-react";
+import { GireappLogo } from "@/components/shared/gireapp-logo";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/features/auth/actions";
 import {
@@ -55,17 +56,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
       className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-indigo-800 pl-8 pr-2 pt-[75px] md:flex"
       aria-label="Dashboard navigation"
     >
-      <Link href={home} className="flex items-center gap-8">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-indigo-50">
-          <GraduationCap
-            className="h-4 w-4 text-indigo-800"
-            aria-hidden="true"
-          />
-        </span>
-        <span className="font-heading text-[28px] font-bold text-white">
-          GIREAPP
-        </span>
-      </Link>
+      <GireappLogo surface="onDark" height={32} href={home} priority />
 
       <nav className="mt-14 flex flex-col gap-10">
         {groups.map((group, index) => (

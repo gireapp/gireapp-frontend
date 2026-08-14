@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, Bell, ChevronDown, GraduationCap } from "lucide-react";
+import { Search, Bell, ChevronDown } from "lucide-react";
+import { GireappLogo } from "@/components/shared/gireapp-logo";
 import { getInitials } from "@/lib/utils";
 
 export function DashboardTopbar({
@@ -16,16 +17,8 @@ export function DashboardTopbar({
     <div className="flex items-center justify-between gap-4 md:gap-8">
       {/* The rail carries the wordmark on desktop, so it only appears here once
           the rail is gone; search is desktop-only in the mobile design. */}
-      <div className="flex items-center gap-2 md:hidden">
-        <span className="flex h-7 w-7 items-center justify-center rounded bg-indigo-800">
-          <GraduationCap
-            className="h-4 w-4 text-indigo-50"
-            aria-hidden="true"
-          />
-        </span>
-        <span className="font-heading text-[20px] font-bold text-indigo-800">
-          GIREAPP
-        </span>
+      <div className="md:hidden">
+        <GireappLogo surface="onLight" height={28} />
       </div>
 
       <label className="hidden h-9 w-full max-w-[472px] items-center gap-3 rounded-xl bg-indigo-100 px-2 md:flex">
