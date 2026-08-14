@@ -164,21 +164,21 @@ function WelcomeCard({
     <section
       className={`relative flex min-h-[188px] items-center overflow-hidden rounded-lg bg-indigo-800 px-7 py-6 md:min-h-[288px] md:px-14 md:py-10 ${className ?? ""}`}
     >
-      <div className="flex w-full flex-col gap-2 md:max-w-[360px]">
+      <div className="relative z-10 flex w-full flex-col gap-2 md:max-w-[360px]">
         {!hasStarted && (
           <p className="font-heading text-[16px] font-bold text-indigo-400">
             Hello, {firstName}!
           </p>
         )}
 
-        <h1 className="max-w-[210px] font-heading text-[20px] font-bold leading-tight text-indigo-50 md:max-w-none md:text-[28px]">
+        <h1 className="max-w-[215px] font-heading text-[20px] font-bold leading-tight text-indigo-50 md:max-w-none md:text-[28px]">
           {hasStarted
             ? "Keep going, you’re making progress."
             : "Welcome to GIREAPP"}
         </h1>
 
         {!hasStarted && (
-          <p className="max-w-[210px] font-sans text-[14px] text-indigo-200 md:max-w-none md:text-[16px]">
+          <p className="max-w-[195px] font-sans text-[14px] text-indigo-200 md:max-w-none md:text-[16px]">
             Let’s start your learning journey.
           </p>
         )}
@@ -219,7 +219,7 @@ function WelcomeCard({
       </div>
 
       <Sparkles
-        className="absolute -right-4 bottom-0 h-[157px] w-[150px] text-indigo-700 md:-right-6 md:h-[269px] md:w-[257px]"
+        className="pointer-events-none absolute bottom-0 -right-4 z-0 h-[150px] w-[140px] text-indigo-700 md:-right-6 md:h-[269px] md:w-[257px]"
         aria-hidden="true"
       />
     </section>
@@ -378,22 +378,22 @@ function StatTile({
   positive: boolean;
 }) {
   return (
-    <div className="flex min-h-[92px] items-center gap-3 rounded-lg bg-indigo-50 px-3 py-2 md:min-h-[120px] md:gap-8 md:px-6">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200 md:h-12 md:w-12">
+    <div className="flex min-h-[92px] items-center gap-2 rounded-lg bg-indigo-50 px-2 py-2 md:min-h-[120px] md:gap-8 md:px-6">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-200 md:h-12 md:w-12">
         <Icon
-          className="h-6 w-6 text-indigo-800 md:h-[30px] md:w-[30px]"
+          className="h-5 w-5 text-indigo-800 md:h-[30px] md:w-[30px]"
           aria-hidden="true"
         />
       </span>
       <span className="flex min-w-0 flex-col gap-1 md:gap-2">
-        <span className="font-heading text-[14px] font-medium text-indigo-800 md:text-[16px]">
+        <span className="whitespace-nowrap font-heading text-[13px] font-medium text-indigo-800 md:whitespace-normal md:text-[16px]">
           {label}
         </span>
-        <span className="font-sans text-[14px] text-indigo-950 md:text-[16px]">
+        <span className="font-sans text-[13px] text-indigo-950 md:text-[16px]">
           {value}
         </span>
         <span
-          className={`font-sans text-[12px] md:text-[14px] ${
+          className={`font-sans text-[11px] leading-tight md:text-[14px] ${
             positive ? "text-green-500" : "text-indigo-400"
           }`}
         >
@@ -408,7 +408,7 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
   if (courses.length === 0) {
     return (
       <div
-        className={`${CARD_CLASSNAME} flex min-h-[392px] items-center justify-center p-8`}
+        className={`${CARD_CLASSNAME} flex min-h-[200px] items-center justify-center p-8 md:min-h-[392px]`}
       >
         <p className="max-w-[280px] text-center font-sans text-[14px] text-indigo-400">
           Subjects picked for you will appear here once your department is set
@@ -419,7 +419,9 @@ function RecommendedSubjects({ courses }: { courses: CourseCard[] }) {
   }
 
   return (
-    <ul className={`${CARD_CLASSNAME} flex min-h-[392px] flex-col gap-2 p-2`}>
+    <ul
+      className={`${CARD_CLASSNAME} flex min-h-[200px] flex-col gap-2 p-2 md:min-h-[392px]`}
+    >
       {courses.slice(0, 4).map((course) => (
         <li
           key={course.id}
