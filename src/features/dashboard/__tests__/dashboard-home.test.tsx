@@ -48,6 +48,7 @@ function overview(patch: Partial<DashboardOverview> = {}): DashboardOverview {
     totalPoints: 1250,
     badgeCount: 8,
     activeCourses: [physics],
+    recommendedCourses: [],
     recentActivity: [
       {
         id: "a1",

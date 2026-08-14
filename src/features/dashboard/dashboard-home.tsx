@@ -65,6 +65,7 @@ export function DashboardHome({
   const resume = findResumeCourse(courses);
   const points = overview?.totalPoints ?? 0;
   const badges = overview?.badgeCount ?? 0;
+  const recommended = overview?.recommendedCourses ?? [];
   const stats = overview?.stats ?? null;
   const nextQuiz = overview?.nextQuiz ?? null;
 
@@ -123,7 +124,7 @@ export function DashboardHome({
               title="Recommended Subjects"
               href="/dashboard/courses"
             />
-            <RecommendedSubjects courses={courses} />
+            <RecommendedSubjects courses={recommended} />
           </section>
 
           {nextQuiz && (
