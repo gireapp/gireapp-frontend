@@ -22,8 +22,9 @@ const SECTION_TITLE_CLASSNAME =
   "font-heading text-[20px] font-bold text-indigo-950";
 const VIEW_ALL_CLASSNAME =
   "font-sans text-[16px] text-indigo-400 hover:underline";
+/** Mobile buttons are 160×32 in the design; desktop 316×48. */
 const PRIMARY_BUTTON_CLASSNAME =
-  "inline-flex h-12 items-center justify-center gap-1 rounded-lg px-3 font-sans text-[14px] text-indigo-50 transition-colors";
+  "inline-flex h-8 items-center justify-center gap-1 rounded-lg px-3 font-sans text-[12px] text-indigo-50 transition-colors md:h-12 md:text-[14px]";
 
 /**
  * The two figures the design shows that the backend still cannot supply:
@@ -65,15 +66,20 @@ export function DashboardHome({
   const hasStarted = points > 0 || badges > 0 || resume !== null;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-[57px]">
+    <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-8 md:gap-[57px]">
       <DashboardTopbar name={name} department={department} />
 
-      <div className="flex flex-col gap-6 xl:flex-row">
-        <div className="flex min-w-0 flex-1 flex-col gap-8">
+      {/* Mobile stacks welcome → progress → resume → recommended → guidance,
+          which interleaves the two desktop columns. `display: contents` drops
+          the column wrappers below xl so `order` can sequence every card in one
+          flow, then restores them as real columns at xl. One DOM, both layouts,
+          and the reading order always matches what is on screen. */}
+      <div className="flex flex-col gap-6 xl:flex-row xl:gap-6">
+        <div className="contents xl:flex xl:min-w-0 xl:flex-1 xl:flex-col xl:gap-8">
           {/* Returning learners get the greeting above the card; new ones get it
               inside, where the card carries the whole welcome. */}
           {hasStarted && (
-            <div className="flex flex-col gap-1">
+            <div className="order-1 flex flex-col gap-1 xl:order-none">
               <p className="font-heading text-[16px] font-bold text-indigo-950">
                 Hello again, {firstName}!
               </p>
@@ -84,12 +90,13 @@ export function DashboardHome({
           )}
 
           <WelcomeCard
+            className="order-2 xl:order-none"
             firstName={firstName}
             hasStarted={hasStarted}
             weeklyGoalProgress={extras.weeklyGoalProgress}
           />
 
-          <section className="flex flex-col gap-8">
+          <section className="order-3 flex flex-col gap-4 xl:order-none xl:gap-8">
             <SectionHeader title="Your Progress" href="/dashboard/progress" />
             <ProgressCard
               points={points}
@@ -100,13 +107,13 @@ export function DashboardHome({
             />
           </section>
 
-          <NeedGuidanceCard />
+          <NeedGuidanceCard className="order-7 xl:order-none" />
         </div>
 
-        <div className="flex flex-col gap-8 xl:w-[443px] xl:shrink-0">
-          <ResumeCard resume={resume} />
+        <div className="contents xl:flex xl:w-[443px] xl:shrink-0 xl:flex-col xl:gap-8">
+          <ResumeCard className="order-4 xl:order-none" resume={resume} />
 
-          <section className="flex flex-col gap-8">
+          <section className="order-5 flex flex-col gap-4 xl:order-none xl:gap-8">
             <SectionHeader
               title="Recommended Subjects"
               href="/dashboard/courses"
@@ -115,7 +122,7 @@ export function DashboardHome({
           </section>
 
           {nextQuiz && (
-            <section className="flex flex-col gap-6">
+            <section className="order-6 flex flex-col gap-4 xl:order-none xl:gap-6">
               <h2 className={SECTION_TITLE_CLASSNAME}>Up Next</h2>
               <UpNextCard quiz={nextQuiz} />
             </section>
@@ -138,10 +145,12 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
 }
 
 function WelcomeCard({
+  className,
   firstName,
   hasStarted,
   weeklyGoalProgress,
 }: {
+  className?: string;
   firstName: string;
   hasStarted: boolean;
   weeklyGoalProgress?: number;
@@ -152,22 +161,24 @@ function WelcomeCard({
       : Math.round(weeklyGoalProgress * 100);
 
   return (
-    <section className="relative flex min-h-[288px] items-center overflow-hidden rounded-lg bg-indigo-800 px-14 py-10">
-      <div className="flex w-full max-w-[360px] flex-col gap-2">
+    <section
+      className={`relative flex min-h-[188px] items-center overflow-hidden rounded-lg bg-indigo-800 px-7 py-6 md:min-h-[288px] md:px-14 md:py-10 ${className ?? ""}`}
+    >
+      <div className="flex w-full flex-col gap-2 md:max-w-[360px]">
         {!hasStarted && (
           <p className="font-heading text-[16px] font-bold text-indigo-400">
             Hello, {firstName}!
           </p>
         )}
 
-        <h1 className="font-heading text-[28px] font-bold leading-tight text-indigo-50">
+        <h1 className="max-w-[210px] font-heading text-[20px] font-bold leading-tight text-indigo-50 md:max-w-none md:text-[28px]">
           {hasStarted
             ? "Keep going, you’re making progress."
             : "Welcome to GIREAPP"}
         </h1>
 
         {!hasStarted && (
-          <p className="font-sans text-[16px] text-indigo-200">
+          <p className="max-w-[210px] font-sans text-[14px] text-indigo-200 md:max-w-none md:text-[16px]">
             Let’s start your learning journey.
           </p>
         )}
@@ -200,7 +211,7 @@ function WelcomeCard({
 
         <Link
           href="/dashboard/courses"
-          className={`${PRIMARY_BUTTON_CLASSNAME} mt-6 w-full max-w-[316px] bg-coral-500 hover:bg-coral-600`}
+          className={`${PRIMARY_BUTTON_CLASSNAME} mt-4 w-full max-w-[160px] bg-coral-500 hover:bg-coral-600 md:mt-6 md:max-w-[316px]`}
         >
           {hasStarted ? "Continue learning" : "Get started"}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -208,22 +219,31 @@ function WelcomeCard({
       </div>
 
       <Sparkles
-        className="absolute -right-6 bottom-0 hidden h-[269px] w-[257px] text-indigo-700 lg:block"
+        className="absolute -right-4 bottom-0 h-[157px] w-[150px] text-indigo-700 md:-right-6 md:h-[269px] md:w-[257px]"
         aria-hidden="true"
       />
     </section>
   );
 }
 
-function ResumeCard({ resume }: { resume: CourseCard | null }) {
+function ResumeCard({
+  className,
+  resume,
+}: {
+  className?: string;
+  resume: CourseCard | null;
+}) {
   const percent = resume ? Math.round(resume.progress * 100) : null;
 
   return (
     <section
-      className={`${CARD_CLASSNAME} flex min-h-[288px] flex-col gap-3 p-14 pt-10`}
+      className={`${CARD_CLASSNAME} relative flex min-h-[184px] flex-col gap-2 overflow-hidden p-7 md:min-h-[288px] md:gap-3 md:p-14 md:pt-10 ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
-        <BookOpen className="h-8 w-8 text-indigo-950" aria-hidden="true" />
+        <BookOpen
+          className="h-6 w-6 text-indigo-950 md:h-8 md:w-8"
+          aria-hidden="true"
+        />
         <h2 className={SECTION_TITLE_CLASSNAME}>
           {resume ? "Continue Learning" : "Start Learning"}
         </h2>
@@ -232,7 +252,7 @@ function ResumeCard({ resume }: { resume: CourseCard | null }) {
       <p className="font-heading text-[16px] font-bold text-indigo-950">
         {resume ? resume.title : "Ready to begin?"}
       </p>
-      <p className="font-sans text-[16px] text-indigo-400">
+      <p className="max-w-[240px] font-sans text-[14px] text-indigo-400 md:max-w-none md:text-[16px]">
         {resume
           ? resume.description
           : "Start your first lesson and it will appear here"}
@@ -261,7 +281,7 @@ function ResumeCard({ resume }: { resume: CourseCard | null }) {
 
       <Link
         href={resume ? `/dashboard/courses/${resume.id}` : "/dashboard/courses"}
-        className={`${PRIMARY_BUTTON_CLASSNAME} mt-auto w-full max-w-[205px] bg-indigo-800 hover:bg-indigo-900`}
+        className={`${PRIMARY_BUTTON_CLASSNAME} mt-auto w-full max-w-[160px] bg-indigo-800 hover:bg-indigo-900 md:max-w-[205px]`}
       >
         {resume ? "Continue" : "Explore Subjects"}
       </Link>
@@ -335,7 +355,7 @@ function ProgressCard({
 
   return (
     <div
-      className={`${CARD_CLASSNAME} grid grid-cols-1 gap-6 px-6 py-3 sm:grid-cols-2`}
+      className={`${CARD_CLASSNAME} grid grid-cols-2 gap-2 p-2 md:gap-6 md:px-6 md:py-3`}
     >
       {tiles.map((tile) => (
         <StatTile key={tile.label} {...tile} />
@@ -358,20 +378,22 @@ function StatTile({
   positive: boolean;
 }) {
   return (
-    <div className="flex min-h-[120px] items-center gap-8 rounded-lg bg-indigo-50 px-6 py-2">
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-200">
+    <div className="flex min-h-[92px] items-center gap-3 rounded-lg bg-indigo-50 px-3 py-2 md:min-h-[120px] md:gap-8 md:px-6">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200 md:h-12 md:w-12">
         <Icon
-          className="h-[30px] w-[30px] text-indigo-800"
+          className="h-6 w-6 text-indigo-800 md:h-[30px] md:w-[30px]"
           aria-hidden="true"
         />
       </span>
-      <span className="flex min-w-0 flex-col gap-2">
-        <span className="font-heading text-[16px] font-medium text-indigo-800">
+      <span className="flex min-w-0 flex-col gap-1 md:gap-2">
+        <span className="font-heading text-[14px] font-medium text-indigo-800 md:text-[16px]">
           {label}
         </span>
-        <span className="font-sans text-[16px] text-indigo-950">{value}</span>
+        <span className="font-sans text-[14px] text-indigo-950 md:text-[16px]">
+          {value}
+        </span>
         <span
-          className={`font-sans text-[14px] ${
+          className={`font-sans text-[12px] md:text-[14px] ${
             positive ? "text-green-500" : "text-indigo-400"
           }`}
         >
@@ -460,20 +482,22 @@ function UpNextCard({ quiz }: { quiz: NextQuiz }) {
   );
 }
 
-function NeedGuidanceCard() {
+function NeedGuidanceCard({ className }: { className?: string }) {
   return (
-    <section className="flex min-h-[156px] items-center gap-6 rounded-lg bg-indigo-200 px-14 py-8">
+    <section
+      className={`flex min-h-[185px] items-center gap-6 rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-8 ${className ?? ""}`}
+    >
       <div className="flex flex-col gap-2">
         <h2 className="font-heading text-[16px] font-bold text-indigo-950">
           Need guidance?
         </h2>
-        <p className="max-w-[308px] font-sans text-[14px] text-indigo-800">
+        <p className="max-w-[190px] font-sans text-[14px] text-indigo-800 md:max-w-[308px]">
           Connect with a mentor who can help you stay focused and overcome
           challenges
         </p>
         <Link
           href="/dashboard/mentors"
-          className={`${PRIMARY_BUTTON_CLASSNAME} mt-2 w-full max-w-[263px] bg-indigo-800 hover:bg-indigo-900`}
+          className={`${PRIMARY_BUTTON_CLASSNAME} mt-2 w-full max-w-[160px] bg-coral-500 hover:bg-coral-600 md:max-w-[263px]`}
         >
           Find a mentor
         </Link>

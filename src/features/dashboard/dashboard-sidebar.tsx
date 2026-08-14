@@ -2,66 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  BookOpen,
-  TrendingUp,
-  Users,
-  UserCircle,
-  HelpCircle,
-  Headphones,
-  LogOut,
-  GraduationCap,
-  type LucideIcon,
-} from "lucide-react";
+import { LogOut, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/features/auth/actions";
-
-/** Figma: "Side nav bar" — 240px column, groups separated by 1px rules. */
-export const SIDEBAR_WIDTH_PX = 240;
-
-const SEGMENT_MAP: Record<string, string> = {
-  SECONDARY: "/dashboard/secondary",
-  TERTIARY: "/dashboard/tertiary",
-  PROFESSIONAL: "/dashboard/professional",
-};
-
-type NavItem = { href: string; label: string; icon: LucideIcon };
-
-function getNavGroups(academicLevel: string | null): NavItem[][] {
-  const home = (academicLevel && SEGMENT_MAP[academicLevel]) || "/dashboard";
-
-  return [
-    [
-      { href: home, label: "Home", icon: Home },
-      { href: "/dashboard/courses", label: "Courses", icon: BookOpen },
-      { href: "/dashboard/progress", label: "Progress", icon: TrendingUp },
-      { href: "/dashboard/mentors", label: "Mentors", icon: Users },
-    ],
-    [
-      {
-        href: "/dashboard/settings",
-        label: "Profile & Settings",
-        icon: UserCircle,
-      },
-    ],
-    [
-      { href: "/dashboard/help", label: "Help Center", icon: HelpCircle },
-      {
-        href: "/dashboard/support",
-        label: "Contact Support",
-        icon: Headphones,
-      },
-    ],
-  ];
-}
-
-/** A nav row is active for its own route and anything nested beneath it, except
- *  "Home", whose href is a segment root that every other route also sits under. */
-function isActive(pathname: string, href: string, isHome: boolean): boolean {
-  if (isHome) return pathname === href;
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+import {
+  getNavGroups,
+  homeHref,
+  isNavItemActive,
+  type NavItem,
+} from "@/features/dashboard/nav-items";
 
 /** Rows hug their label in the design, so the active pill wraps the text rather
  *  than spanning the rail. `whitespace-nowrap` keeps "Contact Support" on one line. */
@@ -99,14 +48,14 @@ export type SidebarUser = { academicLevel: string | null };
 export function DashboardSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname();
   const groups = getNavGroups(user.academicLevel);
-  const homeHref = groups[0]?.[0]?.href;
+  const home = homeHref(user.academicLevel);
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-indigo-800 pl-8 pr-2 pt-[75px] lg:flex"
+      className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-indigo-800 pl-8 pr-2 pt-[75px] md:flex"
       aria-label="Dashboard navigation"
     >
-      <Link href={homeHref ?? "/dashboard"} className="flex items-center gap-8">
+      <Link href={home} className="flex items-center gap-8">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-indigo-50">
           <GraduationCap
             className="h-4 w-4 text-indigo-800"
@@ -126,7 +75,11 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
               <NavRow
                 key={item.href}
                 item={item}
-                active={isActive(pathname, item.href, item.href === homeHref)}
+                active={isNavItemActive(
+                  pathname,
+                  item.href,
+                  item.href === home,
+                )}
               />
             ))}
           </div>
