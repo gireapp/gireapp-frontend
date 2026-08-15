@@ -2,13 +2,20 @@ const isDev = process.env.NODE_ENV === 'development';
 
 // connect-src must allow the backend API origin (frontend and backend are
 // separate origins in dev, and may be in production too).
-const apiOrigin = (() => {
+const originOf = (value) => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? '').origin;
+    return new URL(value ?? '').origin;
   } catch {
     return '';
   }
-})();
+};
+
+const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_URL);
+
+// Lesson PDFs render in an <iframe>. Same-origin files fall under default-src,
+// but once media moves to object storage the frame is cross-origin and CSP
+// blocks it unless that host is named here.
+const mediaOrigin = originOf(process.env.NEXT_PUBLIC_MEDIA_URL);
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -18,6 +25,7 @@ const contentSecurityPolicy = [
   "img-src 'self' blob: data: https:",
   "font-src 'self' data:",
   `connect-src 'self'${apiOrigin ? ` ${apiOrigin}` : ''}${isDev ? ' ws:' : ''}`,
+  `frame-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ''}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
