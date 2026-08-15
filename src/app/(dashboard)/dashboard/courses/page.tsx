@@ -11,18 +11,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { serverApiClient, ApiError } from "@/lib/api-client";
 import { API_PATHS } from "@gireapp/shared";
-import type { CourseDetail } from "@gireapp/shared";
+import type { CourseListItem } from "@gireapp/shared";
 
 export const metadata = {
   title: "Browse Courses | GIREAPP",
 };
 
-async function getCourses() {
+async function getCourses(): Promise<CourseListItem[]> {
   try {
-    const { data } = await serverApiClient<CourseDetail[]>(
+    const { data } = await serverApiClient<{ data: CourseListItem[] }>(
       API_PATHS.COURSES.LIST,
     );
-    return data;
+    // The courses router wraps its payload as { success, data }; /api/dashboard
+    // returns its object bare. Guard the shape rather than trust the envelope.
+    return Array.isArray(data?.data) ? data.data : [];
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {
       redirect("/login");
@@ -75,10 +77,7 @@ export default async function CoursesPage() {
           {courses.map((course) => {
             const isEnrolled = course.isEnrolled;
             const progress = isEnrolled ? Math.round(course.progress * 100) : 0;
-            const totalLessons = course.modules.reduce(
-              (acc, m) => acc + m.lessons.length,
-              0,
-            );
+            const totalLessons = course.lessonCount;
 
             return (
               <Link
@@ -124,7 +123,8 @@ export default async function CoursesPage() {
                         </Badge>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          {totalLessons} lessons
+                          {totalLessons}{" "}
+                          {totalLessons === 1 ? "lesson" : "lessons"}
                         </span>
                       </div>
 

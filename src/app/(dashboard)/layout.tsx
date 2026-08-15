@@ -35,7 +35,11 @@ export default async function DashboardLayout({
         id="main-content"
         className="min-h-screen pb-[85px] md:pb-0 md:pl-[265px]"
       >
-        <div className="px-4 py-6 md:px-6 md:pr-8 lg:py-20">{children}</div>
+        {/* Figma's 80px desktop gutter costs a fifth of a 14" laptop viewport,
+            so the full value waits for a screen tall enough to afford it. */}
+        <div className="px-4 py-6 md:px-6 md:pr-8 lg:py-10 tall:lg:py-20">
+          {children}
+        </div>
       </main>
     </div>
   );

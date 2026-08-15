@@ -368,8 +368,11 @@ function ProgressCard({
   ];
 
   return (
+    // Figma's 92px column gap assumes the left column at its full 676px, which
+    // only happens once the viewport is wide enough for `max-w-[1143px]`. Below
+    // that the gap would eat the tiles, so it waits for 2xl.
     <div
-      className={`${CARD_CLASSNAME} grid grid-cols-2 gap-2 p-2 md:gap-x-[92px] md:gap-y-6 md:px-6 md:py-3`}
+      className={`${CARD_CLASSNAME} grid grid-cols-2 gap-2 p-2 md:gap-x-6 md:gap-y-6 md:px-6 md:py-3 2xl:gap-x-[92px]`}
     >
       {tiles.map((tile) => (
         <StatTile key={tile.label} {...tile} />

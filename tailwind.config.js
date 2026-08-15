@@ -17,6 +17,14 @@ module.exports = {
       },
     },
     extend: {
+      // Every other breakpoint here is width-based, but the dashboard rail's
+      // constraint is vertical: the Figma rhythm needs ~1030px of viewport and
+      // a 1366×768 laptop offers ~640px after browser chrome. Vertical spacing
+      // therefore ships compact and opens up only when the viewport can hold it.
+      screens: {
+        tall: { raw: "(min-height: 800px)" },
+        taller: { raw: "(min-height: 1000px)" },
+      },
       colors: {
         // ── GIREAPP Brand Palette ──
         // Primary: Indigo #3730A3 — trust, depth, academic authority
