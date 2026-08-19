@@ -19,12 +19,10 @@ export const metadata = {
 
 async function getCourses(): Promise<CourseListItem[]> {
   try {
-    const { data } = await serverApiClient<{ data: CourseListItem[] }>(
+    const { data } = await serverApiClient<CourseListItem[]>(
       API_PATHS.COURSES.LIST,
     );
-    // The courses router wraps its payload as { success, data }; /api/dashboard
-    // returns its object bare. Guard the shape rather than trust the envelope.
-    return Array.isArray(data?.data) ? data.data : [];
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {
       redirect("/login");
