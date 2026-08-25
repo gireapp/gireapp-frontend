@@ -33,3 +33,8 @@ CLAUDE.md
 GIREAPP - PRD .pdf
 tsconfig.tsbuildinfo
 .env.local.bak-064039
+
+# Screenshots captured for design handoff — shared directly, not versioned
+design-handoff/
+gireapp-auth-screens.zip
+auth-handoff.html

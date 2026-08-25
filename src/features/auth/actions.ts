@@ -376,8 +376,15 @@ export async function verifyEmailAction(
       body: JSON.stringify({ token }),
     });
 
-    // The address has served its purpose once the link is opened.
-    await clearPendingVerificationEmail();
+    // The address has served its purpose once the link is opened. This runs
+    // during a Server Component render, where Next refuses cookie writes — so a
+    // failure here must never mask a verification that actually succeeded. The
+    // cookie carries its own 30-minute TTL and expires regardless.
+    try {
+      await clearPendingVerificationEmail();
+    } catch {
+      // Non-fatal: the account is verified either way.
+    }
 
     return { success: true, data };
   } catch (error) {
