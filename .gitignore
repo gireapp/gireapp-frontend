@@ -37,4 +37,7 @@ tsconfig.tsbuildinfo
 # Screenshots captured for design handoff — shared directly, not versioned
 design-handoff/
 gireapp-auth-screens.zip
+
+# Throwaway verification scripts run against a local server
+tmp-*.mjs
 auth-handoff.html
