@@ -41,3 +41,6 @@ gireapp-auth-screens.zip
 # Throwaway verification scripts run against a local server
 tmp-*.mjs
 auth-handoff.html
+
+# Decision log — kept local, not versioned
+docs/

@@ -15,6 +15,8 @@ const publicRoutes = [
   // /check-email straight after registering (no session exists until verified).
   "/verify-email",
   "/check-email",
+  // Opened by a guardian, who has no GIREAPP account or session at all.
+  "/guardian-consent",
 ];
 
 // Dashboard segments gated by academic level
