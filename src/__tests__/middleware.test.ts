@@ -66,13 +66,18 @@ describe("middleware — non-page requests", () => {
 });
 
 describe("middleware — unauthenticated visitors", () => {
-  it.each(["/", "/login", "/register", "/forgot-password", "/reset-password"])(
-    "allows the public route %s",
-    async (pathname) => {
-      const response = await middleware(request(pathname));
-      expect(isPassThrough(response)).toBe(true);
-    },
-  );
+  it.each([
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    // A guardian opening the emailed consent link has no account at all.
+    "/guardian-consent",
+  ])("allows the public route %s", async (pathname) => {
+    const response = await middleware(request(pathname));
+    expect(isPassThrough(response)).toBe(true);
+  });
 
   it("redirects a private route to login and preserves the callback url", async () => {
     const response = await middleware(request("/dashboard/courses"));
