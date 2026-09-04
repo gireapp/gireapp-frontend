@@ -17,6 +17,14 @@ module.exports = {
       },
     },
     extend: {
+      // Every other breakpoint here is width-based, but the dashboard rail's
+      // constraint is vertical: the Figma rhythm needs ~1030px of viewport and
+      // a 1366×768 laptop offers ~640px after browser chrome. Vertical spacing
+      // therefore ships compact and opens up only when the viewport can hold it.
+      screens: {
+        tall: { raw: "(min-height: 800px)" },
+        taller: { raw: "(min-height: 1000px)" },
+      },
       colors: {
         // ── GIREAPP Brand Palette ──
         // Primary: Indigo #3730A3 — trust, depth, academic authority
@@ -195,6 +203,8 @@ module.exports = {
         shimmer: "shimmer 2s linear infinite",
         "confetti-fall": "confetti-fall 2s ease-in forwards",
         "badge-pop": "badge-pop 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+        // FE-DASH-010: skeletons pulse on a 1.5s cycle, not Tailwind's 2s default.
+        "pulse-skeleton": "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

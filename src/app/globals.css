@@ -22,7 +22,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 28% 10%;
 
-    --primary: 243 75% 42%;       /* Indigo #3730A3 */
+    --primary: 243 75% 42%; /* Indigo #3730A3 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 16% 95%;
@@ -31,7 +31,7 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 43%;
 
-    --accent: 25 95% 53%;         /* Coral #F97316 */
+    --accent: 25 95% 53%; /* Coral #F97316 */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -61,7 +61,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 97%;
 
-    --primary: 232 82% 75%;       /* Lighter indigo for dark bg */
+    --primary: 232 82% 75%; /* Lighter indigo for dark bg */
     --primary-foreground: 222 47% 11%;
 
     --secondary: 217 33% 17%;
@@ -70,7 +70,7 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 27 96% 61%;         /* Lighter coral for dark bg */
+    --accent: 27 96% 61%; /* Lighter coral for dark bg */
     --accent-foreground: 222 47% 11%;
 
     --destructive: 0 63% 31%;
@@ -95,7 +95,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 
   /* Focus-visible for keyboard accessibility */
@@ -147,12 +149,30 @@
   /* ── Brand gradient text ── */
   .text-gradient-brand {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #3730A3, #4F46E5, #F97316);
+    background-image: linear-gradient(135deg, #3730a3, #4f46e5, #f97316);
   }
 
   /* ── Data saver indicator ── */
   .data-saver-badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300;
+  }
+
+  /* ── Slim scrollbar for dark surfaces (the dashboard rail) ──
+     The platform scrollbar is a light slab against indigo-800; this keeps the
+     affordance visible without cutting a bright stripe through the brand. */
+  .scrollbar-slim {
+    scrollbar-width: thin;
+    /* indigo-400 #818CF8 at 40% — literal so it survives outside @apply. */
+    scrollbar-color: rgba(129, 140, 248, 0.4) transparent;
+  }
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-indigo-400/40;
   }
 
   /* ── Hide scrollbar but keep functionality ── */

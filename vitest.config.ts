@@ -9,6 +9,10 @@ export default defineConfig({
     // `// @vitest-environment jsdom` so DOM setup costs nothing elsewhere.
     environment: "node",
     setupFiles: ["./vitest.setup.ts"],
+    // Component specs that await a real UX delay (e.g. the 2s redirect after a
+    // password reset) intermittently exceed the 5s default once jsdom files run
+    // in parallel. Converting those to fake timers would be faster still.
+    testTimeout: 15_000,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     exclude: ["node_modules", ".next"],
     coverage: {

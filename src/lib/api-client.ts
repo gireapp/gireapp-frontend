@@ -76,23 +76,41 @@ export async function apiClient<T>(
   }
 
   // Parse response
-  let data: T;
+  let body: unknown;
   const contentType = response.headers.get("content-type");
   if (contentType?.includes("application/json")) {
-    data = await response.json();
+    body = await response.json();
   } else {
-    data = (await response.text()) as unknown as T;
+    body = await response.text();
   }
 
   if (!response.ok) {
-    const errorData = data as Record<string, unknown>;
+    const errorData = body as Record<string, unknown>;
     const errorMessage =
       (errorData?.error as string) || `API Error: ${response.status}`;
     const error = new ApiError(errorMessage, response.status, errorData);
     throw error;
   }
 
+  // Unwrap the { success, data } envelope so callers receive the payload
+  // directly. Endpoints still returning a bare object pass through untouched,
+  // which is what lets the backend migrate one route at a time.
+  const data = (isEnvelope(body) ? body.data : body) as T;
+
   return { data, status: response.status };
+}
+
+/** A wrapped success response: `{ success: true, data: … }`. */
+function isEnvelope(
+  body: unknown,
+): body is { success: boolean; data: unknown } {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    "success" in body &&
+    "data" in body &&
+    typeof (body as { success: unknown }).success === "boolean"
+  );
 }
 
 /**

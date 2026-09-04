@@ -44,6 +44,7 @@ import {
   completeOnboardingAction,
   verifyEmailAction,
   resendVerificationAction,
+  confirmGuardianConsentAction,
 } from "@/features/auth/actions";
 import { ApiError } from "@/lib/api-client";
 import { API_PATHS } from "@gireapp/shared";
@@ -571,6 +572,54 @@ describe("verifyEmailAction", () => {
 
     expect(result.error).toBe(
       "Verification failed. The link may be invalid or expired.",
+    );
+  });
+});
+
+describe("confirmGuardianConsentAction", () => {
+  it("posts the token from the guardian's emailed link", async () => {
+    apiMock.mockResolvedValue({ data: { message: "ok" }, status: 200 });
+
+    await confirmGuardianConsentAction("consent-token");
+
+    const body = JSON.parse(apiMock.mock.calls[0]?.[1].body as string);
+    expect(body).toEqual({ token: "consent-token" });
+  });
+
+  it("returns the learner name so the page can name them", async () => {
+    apiMock.mockResolvedValue({
+      data: { message: "Thank you", name: "Tobi" },
+      status: 200,
+    });
+
+    const result = await confirmGuardianConsentAction("consent-token");
+
+    expect(result).toEqual({
+      success: true,
+      data: { message: "Thank you", name: "Tobi" },
+    });
+  });
+
+  it("surfaces an expired-link message from the backend", async () => {
+    apiMock.mockRejectedValue(
+      new ApiError("This consent link is invalid or has expired.", 400),
+    );
+
+    const result = await confirmGuardianConsentAction("stale-token");
+
+    expect(result).toMatchObject({
+      success: false,
+      error: "This consent link is invalid or has expired.",
+    });
+  });
+
+  it("reports a friendly message for non-API failures", async () => {
+    apiMock.mockRejectedValue(new Error("socket hang up"));
+
+    const result = await confirmGuardianConsentAction("any-token");
+
+    expect(result.error).toBe(
+      "We could not confirm consent. The link may be invalid or expired.",
     );
   });
 });

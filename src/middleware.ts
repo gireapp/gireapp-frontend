@@ -15,6 +15,8 @@ const publicRoutes = [
   // /check-email straight after registering (no session exists until verified).
   "/verify-email",
   "/check-email",
+  // Opened by a guardian, who has no GIREAPP account or session at all.
+  "/guardian-consent",
 ];
 
 // Dashboard segments gated by academic level
@@ -69,8 +71,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/onboarding", request.url));
     }
 
-    // Users may only access the dashboard segment matching their academic level;
-    // /dashboard root re-routes them to the correct segment.
+    // /dashboard is a bare entry point with no UI of its own. Resolving it here
+    // rather than in a page keeps it an HTTP redirect — a Server Component
+    // redirect() serialises into the RSC payload and renders a blank document.
+    if (pathname === "/dashboard") {
+      const segment = session.academicLevel?.toLowerCase();
+      const target =
+        segment &&
+        LEVEL_SEGMENTS.includes(segment as (typeof LEVEL_SEGMENTS)[number])
+          ? `/dashboard/${segment}`
+          : "/onboarding";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+
+    // Users may only access the dashboard segment matching their academic level.
     for (const segment of LEVEL_SEGMENTS) {
       if (
         pathname.startsWith(`/dashboard/${segment}`) &&

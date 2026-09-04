@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "scan:injected": "node scripts/scan-injected-code.mjs"
   },
   "dependencies": {
     "@gireapp/shared": "file:./shared",

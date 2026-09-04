@@ -118,6 +118,12 @@ export default async function LessonPlayerPage({
               {currentLesson.content}
             </ReactMarkdown>
           </div>
+        ) : currentLesson.contentType === "TEXT" ? (
+          // Plain text carries no markup, so newlines are the only structure it
+          // has — `whitespace-pre-wrap` is what preserves the author's layout.
+          <div className="whitespace-pre-wrap font-sans text-[16px] leading-relaxed text-foreground">
+            {currentLesson.content}
+          </div>
         ) : currentLesson.contentType === "PDF" && currentLesson.mediaUrl ? (
           <div className="aspect-[4/3] w-full border border-border rounded overflow-hidden">
             <iframe

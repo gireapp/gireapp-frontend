@@ -66,13 +66,18 @@ describe("middleware — non-page requests", () => {
 });
 
 describe("middleware — unauthenticated visitors", () => {
-  it.each(["/", "/login", "/register", "/forgot-password", "/reset-password"])(
-    "allows the public route %s",
-    async (pathname) => {
-      const response = await middleware(request(pathname));
-      expect(isPassThrough(response)).toBe(true);
-    },
-  );
+  it.each([
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    // A guardian opening the emailed consent link has no account at all.
+    "/guardian-consent",
+  ])("allows the public route %s", async (pathname) => {
+    const response = await middleware(request(pathname));
+    expect(isPassThrough(response)).toBe(true);
+  });
 
   it("redirects a private route to login and preserves the callback url", async () => {
     const response = await middleware(request("/dashboard/courses"));
@@ -142,9 +147,37 @@ describe("middleware — onboarding gate", () => {
     expect(redirectTarget(response)?.pathname).toBe("/onboarding");
   });
 
-  it("lets an onboarded user reach the dashboard", async () => {
-    const response = await middleware(request("/dashboard", await signToken()));
+  it("lets an onboarded user reach their segment dashboard", async () => {
+    const response = await middleware(
+      request("/dashboard/secondary", await signToken()),
+    );
     expect(isPassThrough(response)).toBe(true);
+  });
+});
+
+describe("middleware — /dashboard entry point", () => {
+  // /dashboard has no page of its own: a Server Component redirect() there
+  // serialises into the RSC payload and renders a blank document.
+  it.each([
+    ["SECONDARY", "/dashboard/secondary"],
+    ["TERTIARY", "/dashboard/tertiary"],
+    ["PROFESSIONAL", "/dashboard/professional"],
+  ])("routes a %s learner to %s", async (academicLevel, expected) => {
+    const response = await middleware(
+      request("/dashboard", await signToken({ academicLevel })),
+    );
+
+    expect(redirectTarget(response)?.pathname).toBe(expected);
+  });
+
+  it("sends a learner with no academic level to onboarding", async () => {
+    const token = await signToken({
+      academicLevel: null,
+      isOnboardingComplete: true,
+    });
+    const response = await middleware(request("/dashboard", token));
+
+    expect(redirectTarget(response)?.pathname).toBe("/onboarding");
   });
 });
 
@@ -190,7 +223,7 @@ describe("middleware — session headers for server components", () => {
       role: "MENTOR",
       academicLevel: "TERTIARY",
     });
-    const response = await middleware(request("/dashboard", token));
+    const response = await middleware(request("/dashboard/tertiary", token));
 
     expect(response.headers.get("x-middleware-request-x-user-id")).toBe(
       "user-42",

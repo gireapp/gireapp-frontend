@@ -364,6 +364,36 @@ export async function resendVerificationAction(
   return { success: true };
 }
 
+/**
+ * Confirms guardian consent from the one-click link in the guardian's email.
+ * The guardian is not a GIREAPP user and has no session, so this runs entirely
+ * off the token in the URL.
+ */
+export async function confirmGuardianConsentAction(
+  token: string,
+): Promise<ApiResponse<{ message?: string; name?: string }>> {
+  try {
+    const { data } = await serverApiClient<{ message?: string; name?: string }>(
+      API_PATHS.AUTH.GUARDIAN_CONSENT,
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      },
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message };
+    }
+    return {
+      success: false,
+      error:
+        "We could not confirm consent. The link may be invalid or expired.",
+    };
+  }
+}
+
 export async function verifyEmailAction(
   token: string,
 ): Promise<ApiResponse<{ message?: string; name?: string }>> {
@@ -376,8 +406,15 @@ export async function verifyEmailAction(
       body: JSON.stringify({ token }),
     });
 
-    // The address has served its purpose once the link is opened.
-    await clearPendingVerificationEmail();
+    // The address has served its purpose once the link is opened. This runs
+    // during a Server Component render, where Next refuses cookie writes — so a
+    // failure here must never mask a verification that actually succeeded. The
+    // cookie carries its own 30-minute TTL and expires regardless.
+    try {
+      await clearPendingVerificationEmail();
+    } catch {
+      // Non-fatal: the account is verified either way.
+    }
 
     return { success: true, data };
   } catch (error) {
