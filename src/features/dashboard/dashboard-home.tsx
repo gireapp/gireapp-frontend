@@ -73,7 +73,12 @@ export function DashboardHome({
 
   return (
     <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-8">
-      <DashboardTopbar name={name} department={department} points={points} />
+      <DashboardTopbar
+        name={name}
+        department={department}
+        academicLevel={overview?.profile.academicLevel ?? null}
+        points={points}
+      />
 
       {/* Mobile stacks welcome → progress → resume → recommended → guidance,
           which interleaves the two desktop columns. `display: contents` drops

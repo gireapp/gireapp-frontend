@@ -4,18 +4,29 @@ import { Search, Bell, ChevronDown, Trophy } from "lucide-react";
 import { GireappLogo } from "@/components/shared/gireapp-logo";
 import { getInitials, formatNumber } from "@/lib/utils";
 
+/** "SECONDARY" -> "Secondary", to match Figma's "Secondary.Science" label. */
+function formatAcademicLevel(level: string): string {
+  return level.charAt(0) + level.slice(1).toLowerCase();
+}
+
 export function DashboardTopbar({
   name,
   department,
+  academicLevel,
   points = 0,
   notificationCount = 0,
 }: {
   name: string;
   department: string | null;
+  academicLevel: string | null;
   /** FE-DASH-007: total points belong in the header, beside the identity. */
   points?: number;
   notificationCount?: number;
 }) {
+  const roleLabel = academicLevel
+    ? `${formatAcademicLevel(academicLevel)}.${department ?? "Student"}`
+    : (department ?? "Student");
+
   return (
     <div className="flex items-center justify-between gap-4 md:gap-8">
       {/* The rail carries the wordmark on desktop, so it only appears here once
@@ -61,7 +72,7 @@ export function DashboardTopbar({
           <Bell className="h-6 w-6" aria-hidden="true" />
           {notificationCount > 0 && (
             <span
-              className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 font-sans text-[10px] font-bold text-white"
+              className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 font-sans text-[12px] text-indigo-50"
               aria-hidden="true"
             >
               {notificationCount}
@@ -70,15 +81,15 @@ export function DashboardTopbar({
         </button>
 
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-800 font-heading text-[14px] font-bold text-indigo-50">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-950 font-sans text-[20px] text-indigo-400">
             {getInitials(name)}
           </span>
           <span className="hidden flex-col md:flex">
-            <span className="font-heading text-[14px] font-bold text-indigo-950">
+            <span className="font-sans text-[16px] text-indigo-950">
               {name}
             </span>
             <span className="font-sans text-[12px] text-indigo-400">
-              {department ?? "Student"}
+              {roleLabel}
             </span>
           </span>
           <ChevronDown
