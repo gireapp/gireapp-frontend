@@ -2,7 +2,7 @@
   "name": "gireapp-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "GIREAPP \u2014 Frontend (Next.js 15 + Tailwind + shadcn/ui)",
+  "description": "GIREAPP — Frontend (Next.js 15 + Tailwind + shadcn/ui)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
