@@ -5,6 +5,8 @@
 
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
+import { getDashboardOverview } from "@/features/dashboard/actions";
+import { hasDashboardActivity } from "@/features/dashboard/dashboard-utils";
 import { DashboardSidebar } from "@/features/dashboard/dashboard-sidebar";
 import { DashboardBottomNav } from "@/features/dashboard/dashboard-bottom-nav";
 
@@ -23,9 +25,18 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
+  // Cached per request (see actions.ts): the dashboard home page asks for the
+  // same overview to render its content, and this collapses into one backend
+  // call rather than two.
+  const overview = await getDashboardOverview();
+  const hasStarted = hasDashboardActivity(overview);
+
   return (
     <div className="min-h-screen bg-indigo-50">
-      <DashboardSidebar user={{ academicLevel: session.academicLevel }} />
+      <DashboardSidebar
+        user={{ academicLevel: session.academicLevel }}
+        hasStarted={hasStarted}
+      />
       <DashboardBottomNav academicLevel={session.academicLevel} />
 
       {/* Figma places desktop content at x=265 against a 240px rail — a 25px

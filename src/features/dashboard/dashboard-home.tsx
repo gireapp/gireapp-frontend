@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   BookOpen,
   Award,
@@ -16,6 +17,10 @@ import type {
 } from "@gireapp/shared";
 import { formatNumber } from "@/lib/utils";
 import { DashboardTopbar } from "@/features/dashboard/dashboard-topbar";
+import {
+  findResumeCourse,
+  hasDashboardActivity,
+} from "@/features/dashboard/dashboard-utils";
 
 const CARD_CLASSNAME = "rounded-lg bg-indigo-100";
 const SECTION_TITLE_CLASSNAME =
@@ -43,12 +48,6 @@ export type DashboardExtras = {
   quizzesToNextBadge?: number;
 };
 
-function findResumeCourse(courses: CourseCard[]): CourseCard | null {
-  const started = courses.filter((c) => c.progress > 0 && c.progress < 1);
-  const [first] = started.length > 0 ? started : courses;
-  return first ?? null;
-}
-
 export function DashboardHome({
   name,
   department,
@@ -69,7 +68,7 @@ export function DashboardHome({
   const stats = overview?.stats ?? null;
   const nextQuiz = overview?.nextQuiz ?? null;
 
-  const hasStarted = points > 0 || badges > 0 || resume !== null;
+  const hasStarted = hasDashboardActivity(overview);
 
   return (
     <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-8">
@@ -229,9 +228,15 @@ function WelcomeCard({
         </Link>
       </div>
 
-      <Sparkles
-        className="pointer-events-none absolute bottom-0 -right-4 z-0 h-[150px] w-[140px] text-indigo-700 md:-right-6 md:h-[269px] md:w-[257px]"
-        aria-hidden="true"
+      {/* Figma: "image 5" — 150×157 mobile, 257×269 desktop, flush against
+          the card's right edge. */}
+      <Image
+        src="/dashboard/hero-portrait.png"
+        alt=""
+        width={257}
+        height={269}
+        className="pointer-events-none absolute bottom-0 -right-4 z-0 h-[157px] w-[150px] object-contain object-bottom md:-right-6 md:h-[269px] md:w-[257px]"
+        priority
       />
     </section>
   );
@@ -304,6 +309,16 @@ function ResumeCard({
       >
         {resume ? "Continue" : "Explore Subjects"}
       </Link>
+
+      {/* Figma: "image 3" — flush against the card's bottom-right corner,
+          169×169, desktop only (not present in the mobile frame at this spot). */}
+      <Image
+        src="/dashboard/continue-learning-books.png"
+        alt=""
+        width={169}
+        height={169}
+        className="pointer-events-none absolute bottom-0 right-0 z-0 hidden h-[169px] w-[169px] object-contain md:block"
+      />
     </section>
   );
 }
@@ -519,7 +534,7 @@ function UpNextCard({ quiz }: { quiz: NextQuiz }) {
 function NeedGuidanceCard({ className }: { className?: string }) {
   return (
     <section
-      className={`flex min-h-[185px] items-center gap-6 rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-4 ${className ?? ""}`}
+      className={`relative flex min-h-[185px] items-center gap-6 overflow-hidden rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-4 ${className ?? ""}`}
     >
       <div className="flex flex-col gap-2">
         <h2 className="font-heading text-[16px] font-bold text-indigo-950">
@@ -536,6 +551,16 @@ function NeedGuidanceCard({ className }: { className?: string }) {
           Find a mentor
         </Link>
       </div>
+
+      {/* Figma: "image 4" — flush top-right, 154×154, desktop only (not
+          present in the mobile frame at this spot). */}
+      <Image
+        src="/dashboard/mentor-guidance.png"
+        alt=""
+        width={154}
+        height={154}
+        className="pointer-events-none absolute right-0 top-0 z-0 hidden h-[154px] w-[154px] object-contain md:block"
+      />
     </section>
   );
 }

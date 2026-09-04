@@ -49,7 +49,13 @@ function GroupDivider() {
 
 export type SidebarUser = { academicLevel: string | null };
 
-export function DashboardSidebar({ user }: { user: SidebarUser }) {
+export function DashboardSidebar({
+  user,
+  hasStarted,
+}: {
+  user: SidebarUser;
+  hasStarted: boolean;
+}) {
   const pathname = usePathname();
   const groups = getNavGroups(user.academicLevel);
   const home = homeHref(user.academicLevel);
@@ -106,7 +112,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
           </div>
         </nav>
 
-        <JourneyCard />
+        <JourneyCard hasStarted={hasStarted} />
       </div>
     </aside>
   );
@@ -117,8 +123,11 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
  * decoration, so short viewports drop it entirely rather than spend their
  * scroll budget on it; the wrapper carries `mt-auto` so the card still sinks to
  * the bottom when the rail has room to spare.
+ *
+ * Copy switches once the learner has any activity, matching the dashboard
+ * home's own "Welcome" → "Keep going" switch (see `hasDashboardActivity`).
  */
-function JourneyCard() {
+function JourneyCard({ hasStarted }: { hasStarted: boolean }) {
   return (
     <div className="mt-auto hidden shrink-0 pt-6 tall:block">
       <div className="flex flex-col items-center gap-2.5 rounded-[10px] bg-indigo-200/20 p-3 text-center">
@@ -127,10 +136,12 @@ function JourneyCard() {
           aria-hidden="true"
         />
         <p className="font-heading text-[13px] font-bold text-indigo-200">
-          Start your journey today
+          {hasStarted ? "Keep it up!" : "Start your journey today"}
         </p>
         <p className="font-sans text-[10px] leading-tight text-indigo-200">
-          Small steps today, Big achievements tomorrow
+          {hasStarted
+            ? "Consistency today, Mastery tomorrow."
+            : "Small steps today, Big achievements tomorrow"}
         </p>
       </div>
     </div>
