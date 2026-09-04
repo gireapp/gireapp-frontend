@@ -1,0 +1,39 @@
+name: Frontend CI
+
+# Every branch: the August 2026 compromise was force-pushed to main, staging and
+# a feature branch of this repo, where no workflow existed at all, and the
+# payload in postcss.config.js sat undetected for three weeks.
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Before npm ci — installing runs lifecycle scripts, and postcss.config.js
+      # is executed by every next build/dev. Anything injected has to be found
+      # while the checkout is still inert.
+      - name: Scan for injected code
+        run: node scripts/scan-injected-code.mjs
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Unit tests
+        run: npm test

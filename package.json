@@ -2,7 +2,7 @@
   "name": "gireapp-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "GIREAPP — Frontend (Next.js 15 + Tailwind + shadcn/ui)",
+  "description": "GIREAPP \u2014 Frontend (Next.js 15 + Tailwind + shadcn/ui)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "scan:injected": "node scripts/scan-injected-code.mjs"
   },
   "dependencies": {
     "@gireapp/shared": "file:./shared",
