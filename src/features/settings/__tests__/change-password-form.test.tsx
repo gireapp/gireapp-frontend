@@ -69,7 +69,9 @@ describe("ChangePasswordForm — submitting", () => {
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => expect(changePasswordActionMock).toHaveBeenCalled());
-    const formData = changePasswordActionMock.mock.calls[0][1] as FormData;
+    const call = changePasswordActionMock.mock.calls[0];
+    if (!call) throw new Error("the action was never called");
+    const formData = call[1] as FormData;
     expect(formData.get("currentPassword")).toBe("OldPassw0rd");
     expect(formData.get("password")).toBe("NewPassw0rd");
     expect(formData.get("confirmPassword")).toBe("NewPassw0rd");
