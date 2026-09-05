@@ -1,20 +1,21 @@
-import type { Metadata } from 'next';
-import { ForgotPasswordForm } from '@/features/auth/forgot-password-form';
+import type { Metadata } from "next";
+import { ForgotPasswordForm } from "@/features/auth/forgot-password-form";
+import { AuthPageHeader } from "@/components/shared/auth-page-header";
 
 export const metadata: Metadata = {
-  title: 'Forgot Password',
-  description: 'Reset your GIREAPP password.',
+  title: "Forgot Password",
+  description: "Reset your GIREAPP password.",
 };
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-h2 text-foreground">Forgot password?</h1>
-        <p className="text-body-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link
-        </p>
-      </div>
+    <div className="w-full max-w-[490px] mx-auto flex flex-col gap-8 lg:min-h-[calc(100vh-200px)] justify-center">
+      <AuthPageHeader
+        title="Forgot password?"
+        subtitle="Enter your email and we'll send you a reset link"
+        backHref="/login"
+        backLabel="Go back to log in"
+      />
       <ForgotPasswordForm />
     </div>
   );

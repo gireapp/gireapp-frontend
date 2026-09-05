@@ -3,56 +3,68 @@
 // Renders markdown content and tracks completion
 // ─────────────────────────────────────────────────
 
-import { getSession } from '@/lib/session';
-import { cookies } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, ArrowRight, LayoutList } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { CompleteLessonButton } from '@/features/courses/complete-lesson-button';
+import { getSession } from "@/lib/session";
+import { cookies } from "next/headers";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowRight, LayoutList } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { CompleteLessonButton } from "@/features/courses/complete-lesson-button";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export async function generateMetadata({ params }: { params: { lessonId: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lessonId: string }>;
+}) {
+  await params;
   return { title: `Lesson | GIREAPP` }; // Simplified since we'd need another API call to get just the title
 }
 
 export default async function LessonPlayerPage({
   params,
 }: {
-  params: { courseId: string; lessonId: string };
+  params: Promise<{ courseId: string; lessonId: string }>;
 }) {
   const session = await getSession();
-  if (!session?.userId) redirect('/login');
+  if (!session?.userId) redirect("/login");
 
-  const { courseId, lessonId } = params;
+  const { courseId, lessonId } = await params;
 
   // Retrieve token for fetch request
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get("token")?.value;
 
-  const response = await fetch(`${API_URL}/api/courses/${courseId}/lessons/${lessonId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
+  const response = await fetch(
+    `${API_URL}/api/courses/${courseId}/lessons/${lessonId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      // Cache to prevent double hop latency, revalidate every hour or tag based
+      next: { revalidate: 3600 },
     },
-    // Cache to prevent double hop latency, revalidate every hour or tag based
-    next: { revalidate: 3600 } 
-  });
+  );
 
-  if (response.status === 401) redirect('/login');
+  if (response.status === 401) redirect("/login");
   if (response.status === 403) redirect(`/dashboard/courses/${courseId}`);
   if (response.status === 404) notFound();
 
   const { data } = await response.json();
-  
+
   if (!data || !data.lesson) {
     notFound();
   }
 
   const currentLesson = data.lesson;
-  const nextLessonUrl = data.nextLessonId ? `/dashboard/courses/${courseId}/lessons/${data.nextLessonId}` : undefined;
-  const prevLessonUrl = data.prevLessonId ? `/dashboard/courses/${courseId}/lessons/${data.prevLessonId}` : undefined;
+  const nextLessonUrl = data.nextLessonId
+    ? `/dashboard/courses/${courseId}/lessons/${data.nextLessonId}`
+    : undefined;
+  const prevLessonUrl = data.prevLessonId
+    ? `/dashboard/courses/${courseId}/lessons/${data.prevLessonId}`
+    : undefined;
   const currentModule = data.module;
   const isCompleted = data.isCompleted;
 
@@ -89,20 +101,30 @@ export default async function LessonPlayerPage({
 
       {/* ── Lesson Header ── */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-primary">{currentModule?.title}</p>
+        <p className="text-sm font-medium text-primary">
+          {currentModule?.title}
+        </p>
         <h1 className="text-h2 text-foreground">{currentLesson.title}</h1>
-        <p className="text-sm text-muted-foreground">Estimated time: {currentLesson.estimatedMinutes} mins</p>
+        <p className="text-sm text-muted-foreground">
+          Estimated time: {currentLesson.estimatedMinutes} mins
+        </p>
       </div>
 
       {/* ── Lesson Content ── */}
       <div className="bg-card border border-border rounded-xl p-6 md:p-8 shadow-sm">
-        {currentLesson.contentType === 'MARKDOWN' ? (
+        {currentLesson.contentType === "MARKDOWN" ? (
           <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary hover:prose-a:underline">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {currentLesson.content}
             </ReactMarkdown>
           </div>
-        ) : currentLesson.contentType === 'PDF' && currentLesson.mediaUrl ? (
+        ) : currentLesson.contentType === "TEXT" ? (
+          // Plain text carries no markup, so newlines are the only structure it
+          // has — `whitespace-pre-wrap` is what preserves the author's layout.
+          <div className="whitespace-pre-wrap font-sans text-[16px] leading-relaxed text-foreground">
+            {currentLesson.content}
+          </div>
+        ) : currentLesson.contentType === "PDF" && currentLesson.mediaUrl ? (
           <div className="aspect-[4/3] w-full border border-border rounded overflow-hidden">
             <iframe
               src={`${currentLesson.mediaUrl}#toolbar=0`}

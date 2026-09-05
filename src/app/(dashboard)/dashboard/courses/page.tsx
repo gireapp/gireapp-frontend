@@ -3,27 +3,29 @@
 // Shows available courses for the user's segment/department
 // ─────────────────────────────────────────────────
 
-import { getSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowRight, BookOpen, Clock, Lock } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { serverApiClient, ApiError } from '@/lib/api-client';
-import { API_PATHS } from '@gireapp/shared';
-import type { CourseDetail } from '@gireapp/shared';
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Clock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { serverApiClient, ApiError } from "@/lib/api-client";
+import { API_PATHS } from "@gireapp/shared";
+import type { CourseListItem } from "@gireapp/shared";
 
 export const metadata = {
-  title: 'Browse Courses | GIREAPP',
+  title: "Browse Courses | GIREAPP",
 };
 
-async function getCourses() {
+async function getCourses(): Promise<CourseListItem[]> {
   try {
-    const { data } = await serverApiClient<CourseDetail[]>(API_PATHS.COURSES.LIST);
-    return data;
+    const { data } = await serverApiClient<CourseListItem[]>(
+      API_PATHS.COURSES.LIST,
+    );
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {
-       redirect('/login');
+      redirect("/login");
     }
     return [];
   }
@@ -31,12 +33,12 @@ async function getCourses() {
 
 export default async function CoursesPage() {
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session) redirect("/login");
 
   const { academicLevel, department } = session;
 
   // If onboarding is incomplete, redirect
-  if (!academicLevel || !department) redirect('/onboarding');
+  if (!academicLevel || !department) redirect("/onboarding");
 
   const courses = await getCourses();
 
@@ -45,7 +47,8 @@ export default async function CoursesPage() {
       <div className="space-y-3">
         <h1 className="text-h2 text-foreground">Available Courses</h1>
         <p className="text-body text-muted-foreground">
-          Courses tailored for {academicLevel.toLowerCase()} students in {department}.
+          Courses tailored for {academicLevel.toLowerCase()} students in{" "}
+          {department}.
         </p>
       </div>
 
@@ -53,11 +56,17 @@ export default async function CoursesPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <BookOpen className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
+              <BookOpen
+                className="w-8 h-8 text-muted-foreground"
+                aria-hidden="true"
+              />
             </div>
-            <h3 className="text-h4 text-foreground mb-2">No courses available yet</h3>
+            <h3 className="text-h4 text-foreground mb-2">
+              No courses available yet
+            </h3>
             <p className="text-body-sm text-muted-foreground max-w-sm">
-              We are working hard to bring you the best content. Check back soon for new courses in {department}.
+              We are working hard to bring you the best content. Check back soon
+              for new courses in {department}.
             </p>
           </CardContent>
         </Card>
@@ -66,10 +75,14 @@ export default async function CoursesPage() {
           {courses.map((course) => {
             const isEnrolled = course.isEnrolled;
             const progress = isEnrolled ? Math.round(course.progress * 100) : 0;
-            const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
-            
+            const totalLessons = course.lessonCount;
+
             return (
-              <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="group block">
+              <Link
+                key={course.id}
+                href={`/dashboard/courses/${course.id}`}
+                className="group block"
+              >
                 <Card className="h-full overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all duration-300">
                   {/* Thumbnail Placeholder */}
                   <div className="aspect-video w-full bg-muted relative">
@@ -87,25 +100,32 @@ export default async function CoursesPage() {
                     )}
                     {isEnrolled && (
                       <div className="absolute top-3 right-3">
-                        <Badge variant="default" className="bg-primary/90 hover:bg-primary">
+                        <Badge
+                          variant="default"
+                          className="bg-primary/90 hover:bg-primary"
+                        >
                           Enrolled
                         </Badge>
                       </div>
                     )}
                   </div>
-                  
+
                   <CardContent className="p-5 flex flex-col justify-between h-[calc(100%-auto)]">
                     <div className="space-y-3">
                       <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs font-medium">
+                        <Badge
+                          variant="outline"
+                          className="text-xs font-medium"
+                        >
                           {course.department}
                         </Badge>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          {totalLessons} lessons
+                          {totalLessons}{" "}
+                          {totalLessons === 1 ? "lesson" : "lessons"}
                         </span>
                       </div>
-                      
+
                       <h3 className="text-h4 text-foreground group-hover:text-primary transition-colors line-clamp-2">
                         {course.title}
                       </h3>
@@ -116,11 +136,13 @@ export default async function CoursesPage() {
 
                     <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
                       <span className="text-sm font-medium text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        {isEnrolled ? 'Continue Course' : 'View Details'}
+                        {isEnrolled ? "Continue Course" : "View Details"}
                         <ArrowRight className="w-4 h-4" />
                       </span>
                       {isEnrolled && progress === 100 && (
-                        <Badge variant="success" className="text-xs">Completed</Badge>
+                        <Badge variant="success" className="text-xs">
+                          Completed
+                        </Badge>
                       )}
                     </div>
                   </CardContent>

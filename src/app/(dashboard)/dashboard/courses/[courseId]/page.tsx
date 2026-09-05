@@ -3,64 +3,96 @@
 // Shows course details, module accordion, and enrolment
 // ─────────────────────────────────────────────────
 
-import { getSession } from '@/lib/session';
-import { serverApiClient, ApiError } from '@/lib/api-client';
-import { redirect, notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, BookOpen, Clock, PlayCircle, CheckCircle2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { EnrollButton } from '@/features/courses/enroll-button';
-import { API_PATHS } from '@gireapp/shared';
-import type { CourseDetail } from '@gireapp/shared';
+import { getSession } from "@/lib/session";
+import { serverApiClient, ApiError } from "@/lib/api-client";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  PlayCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { EnrollButton } from "@/features/courses/enroll-button";
+import { API_PATHS } from "@gireapp/shared";
+import type { CourseDetail } from "@gireapp/shared";
 
-export async function generateMetadata({ params }: { params: { courseId: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const { courseId } = await params;
   try {
-    const { data: course } = await serverApiClient<CourseDetail>(API_PATHS.COURSES.DETAIL(params.courseId));
-    return { title: `${course?.title ?? 'Course'} | GIREAPP` };
-  } catch (error) {
-    return { title: 'Course | GIREAPP' };
+    const { data: course } = await serverApiClient<CourseDetail>(
+      API_PATHS.COURSES.DETAIL(courseId),
+    );
+    return { title: `${course?.title ?? "Course"} | GIREAPP` };
+  } catch {
+    return { title: "Course | GIREAPP" };
   }
 }
 
 async function getCourse(courseId: string) {
   try {
-    const { data } = await serverApiClient<CourseDetail>(API_PATHS.COURSES.DETAIL(courseId));
+    const { data } = await serverApiClient<CourseDetail>(
+      API_PATHS.COURSES.DETAIL(courseId),
+    );
     return data;
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {
-       redirect('/login');
+      redirect("/login");
     }
     if (error instanceof ApiError && error.status === 404) {
-       notFound();
+      notFound();
     }
     throw error;
   }
 }
 
-export default async function CourseOverviewPage({ params }: { params: { courseId: string } }) {
+export default async function CourseOverviewPage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const { courseId } = await params;
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session) redirect("/login");
 
-  const course = await getCourse(params.courseId);
+  const course = await getCourse(courseId);
 
   if (!course || !course.published) notFound();
 
   // Validate segment match
-  if (course.academicLevel !== session.academicLevel || course.department !== session.department) {
-    redirect('/dashboard/courses');
+  if (
+    course.academicLevel !== session.academicLevel ||
+    course.department !== session.department
+  ) {
+    redirect("/dashboard/courses");
   }
 
   const isEnrolled = course.isEnrolled;
   const enrolmentProgress = isEnrolled ? Math.round(course.progress * 100) : 0;
   const totalModules = course.modules.length;
-  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+  const totalLessons = course.modules.reduce(
+    (acc, m) => acc + m.lessons.length,
+    0,
+  );
   const totalMinutes = course.modules.reduce(
-    (acc, m) => acc + m.lessons.reduce((lAcc, l) => lAcc + l.estimatedMinutes, 0),
-    0
+    (acc, m) =>
+      acc + m.lessons.reduce((lAcc, l) => lAcc + l.estimatedMinutes, 0),
+    0,
   );
 
   // Find next lesson to continue
@@ -117,8 +149,8 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
               {totalLessons} Lessons
             </div>
             <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-              <Clock className="w-4 h-4 text-emerald-500" />
-              ~{Math.round(totalMinutes / 60)}h {totalMinutes % 60}m Total Time
+              <Clock className="w-4 h-4 text-emerald-500" />~
+              {Math.round(totalMinutes / 60)}h {totalMinutes % 60}m Total Time
             </div>
           </div>
         </div>
@@ -148,11 +180,13 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
                     <span className="text-primary">{enrolmentProgress}%</span>
                   </div>
                   <Progress value={enrolmentProgress} className="h-2.5" />
-                  
+
                   {nextLessonUrl ? (
                     <Button asChild className="w-full" size="lg">
                       <Link href={nextLessonUrl}>
-                        {enrolmentProgress === 0 ? 'Start Course' : 'Continue Learning'}
+                        {enrolmentProgress === 0
+                          ? "Start Course"
+                          : "Continue Learning"}
                       </Link>
                     </Button>
                   ) : (
@@ -164,7 +198,8 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground text-center">
-                    Enroll in this course to track your progress and earn points.
+                    Enroll in this course to track your progress and earn
+                    points.
                   </p>
                   <EnrollButton courseId={course.id} />
                 </div>
@@ -177,16 +212,28 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
       {/* ── Curriculum / Modules Accordion ── */}
       <div className="space-y-4 max-w-3xl">
         <h2 className="text-h3 text-foreground">Course Curriculum</h2>
-        
+
         {course.modules.length === 0 ? (
-          <p className="text-muted-foreground italic">Modules are being added to this course.</p>
+          <p className="text-muted-foreground italic">
+            Modules are being added to this course.
+          </p>
         ) : (
-          <Accordion type="multiple" defaultValue={[course.modules[0]?.id]} className="w-full space-y-4">
+          <Accordion
+            type="multiple"
+            defaultValue={course.modules[0] ? [course.modules[0].id] : []}
+            className="w-full space-y-4"
+          >
             {course.modules.map((module, index) => {
-              const completedLessons = module.lessons.filter((l) => l.isCompleted).length;
-              
+              const completedLessons = module.lessons.filter(
+                (l) => l.isCompleted,
+              ).length;
+
               return (
-                <AccordionItem key={module.id} value={module.id} className="bg-card border border-border rounded-xl px-2">
+                <AccordionItem
+                  key={module.id}
+                  value={module.id}
+                  className="bg-card border border-border rounded-xl px-2"
+                >
                   <AccordionTrigger className="hover:no-underline py-4 px-4">
                     <div className="flex flex-1 items-center justify-between pr-4">
                       <div className="flex items-center gap-4 text-left">
@@ -213,11 +260,13 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
                     <div className="space-y-2 mt-2">
                       {module.lessons.map((lesson, lIndex) => {
                         const isCompleted = isEnrolled && lesson.isCompleted;
-                        const lessonUrl = isEnrolled ? `/dashboard/courses/${course.id}/lessons/${lesson.id}` : '#';
-                        
+                        const lessonUrl = isEnrolled
+                          ? `/dashboard/courses/${course.id}/lessons/${lesson.id}`
+                          : "#";
+
                         return (
-                          <div 
-                            key={lesson.id} 
+                          <div
+                            key={lesson.id}
                             className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <div className="flex items-center gap-3">
@@ -231,18 +280,26 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
                                   {lIndex + 1}. {lesson.title}
                                 </span>
                                 <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] px-1.5 py-0"
+                                  >
                                     {lesson.contentType}
                                   </Badge>
                                   <span>{lesson.estimatedMinutes} mins</span>
                                 </div>
                               </div>
                             </div>
-                            
+
                             {isEnrolled && (
-                              <Button variant="ghost" size="sm" asChild className="shrink-0 hidden sm:flex">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="shrink-0 hidden sm:flex"
+                              >
                                 <Link href={lessonUrl}>
-                                  {isCompleted ? 'Review' : 'Start'}
+                                  {isCompleted ? "Review" : "Start"}
                                 </Link>
                               </Button>
                             )}
@@ -250,7 +307,9 @@ export default async function CourseOverviewPage({ params }: { params: { courseI
                         );
                       })}
                       {module.lessons.length === 0 && (
-                        <p className="text-sm text-muted-foreground italic px-2">No lessons added yet.</p>
+                        <p className="text-sm text-muted-foreground italic px-2">
+                          No lessons added yet.
+                        </p>
                       )}
                     </div>
                   </AccordionContent>

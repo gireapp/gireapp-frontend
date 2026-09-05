@@ -4,11 +4,10 @@
 // Used on CTA buttons across the landing page
 // ─────────────────────────────────────────────────
 
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useRef, type ComponentProps } from 'react';
+import Link from "next/link";
+import { useCallback, useRef, type ComponentProps } from "react";
 
 type SafeLinkProps = ComponentProps<typeof Link>;
 
@@ -19,7 +18,6 @@ type SafeLinkProps = ComponentProps<typeof Link>;
  */
 export function SafeLink({ href, onClick, children, ...props }: SafeLinkProps) {
   const isNavigating = useRef(false);
-  const router = useRouter();
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -42,7 +40,7 @@ export function SafeLink({ href, onClick, children, ...props }: SafeLinkProps) {
         isNavigating.current = false;
       }, 500);
     },
-    [onClick]
+    [onClick],
   );
 
   return (
