@@ -11,10 +11,10 @@ import {
   LogOut,
 } from "lucide-react";
 import { homeHref } from "@/features/dashboard/nav-items";
-import { getSession } from "@/lib/session";
 import { logoutAction } from "@/features/auth/actions";
 import { getDashboardOverview } from "@/features/dashboard/actions";
 import { DashboardTopbar } from "@/features/dashboard/dashboard-topbar";
+import { getSettingsIdentity } from "@/features/settings/profile-identity";
 import { ProfileHero } from "@/features/settings/profile-hero";
 import {
   SettingsRow,
@@ -27,17 +27,8 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const [session, overview] = await Promise.all([
-    getSession(),
-    getDashboardOverview(),
-  ]);
-
-  const profile = overview?.profile;
-  const name = profile?.name ?? session?.email ?? "there";
-  const email = profile?.email ?? session?.email ?? "";
-  const academicLevel =
-    profile?.academicLevel ?? session?.academicLevel ?? null;
-  const department = profile?.department ?? session?.department ?? null;
+  const [{ name, email, academicLevel, department, image }, overview] =
+    await Promise.all([getSettingsIdentity(), getDashboardOverview()]);
 
   return (
     <div className="mx-auto flex w-full max-w-[1143px] flex-col gap-6 md:gap-8">
@@ -70,7 +61,7 @@ export default async function SettingsPage() {
         email={email}
         academicLevel={academicLevel}
         department={department}
-        image={profile?.image}
+        image={image}
       />
 
       {/* Figma stacks these in one column on mobile and pairs them across the
