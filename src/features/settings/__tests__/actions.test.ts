@@ -1,15 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { API_PATHS } from "@gireapp/shared";
 
-const { redirectMock, clearSessionTokenMock, apiMock } = vi.hoisted(() => ({
+const {
+  redirectMock,
+  clearSessionTokenMock,
+  setSessionTokenMock,
+  revalidatePathMock,
+  apiMock,
+} = vi.hoisted(() => ({
   redirectMock: vi.fn(),
   clearSessionTokenMock: vi.fn(),
+  setSessionTokenMock: vi.fn(),
+  revalidatePathMock: vi.fn(),
   apiMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
-vi.mock("@/lib/session", () => ({ clearSessionToken: clearSessionTokenMock }));
+// Outside a Next request context this throws; the actions call it after the
+// save has already succeeded.
+vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
+
+vi.mock("@/lib/session", () => ({
+  clearSessionToken: clearSessionTokenMock,
+  setSessionToken: setSessionTokenMock,
+}));
 
 // ApiError must stay the real class so `instanceof` checks in the action hold.
 vi.mock("@/lib/api-client", async (importOriginal) => {
@@ -23,6 +38,7 @@ import {
   endChangedPasswordSession,
   updateEmailAction,
   confirmEmailChangeAction,
+  updateLearningPreferencesAction,
 } from "@/features/settings/actions";
 
 function formDataOf(values: Record<string, string>): FormData {
@@ -267,5 +283,98 @@ describe("confirmEmailChangeAction", () => {
     await confirmEmailChangeAction("raw-token");
 
     expect(clearSessionTokenMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateLearningPreferencesAction", () => {
+  const VALID = {
+    academicLevel: "SECONDARY",
+    department: "Science",
+    moodTheme: "calm",
+  };
+
+  it("reuses the onboarding endpoint rather than a parallel one", async () => {
+    apiMock.mockResolvedValue({ data: {} });
+
+    const result = await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf(VALID),
+    );
+
+    expect(result).toEqual({ success: true });
+    expect(apiMock).toHaveBeenCalledWith(API_PATHS.AUTH.ONBOARDING, {
+      method: "POST",
+      body: JSON.stringify(VALID),
+    });
+  });
+
+  it("adopts the re-signed token, which carries the new academic level", async () => {
+    apiMock.mockResolvedValue({ data: { token: "fresh.jwt.token" } });
+
+    await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf(VALID),
+    );
+
+    expect(setSessionTokenMock).toHaveBeenCalledWith("fresh.jwt.token");
+  });
+
+  it("refuses a department that does not belong to the track", async () => {
+    const result = await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf({ ...VALID, department: "Postgraduate" }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.errors?.department).toContain(
+      "Selected department does not match your academic level",
+    );
+  });
+
+  it("reports a network failure without leaking the underlying error", async () => {
+    apiMock.mockRejectedValue(new TypeError("fetch failed"));
+
+    const result = await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf(VALID),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: "Failed to save your preferences. Please try again.",
+    });
+    expect(setSessionTokenMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("revalidation is not part of the save", () => {
+  it("refreshes the shell only once the preferences are stored", async () => {
+    apiMock.mockResolvedValue({ data: {} });
+
+    await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf({
+        academicLevel: "SECONDARY",
+        department: "Science",
+        moodTheme: "calm",
+      }),
+    );
+
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard", "layout");
+  });
+
+  it("does not refresh the shell when the save was refused", async () => {
+    apiMock.mockRejectedValue(new ApiError("Validation failed.", 422, {}));
+
+    await updateLearningPreferencesAction(
+      { success: false },
+      formDataOf({
+        academicLevel: "SECONDARY",
+        department: "Science",
+        moodTheme: "calm",
+      }),
+    );
+
+    expect(revalidatePathMock).not.toHaveBeenCalled();
   });
 });

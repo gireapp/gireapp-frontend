@@ -6,11 +6,12 @@ import {
   changePasswordSchema,
   updateEmailSchema,
   updateAvatarSchema,
+  onboardingSchema,
   API_PATHS,
 } from "@gireapp/shared";
 import type { ApiResponse } from "@gireapp/shared";
 import { serverApiClient, ApiError } from "@/lib/api-client";
-import { clearSessionToken } from "@/lib/session";
+import { clearSessionToken, setSessionToken } from "@/lib/session";
 
 /**
  * Change the password from inside the account. The backend stamps
@@ -209,4 +210,59 @@ export async function saveAvatarAction(
       error: "Could not save your photo. Please try again.",
     };
   }
+}
+
+/**
+ * Change the learning track, department and mood theme. This is the onboarding
+ * choice being revisited, so it reuses that endpoint rather than duplicating
+ * it — including the re-signed token, without which the session would keep
+ * claiming the old academic level and middleware would route on it.
+ */
+export async function updateLearningPreferencesAction(
+  _prevState: ApiResponse,
+  formData: FormData,
+): Promise<ApiResponse> {
+  const result = onboardingSchema.safeParse({
+    academicLevel: formData.get("academicLevel") as string,
+    department: formData.get("department") as string,
+    moodTheme: formData.get("moodTheme") as string,
+  });
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    const { data } = await serverApiClient<{ token?: string }>(
+      API_PATHS.AUTH.ONBOARDING,
+      { method: "POST", body: JSON.stringify(result.data) },
+    );
+
+    if (data.token) {
+      await setSessionToken(data.token);
+    }
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
+    }
+    return {
+      success: false,
+      error: "Failed to save your preferences. Please try again.",
+    };
+  }
+
+  // Outside the catch above, which is only for the save: the preferences are
+  // already stored by this point, so a revalidation fault must never be
+  // reported back as a save that failed. The track decides where the sidebar's
+  // Home link points.
+  revalidatePath("/dashboard", "layout");
+
+  return { success: true };
 }
