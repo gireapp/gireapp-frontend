@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import {
   changePasswordSchema,
   updateEmailSchema,
+  updateAvatarSchema,
   API_PATHS,
 } from "@gireapp/shared";
 import type { ApiResponse } from "@gireapp/shared";
@@ -135,6 +137,76 @@ export async function confirmEmailChangeAction(
     return {
       success: false,
       error: "We could not confirm that change. The link may have expired.",
+    };
+  }
+}
+
+/**
+ * Ask the backend for a short-lived URL to upload a photo straight to storage.
+ * The bytes go browser → storage; neither server ever holds the file.
+ */
+export async function requestAvatarUploadAction(
+  filename: string,
+  fileSize: number,
+): Promise<ApiResponse<{ uploadUrl: string; key: string }>> {
+  const query = new URLSearchParams({
+    filename,
+    fileSize: String(fileSize),
+  });
+
+  try {
+    const { data } = await serverApiClient<{ uploadUrl: string; key: string }>(
+      `${API_PATHS.AUTH.AVATAR_UPLOAD_URL}?${query}`,
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message };
+    }
+    return {
+      success: false,
+      error: "Could not start the upload. Please try again.",
+    };
+  }
+}
+
+/** Point the account at a photo that has finished uploading. */
+export async function saveAvatarAction(
+  key: string,
+): Promise<ApiResponse<{ message?: string; image?: string }>> {
+  const result = updateAvatarSchema.safeParse({ key });
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    const { data } = await serverApiClient<{
+      message?: string;
+      image?: string;
+    }>(API_PATHS.AUTH.AVATAR, {
+      method: "POST",
+      body: JSON.stringify(result.data),
+    });
+
+    // The photo appears in the sidebar and topbar too, not just this screen.
+    revalidatePath("/dashboard", "layout");
+
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
+    }
+    return {
+      success: false,
+      error: "Could not save your photo. Please try again.",
     };
   }
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { UserRoundPen } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 import { SETTINGS_CARD_CLASSNAME } from "@/features/settings/settings-rows";
@@ -33,7 +34,11 @@ export function ProfileHero({
     >
       {/* Figma shows a 150px portrait on desktop; until an avatar upload exists,
           initials stand in rather than a broken image. */}
-      <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-200 font-heading text-[24px] font-bold text-indigo-800 md:h-[150px] md:w-[150px] md:text-[44px]">
+      <Link
+        href="/dashboard/settings/photo"
+        aria-label="Change your profile photo"
+        className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-200 font-heading text-[24px] font-bold text-indigo-800 md:h-[150px] md:w-[150px] md:text-[44px]"
+      >
         {image ? (
           /* Avatars are arbitrary backend URLs, so next/image would need every
              host allow-listed up front; a plain img keeps them working. */
@@ -42,7 +47,7 @@ export function ProfileHero({
         ) : (
           getInitials(name)
         )}
-      </span>
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-2">
         <p className="truncate font-heading text-[16px] font-bold text-indigo-950 md:text-[20px]">
@@ -58,15 +63,17 @@ export function ProfileHero({
         )}
       </div>
 
-      {/* Not yet a destination — the edit flow ships with the sub-screens. */}
-      <span className="hidden shrink-0 items-center gap-2 self-start font-sans text-[16px] text-coral-500 md:flex">
+      <Link
+        href="/dashboard/settings/photo"
+        className="hidden shrink-0 items-center gap-2 self-start font-sans text-[16px] text-coral-500 transition-colors hover:text-coral-600 md:flex"
+      >
         <UserRoundPen
           className="h-8 w-8"
           strokeWidth={1.5}
           aria-hidden="true"
         />
         Edit Profile
-      </span>
+      </Link>
     </section>
   );
 }
