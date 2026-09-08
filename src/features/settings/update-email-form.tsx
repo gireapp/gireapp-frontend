@@ -6,7 +6,6 @@ import { updateEmailAction } from "@/features/settings/actions";
 import {
   SETTINGS_FIELD_CLASSNAME,
   SETTINGS_LABEL_CLASSNAME,
-  SETTINGS_STATUS_ELEMENT_ID,
   SettingsFormLayout,
   SettingsStatusPanel,
 } from "@/features/settings/settings-form";

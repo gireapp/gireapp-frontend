@@ -100,7 +100,9 @@ export function SettingsFormLayout({
   children: React.ReactNode;
 }) {
   return (
-    <form action={action} className="flex flex-col gap-14 md:gap-24">
+    // noValidate: the schema is the only arbiter, so a browser bubble can
+    // never pre-empt the error state the design specifies.
+    <form action={action} noValidate className="flex flex-col gap-14 md:gap-24">
       {/* Figma hangs the side panel lower than the fields; centring it against
           the column lands in the same place without pinning a magic offset. */}
       <div className="flex flex-col gap-[30px] md:flex-row md:items-center md:justify-between md:gap-16">

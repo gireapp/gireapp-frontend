@@ -176,15 +176,19 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
  */
 export const updateEmailSchema = z
   .object({
+    // Trimmed before the address is judged: a trailing space survives a
+    // copy-paste far more often than a typo does.
     newEmail: z
       .string()
+      .trim()
       .email("Please enter a valid email address")
       .max(255, "Email must be under 255 characters")
-      .transform((e) => e.toLowerCase().trim()),
+      .transform((e) => e.toLowerCase()),
     confirmEmail: z
       .string()
+      .trim()
       .min(1, "Please confirm your new email address")
-      .transform((e) => e.toLowerCase().trim()),
+      .transform((e) => e.toLowerCase()),
   })
   .refine((data) => data.newEmail === data.confirmEmail, {
     message: "Email addresses do not match",
