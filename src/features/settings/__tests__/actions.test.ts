@@ -136,6 +136,7 @@ describe("updateEmailAction", () => {
   const VALID = {
     newEmail: "new@example.com",
     confirmEmail: "new@example.com",
+    currentPassword: "OldPassw0rd",
   };
 
   it("posts the normalised payload to the update-email endpoint", async () => {
@@ -144,6 +145,7 @@ describe("updateEmailAction", () => {
       formDataOf({
         newEmail: "NEW@Example.com ",
         confirmEmail: " new@example.COM",
+        currentPassword: "OldPassw0rd",
       }),
     );
 
@@ -169,7 +171,7 @@ describe("updateEmailAction", () => {
   it("rejects a malformed address before the request is made", async () => {
     const result = await updateEmailAction(
       { success: false },
-      formDataOf({ newEmail: "nope.com", confirmEmail: "nope.com" }),
+      formDataOf({ ...VALID, newEmail: "nope.com", confirmEmail: "nope.com" }),
     );
 
     expect(apiMock).not.toHaveBeenCalled();
@@ -207,6 +209,18 @@ describe("updateEmailAction", () => {
       success: false,
       error: "Failed to update your email address. Please try again.",
     });
+  });
+
+  it("never reaches the backend without the current password", async () => {
+    const result = await updateEmailAction(
+      { success: false },
+      formDataOf({ ...VALID, currentPassword: "" }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.errors?.currentPassword).toContain(
+      "Please enter your current password",
+    );
   });
 
   it("leaves the session alone — nothing has changed until the link is opened", async () => {

@@ -1,17 +1,15 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { CircleCheck, Eye, EyeOff } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 import type { ApiResponse } from "@gireapp/shared";
 import {
   changePasswordAction,
   endChangedPasswordSession,
 } from "@/features/settings/actions";
 import {
-  SETTINGS_FIELD_CLASSNAME,
-  SETTINGS_LABEL_CLASSNAME,
-  SETTINGS_STATUS_ELEMENT_ID,
   SettingsFormLayout,
+  SettingsPasswordField,
   SettingsStatusPanel,
 } from "@/features/settings/settings-form";
 
@@ -50,67 +48,6 @@ function firstFieldError(errors?: Record<string, string[]>): string | null {
     if (message) return message;
   }
   return null;
-}
-
-function PasswordField({
-  name,
-  label,
-  placeholder,
-  autoComplete,
-  value,
-  onChange,
-  isInvalid,
-  isDisabled,
-}: {
-  name: FieldName;
-  label: string;
-  placeholder: string;
-  autoComplete: string;
-  value: string;
-  onChange: (value: string) => void;
-  isInvalid: boolean;
-  isDisabled: boolean;
-}) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ToggleIcon = isVisible ? Eye : EyeOff;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <label htmlFor={name} className={SETTINGS_LABEL_CLASSNAME}>
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          id={name}
-          name={name}
-          type={isVisible ? "text" : "password"}
-          required
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          disabled={isDisabled}
-          aria-invalid={isInvalid ? "true" : undefined}
-          aria-describedby={isInvalid ? SETTINGS_STATUS_ELEMENT_ID : undefined}
-          className={`${SETTINGS_FIELD_CLASSNAME} bg-transparent pr-11 md:pr-14 ${
-            isInvalid ? "border-red-500" : "border-indigo-200"
-          }`}
-        />
-        <button
-          type="button"
-          onClick={() => setIsVisible(!isVisible)}
-          aria-label={`${isVisible ? "Hide" : "Show"} ${label.toLowerCase()}`}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 transition-colors hover:text-indigo-500"
-        >
-          <ToggleIcon
-            className="h-5 w-5 md:h-8 md:w-8"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
-        </button>
-      </div>
-    </div>
-  );
 }
 
 function RequirementsPanel({ password }: { password: string }) {
@@ -188,7 +125,7 @@ export function ChangePasswordForm() {
       isPending={isPending}
       isDisabled={isLocked}
     >
-      <PasswordField
+      <SettingsPasswordField
         name="currentPassword"
         label="Current Password"
         placeholder="Enter current password"
@@ -198,7 +135,7 @@ export function ChangePasswordForm() {
         isInvalid={Boolean(state.errors?.currentPassword)}
         isDisabled={isLocked}
       />
-      <PasswordField
+      <SettingsPasswordField
         name="password"
         label="New Password"
         placeholder="Enter new password"
@@ -208,7 +145,7 @@ export function ChangePasswordForm() {
         isInvalid={Boolean(state.errors?.password)}
         isDisabled={isLocked}
       />
-      <PasswordField
+      <SettingsPasswordField
         name="confirmPassword"
         label="Confirm Password"
         placeholder="Confirm new password"

@@ -20,6 +20,8 @@ beforeEach(() => {
   updateEmailActionMock.mockResolvedValue({ success: true });
 });
 
+const PASSWORD = "OldPassw0rd";
+
 async function fillForm(
   user: ReturnType<typeof userEvent.setup>,
   next: string,
@@ -27,6 +29,7 @@ async function fillForm(
 ) {
   await user.type(screen.getByLabelText("New Email"), next);
   await user.type(screen.getByLabelText("Confirm Email"), confirm);
+  await user.type(screen.getByLabelText("Current Password"), PASSWORD);
 }
 
 describe("UpdateEmailForm — before submitting", () => {
@@ -60,6 +63,7 @@ describe("UpdateEmailForm — submitting", () => {
     const formData = call[1] as FormData;
     expect(formData.get("newEmail")).toBe("new@example.com");
     expect(formData.get("confirmEmail")).toBe("new@example.com");
+    expect(formData.get("currentPassword")).toBe(PASSWORD);
   });
 
   it("reaches the action even though the address is malformed, so the schema decides", async () => {
@@ -118,6 +122,42 @@ describe("UpdateEmailForm — submitting", () => {
         screen.getAllByText("That email address is already in use").length,
       ).toBeGreaterThan(0),
     );
+  });
+
+  it("names a wrong password under the password field", async () => {
+    updateEmailActionMock.mockResolvedValue({
+      success: false,
+      errors: { currentPassword: ["That is not your current password"] },
+    });
+    const user = userEvent.setup();
+    render(<UpdateEmailForm currentEmail={CURRENT} />);
+
+    await fillForm(user, "new@example.com");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("Current Password")).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      ),
+    );
+    expect(screen.getByLabelText("New Email")).not.toHaveAttribute(
+      "aria-invalid",
+    );
+  });
+
+  it("keeps the password out of view until asked", async () => {
+    const user = userEvent.setup();
+    render(<UpdateEmailForm currentEmail={CURRENT} />);
+
+    const field = screen.getByLabelText("Current Password");
+    expect(field).toHaveAttribute("type", "password");
+
+    await user.click(
+      screen.getByRole("button", { name: /show current password/i }),
+    );
+
+    expect(field).toHaveAttribute("type", "text");
   });
 });
 

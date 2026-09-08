@@ -77,6 +77,7 @@ export async function updateEmailAction(
   const result = updateEmailSchema.safeParse({
     newEmail: formData.get("newEmail") as string,
     confirmEmail: formData.get("confirmEmail") as string,
+    currentPassword: formData.get("currentPassword") as string,
   });
 
   if (!result.success) {

@@ -38,9 +38,10 @@ export const registerSchema = z
       .trim(),
     email: z
       .string()
+      .trim()
       .email("Please enter a valid email address")
       .max(255, "Email must be under 255 characters")
-      .transform((e) => e.toLowerCase().trim()),
+      .transform((e) => e.toLowerCase()),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -96,8 +97,9 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export const loginSchema = z.object({
   email: z
     .string()
+    .trim()
     .email("Please enter a valid email address")
-    .transform((e) => e.toLowerCase().trim()),
+    .transform((e) => e.toLowerCase()),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -106,8 +108,9 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const forgotPasswordSchema = z.object({
   email: z
     .string()
+    .trim()
     .email("Please enter a valid email address")
-    .transform((e) => e.toLowerCase().trim()),
+    .transform((e) => e.toLowerCase()),
 });
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
@@ -115,8 +118,9 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export const resendVerificationSchema = z.object({
   email: z
     .string()
+    .trim()
     .email("Please enter a valid email address")
-    .transform((e) => e.toLowerCase().trim()),
+    .transform((e) => e.toLowerCase()),
 });
 
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
@@ -172,7 +176,9 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 /**
  * Changing the account's email from inside the account. The address is typed
  * twice because a typo here is unrecoverable — the confirmation link goes to
- * the new address, and nobody would ever receive it.
+ * the new address, and nobody would ever receive it. The current password is
+ * required because a live session alone is not proof of ownership: whoever holds
+ * one could otherwise move the account to an inbox the real owner cannot reach.
  */
 export const updateEmailSchema = z
   .object({
@@ -189,6 +195,7 @@ export const updateEmailSchema = z
       .trim()
       .min(1, "Please confirm your new email address")
       .transform((e) => e.toLowerCase()),
+    currentPassword: z.string().min(1, "Please enter your current password"),
   })
   .refine((data) => data.newEmail === data.confirmEmail, {
     message: "Email addresses do not match",

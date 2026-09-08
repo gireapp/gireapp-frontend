@@ -7,13 +7,14 @@ import {
   SETTINGS_FIELD_CLASSNAME,
   SETTINGS_LABEL_CLASSNAME,
   SettingsFormLayout,
+  SettingsPasswordField,
   SettingsStatusPanel,
 } from "@/features/settings/settings-form";
 
 const initialState: ApiResponse = { success: false };
 
 /** Reported in the order the fields are read, so the message matches the border. */
-const FIELD_ORDER = ["newEmail", "confirmEmail"] as const;
+const FIELD_ORDER = ["newEmail", "confirmEmail", "currentPassword"] as const;
 
 type FieldName = (typeof FIELD_ORDER)[number];
 
@@ -96,7 +97,11 @@ export function UpdateEmailForm({ currentEmail }: { currentEmail: string }) {
     updateEmailAction,
     initialState,
   );
-  const [values, setValues] = useState({ newEmail: "", confirmEmail: "" });
+  const [values, setValues] = useState({
+    newEmail: "",
+    confirmEmail: "",
+    currentPassword: "",
+  });
 
   const errorMessage = state.success
     ? null
@@ -121,6 +126,7 @@ export function UpdateEmailForm({ currentEmail }: { currentEmail: string }) {
     <SettingsStatusPanel
       variant="info"
       message="We’ll send a verification link to your new email address."
+      detail="Your password confirms it’s really you making the change."
     />
   );
 
@@ -148,6 +154,18 @@ export function UpdateEmailForm({ currentEmail }: { currentEmail: string }) {
         value={values.confirmEmail}
         onChange={setField("confirmEmail")}
         error={state.errors?.confirmEmail?.[0]}
+        isDisabled={isLocked}
+      />
+      {/* Not in the Figma frames. A live session alone would otherwise be enough
+          to move the account to an inbox its owner cannot reach. */}
+      <SettingsPasswordField
+        name="currentPassword"
+        label="Current Password"
+        placeholder="Enter your current password"
+        autoComplete="current-password"
+        value={values.currentPassword}
+        onChange={setField("currentPassword")}
+        error={state.errors?.currentPassword?.[0]}
         isDisabled={isLocked}
       />
     </SettingsFormLayout>

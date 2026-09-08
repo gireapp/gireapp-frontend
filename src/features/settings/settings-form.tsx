@@ -1,4 +1,7 @@
-import { CircleCheck, CircleX, Info, Loader2 } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { CircleCheck, CircleX, Eye, EyeOff, Info, Loader2 } from "lucide-react";
 
 /** The one element carrying a form's outcome, referenced by any invalid field. */
 export const SETTINGS_STATUS_ELEMENT_ID = "settings-form-status";
@@ -10,6 +13,90 @@ export const SETTINGS_LABEL_CLASSNAME =
 /** The field frame: 54px on mobile, 64px on desktop, radius 10, hairline border. */
 export const SETTINGS_FIELD_CLASSNAME =
   "h-[54px] w-full rounded-[10px] border px-3 font-sans text-[12px] text-indigo-950 placeholder:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-60 md:h-16 md:text-[16px]";
+
+/**
+ * A labelled field with a show/hide toggle, shared by every settings screen that
+ * asks for a password.
+ */
+export function SettingsPasswordField({
+  name,
+  label,
+  placeholder,
+  autoComplete,
+  value,
+  onChange,
+  error,
+  isInvalid,
+  isDisabled,
+}: {
+  name: string;
+  label: string;
+  placeholder: string;
+  autoComplete: string;
+  value: string;
+  onChange: (value: string) => void;
+  /** Shown beneath the field. Omit to flag the border only and leave the reason
+   *  to the status panel, which is how the password screen is drawn. */
+  error?: string;
+  isInvalid?: boolean;
+  isDisabled: boolean;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ToggleIcon = isVisible ? Eye : EyeOff;
+  const invalid = isInvalid ?? Boolean(error);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <label htmlFor={name} className={SETTINGS_LABEL_CLASSNAME}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={name}
+          name={name}
+          type={isVisible ? "text" : "password"}
+          required
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          disabled={isDisabled}
+          aria-invalid={invalid ? "true" : undefined}
+          aria-describedby={
+            error
+              ? `${name}-error`
+              : invalid
+                ? SETTINGS_STATUS_ELEMENT_ID
+                : undefined
+          }
+          className={`${SETTINGS_FIELD_CLASSNAME} bg-transparent pr-11 md:pr-14 ${
+            invalid ? "border-red-500" : "border-indigo-200"
+          }`}
+        />
+        <button
+          type="button"
+          onClick={() => setIsVisible(!isVisible)}
+          aria-label={`${isVisible ? "Hide" : "Show"} ${label.toLowerCase()}`}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 transition-colors hover:text-indigo-500"
+        >
+          <ToggleIcon
+            className="h-5 w-5 md:h-8 md:w-8"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+      {error && (
+        <p
+          id={`${name}-error`}
+          className="pl-3 font-sans text-[12px] text-red-500 md:text-[16px]"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
 
 export type SettingsStatusVariant = "info" | "success" | "error";
 
