@@ -39,6 +39,7 @@ import {
   updateEmailAction,
   confirmEmailChangeAction,
   updateLearningPreferencesAction,
+  updateNameAction,
 } from "@/features/settings/actions";
 
 function formDataOf(values: Record<string, string>): FormData {
@@ -375,6 +376,58 @@ describe("revalidation is not part of the save", () => {
       }),
     );
 
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateNameAction", () => {
+  it("posts the trimmed name", async () => {
+    apiMock.mockResolvedValue({ data: {} });
+
+    const result = await updateNameAction(
+      { success: false },
+      formDataOf({ name: "  Afolabi Hassan  " }),
+    );
+
+    expect(result).toEqual({ success: true });
+    expect(apiMock).toHaveBeenCalledWith(API_PATHS.AUTH.NAME, {
+      method: "POST",
+      body: JSON.stringify({ name: "Afolabi Hassan" }),
+    });
+  });
+
+  it("refuses a name that is only padding, before the request is made", async () => {
+    const result = await updateNameAction(
+      { success: false },
+      formDataOf({ name: "   A   " }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.errors?.name).toContain("Name must be at least 2 characters");
+  });
+
+  it("refuses a name past the column limit", async () => {
+    const result = await updateNameAction(
+      { success: false },
+      formDataOf({ name: "a".repeat(101) }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.errors?.name).toContain("Name must be under 100 characters");
+  });
+
+  it("reports a network failure without leaking the underlying error", async () => {
+    apiMock.mockRejectedValue(new TypeError("fetch failed"));
+
+    const result = await updateNameAction(
+      { success: false },
+      formDataOf({ name: "Afolabi Hassan" }),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: "Failed to update your name. Please try again.",
+    });
     expect(revalidatePathMock).not.toHaveBeenCalled();
   });
 });

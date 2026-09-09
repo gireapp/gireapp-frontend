@@ -15,6 +15,68 @@ export const SETTINGS_FIELD_CLASSNAME =
   "h-[54px] w-full rounded-[10px] border px-3 font-sans text-[12px] text-indigo-950 placeholder:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-60 md:h-16 md:text-[16px]";
 
 /**
+ * A labelled single-line field. The error, when there is one, is repeated
+ * beneath the field rather than left only to the side panel, so the fix is
+ * visible without looking away.
+ */
+export function SettingsTextField({
+  name,
+  label,
+  placeholder,
+  type = "text",
+  autoComplete,
+  inputMode,
+  value,
+  onChange,
+  error,
+  isDisabled,
+}: {
+  name: string;
+  label: string;
+  placeholder: string;
+  type?: "text" | "email";
+  autoComplete?: string;
+  inputMode?: "text" | "email";
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  isDisabled: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <label htmlFor={name} className={SETTINGS_LABEL_CLASSNAME}>
+        {label}
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={isDisabled}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className={`${SETTINGS_FIELD_CLASSNAME} bg-transparent ${
+          error ? "border-red-500" : "border-indigo-200"
+        }`}
+      />
+      {error && (
+        <p
+          id={`${name}-error`}
+          className="pl-3 font-sans text-[12px] text-red-500 md:text-[16px]"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
  * A labelled field with a show/hide toggle, shared by every settings screen that
  * asks for a password.
  */

@@ -6,6 +6,7 @@ import {
   changePasswordSchema,
   updateEmailSchema,
   updateAvatarSchema,
+  updateNameSchema,
   onboardingSchema,
   API_PATHS,
 } from "@gireapp/shared";
@@ -262,6 +263,51 @@ export async function updateLearningPreferencesAction(
   // already stored by this point, so a revalidation fault must never be
   // reported back as a save that failed. The track decides where the sidebar's
   // Home link points.
+  revalidatePath("/dashboard", "layout");
+
+  return { success: true };
+}
+
+/**
+ * Change the display name. The session token does not carry the name, so there
+ * is nothing to re-sign — only the shell to refresh, since the topbar and
+ * sidebar greet the learner by it.
+ */
+export async function updateNameAction(
+  _prevState: ApiResponse,
+  formData: FormData,
+): Promise<ApiResponse> {
+  const result = updateNameSchema.safeParse({
+    name: formData.get("name") as string,
+  });
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    await serverApiClient(API_PATHS.AUTH.NAME, {
+      method: "POST",
+      body: JSON.stringify(result.data),
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
+    }
+    return {
+      success: false,
+      error: "Failed to update your name. Please try again.",
+    };
+  }
+
+  // Outside the catch: the name is already stored by this point.
   revalidatePath("/dashboard", "layout");
 
   return { success: true };
