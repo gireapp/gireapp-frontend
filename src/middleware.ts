@@ -17,7 +17,14 @@ const publicRoutes = [
   "/check-email",
   // Opened by a guardian, who has no GIREAPP account or session at all.
   "/guardian-consent",
+  // Opened from the link sent to a new address during an email change.
+  "/confirm-email-change",
 ];
+
+// Public routes a signed-in user may also open, so they are not bounced to the
+// dashboard: the landing page, and the email-change link — which is normally
+// opened in the very browser that asked for the change.
+const sessionAgnosticRoutes = ["/", "/confirm-email-change"];
 
 // Dashboard segments gated by academic level
 const LEVEL_SEGMENTS = ["secondary", "tertiary", "professional"] as const;
@@ -60,7 +67,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from public auth routes
-  if (session && isPublicRoute && pathname !== "/") {
+  if (session && isPublicRoute && !sessionAgnosticRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
