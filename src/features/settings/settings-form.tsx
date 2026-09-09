@@ -77,6 +77,59 @@ export function SettingsTextField({
 }
 
 /**
+ * A labelled multi-line field. Sized to invite a few sentences rather than a
+ * single line, since the schemas that back it ask for real detail.
+ */
+export function SettingsTextArea({
+  name,
+  label,
+  placeholder,
+  value,
+  onChange,
+  error,
+  isDisabled,
+}: {
+  name: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  isDisabled: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <label htmlFor={name} className={SETTINGS_LABEL_CLASSNAME}>
+        {label}
+      </label>
+      <textarea
+        id={name}
+        name={name}
+        required
+        rows={6}
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={isDisabled}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className={`w-full resize-y rounded-[10px] border bg-transparent px-3 py-3 font-sans text-[12px] text-indigo-950 placeholder:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-60 md:text-[16px] ${
+          error ? "border-red-500" : "border-indigo-200"
+        }`}
+      />
+      {error && (
+        <p
+          id={`${name}-error`}
+          className="pl-3 font-sans text-[12px] text-red-500 md:text-[16px]"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
  * A labelled field with a show/hide toggle, shared by every settings screen that
  * asks for a password.
  */
@@ -240,12 +293,17 @@ export function SettingsFormLayout({
   panel,
   isPending,
   isDisabled,
+  submitLabel = "Save Changes",
+  pendingLabel = "Saving...",
   children,
 }: {
   action: (formData: FormData) => void;
   panel: React.ReactNode;
   isPending: boolean;
   isDisabled: boolean;
+  /** Not every settings screen is saving something — support is sending. */
+  submitLabel?: string;
+  pendingLabel?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -269,7 +327,7 @@ export function SettingsFormLayout({
         {isPending && (
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
         )}
-        {isPending ? "Saving..." : "Save Changes"}
+        {isPending ? pendingLabel : submitLabel}
       </button>
     </form>
   );

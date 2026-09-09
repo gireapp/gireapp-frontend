@@ -40,6 +40,7 @@ import {
   confirmEmailChangeAction,
   updateLearningPreferencesAction,
   updateNameAction,
+  contactSupportAction,
 } from "@/features/settings/actions";
 
 function formDataOf(values: Record<string, string>): FormData {
@@ -429,5 +430,65 @@ describe("updateNameAction", () => {
       error: "Failed to update your name. Please try again.",
     });
     expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("contactSupportAction", () => {
+  const VALID = {
+    subject: "Cannot open my quiz",
+    message: "The quiz page has been loading forever since yesterday evening.",
+    urgency: "high",
+  };
+
+  it("posts the request to the support endpoint", async () => {
+    apiMock.mockResolvedValue({ data: {} });
+
+    const result = await contactSupportAction(
+      { success: false },
+      formDataOf(VALID),
+    );
+
+    expect(result).toEqual({ success: true });
+    expect(apiMock).toHaveBeenCalledWith(API_PATHS.SUPPORT.CONTACT, {
+      method: "POST",
+      body: JSON.stringify(VALID),
+    });
+  });
+
+  it("refuses a message with too little to go on", async () => {
+    const result = await contactSupportAction(
+      { success: false },
+      formDataOf({ ...VALID, message: "broken" }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.errors?.message).toContain(
+      "Please provide more detail (at least 20 characters)",
+    );
+  });
+
+  it("refuses an urgency outside the three the schema allows", async () => {
+    const result = await contactSupportAction(
+      { success: false },
+      formDataOf({ ...VALID, urgency: "catastrophic" }),
+    );
+
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(result.success).toBe(false);
+  });
+
+  it("reports a failed send rather than thanking the learner", async () => {
+    // Nothing is stored, so an undelivered message never happened.
+    apiMock.mockRejectedValue(new TypeError("fetch failed"));
+
+    const result = await contactSupportAction(
+      { success: false },
+      formDataOf(VALID),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: "Could not send your message. Please try again.",
+    });
   });
 });

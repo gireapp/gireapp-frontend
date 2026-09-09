@@ -7,6 +7,7 @@ import {
   updateEmailSchema,
   updateAvatarSchema,
   updateNameSchema,
+  contactFormSchema,
   onboardingSchema,
   API_PATHS,
 } from "@gireapp/shared";
@@ -311,4 +312,48 @@ export async function updateNameAction(
   revalidatePath("/dashboard", "layout");
 
   return { success: true };
+}
+
+/**
+ * Raise a support request. Nothing is stored — the message is delivered by
+ * email — so a failure here means the request genuinely did not happen and the
+ * learner must be told rather than thanked.
+ */
+export async function contactSupportAction(
+  _prevState: ApiResponse,
+  formData: FormData,
+): Promise<ApiResponse> {
+  const result = contactFormSchema.safeParse({
+    subject: formData.get("subject") as string,
+    message: formData.get("message") as string,
+    urgency: formData.get("urgency") as string,
+  });
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  try {
+    await serverApiClient(API_PATHS.SUPPORT.CONTACT, {
+      method: "POST",
+      body: JSON.stringify(result.data),
+    });
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.message,
+        errors: error.fieldErrors,
+      };
+    }
+    return {
+      success: false,
+      error: "Could not send your message. Please try again.",
+    };
+  }
 }

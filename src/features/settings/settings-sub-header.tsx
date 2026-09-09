@@ -4,7 +4,7 @@ import { getDashboardOverview } from "@/features/dashboard/actions";
 import { DashboardTopbar } from "@/features/dashboard/dashboard-topbar";
 import { getSettingsIdentity } from "@/features/settings/profile-identity";
 
-/** Every settings sub-screen returns to the settings index, never the dashboard. */
+/** Where a settings sub-screen goes back to, unless it says otherwise. */
 const SETTINGS_INDEX_HREF = "/dashboard/settings";
 
 /**
@@ -12,7 +12,16 @@ const SETTINGS_INDEX_HREF = "/dashboard/settings";
  * and a back arrow beside the screen title at both sizes. Figma centres the
  * title on mobile and drops it beside the arrow on desktop.
  */
-export async function SettingsSubHeader({ title }: { title: string }) {
+export async function SettingsSubHeader({
+  title,
+  backHref = SETTINGS_INDEX_HREF,
+  backLabel = "Back to profile and settings",
+}: {
+  title: string;
+  /** Help and Support sit outside the settings tree but are listed within it. */
+  backHref?: string;
+  backLabel?: string;
+}) {
   const [identity, overview] = await Promise.all([
     getSettingsIdentity(),
     getDashboardOverview(),
@@ -31,8 +40,8 @@ export async function SettingsSubHeader({ title }: { title: string }) {
 
       <div className="relative flex items-center md:gap-[52px]">
         <Link
-          href={SETTINGS_INDEX_HREF}
-          aria-label="Back to profile and settings"
+          href={backHref}
+          aria-label={backLabel}
           className="text-indigo-500 transition-colors hover:text-indigo-800"
         >
           <ArrowLeft

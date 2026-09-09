@@ -51,6 +51,10 @@ export const API_PATHS = {
     ONBOARDING: "/api/auth/onboarding",
     GUARDIAN_CONSENT: "/api/auth/guardian-consent",
   },
+  SUPPORT: {
+    CONTACT: "/api/support/contact",
+  },
+
   COURSES: {
     LIST: "/api/courses",
     DETAIL: (courseId: string) => `/api/courses/${courseId}`,
