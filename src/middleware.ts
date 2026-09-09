@@ -26,6 +26,11 @@ const publicRoutes = [
 // opened in the very browser that asked for the change.
 const sessionAgnosticRoutes = ["/", "/confirm-email-change"];
 
+// Everything under /admin is staff-only. The backend enforces this too
+// (`requireStaff` on /api/admin/*); this stops a learner from loading the shell
+// and its empty-looking screens at all.
+const STAFF_ROLES = ["ADMIN", "TUTOR"];
+
 // Dashboard segments gated by academic level
 const LEVEL_SEGMENTS = ["secondary", "tertiary", "professional"] as const;
 
@@ -100,6 +105,14 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
+  }
+
+  if (
+    session &&
+    pathname.startsWith("/admin") &&
+    !STAFF_ROLES.includes(session.role)
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Attach session data to headers for Server Components to consume easily

@@ -248,3 +248,30 @@ describe("middleware — session headers for server components", () => {
     expect(response.headers.get("x-middleware-request-x-user-id")).toBeNull();
   });
 });
+
+describe("middleware — the admin shell is staff-only", () => {
+  it.each(["ADMIN", "TUTOR"])(
+    "lets a %s through to /admin/students",
+    async (role) => {
+      const response = await middleware(
+        request("/admin/students", await signToken({ role })),
+      );
+
+      expect(isPassThrough(response)).toBe(true);
+    },
+  );
+
+  it("sends a learner back to their own dashboard", async () => {
+    const response = await middleware(
+      request("/admin/students", await signToken({ role: "STUDENT" })),
+    );
+
+    expect(redirectTarget(response)?.pathname).toBe("/dashboard");
+  });
+
+  it("sends a signed-out visitor to login rather than leaking that /admin exists", async () => {
+    const response = await middleware(request("/admin/students"));
+
+    expect(redirectTarget(response)?.pathname).toBe("/login");
+  });
+});
