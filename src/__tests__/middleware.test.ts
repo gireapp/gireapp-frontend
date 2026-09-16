@@ -275,3 +275,48 @@ describe("middleware — the admin shell is staff-only", () => {
     expect(redirectTarget(response)?.pathname).toBe("/login");
   });
 });
+
+describe("middleware — staff land on the admin shell", () => {
+  it.each(["ADMIN", "TUTOR"])(
+    "sends a %s from /dashboard to /admin, even though they never onboarded as a learner",
+    async (role) => {
+      const response = await middleware(
+        request(
+          "/dashboard",
+          await signToken({
+            role,
+            academicLevel: null,
+            isOnboardingComplete: false,
+          }),
+        ),
+      );
+
+      expect(redirectTarget(response)?.pathname).toBe("/admin");
+    },
+  );
+
+  it("sends a staff member who opens /login while signed in on to /admin", async () => {
+    const token = await signToken({
+      role: "ADMIN",
+      isOnboardingComplete: false,
+    });
+
+    const first = await middleware(request("/login", token));
+    const firstTarget = redirectTarget(first);
+    expect(firstTarget?.pathname).toBe("/dashboard");
+
+    const second = await middleware(request("/dashboard", token));
+    expect(redirectTarget(second)?.pathname).toBe("/admin");
+  });
+
+  it("still routes a learner from /dashboard to their own segment", async () => {
+    const response = await middleware(
+      request(
+        "/dashboard",
+        await signToken({ role: "STUDENT", academicLevel: "TERTIARY" }),
+      ),
+    );
+
+    expect(redirectTarget(response)?.pathname).toBe("/dashboard/tertiary");
+  });
+});

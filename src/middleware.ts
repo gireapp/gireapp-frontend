@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import * as jose from "jose";
 import type { JwtPayload } from "@gireapp/shared";
 import { JWT_SECRET } from "@/lib/auth-secret";
+import { ADMIN_HOME, isStaffRole } from "@/lib/roles";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -25,11 +26,6 @@ const publicRoutes = [
 // dashboard: the landing page, and the email-change link — which is normally
 // opened in the very browser that asked for the change.
 const sessionAgnosticRoutes = ["/", "/confirm-email-change"];
-
-// Everything under /admin is staff-only. The backend enforces this too
-// (`requireStaff` on /api/admin/*); this stops a learner from loading the shell
-// and its empty-looking screens at all.
-const STAFF_ROLES = ["ADMIN", "TUTOR"];
 
 // Dashboard segments gated by academic level
 const LEVEL_SEGMENTS = ["secondary", "tertiary", "professional"] as const;
@@ -76,6 +72,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Staff have no learner dashboard: they are never onboarded as learners, so
+  // /dashboard would bounce them to /onboarding. Every "go home" path — the
+  // post-login fallback, a signed-in visit to /login — lands on /dashboard, so
+  // resolving staff here covers all of them at once.
+  if (session && pathname === "/dashboard" && isStaffRole(session.role)) {
+    return NextResponse.redirect(new URL(ADMIN_HOME, request.url));
+  }
+
   // Segment / Role based routing enforcement
   if (session && pathname.startsWith("/dashboard")) {
     // Onboarding must be completed before any dashboard route is reachable
@@ -107,10 +111,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Everything under /admin is staff-only. The backend enforces this too
+  // (`requireStaff` on /api/admin/*); this stops a learner from loading the shell
+  // and its empty-looking screens at all.
   if (
     session &&
-    pathname.startsWith("/admin") &&
-    !STAFF_ROLES.includes(session.role)
+    pathname.startsWith(ADMIN_HOME) &&
+    !isStaffRole(session.role)
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
