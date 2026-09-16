@@ -8,6 +8,7 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
+import { ADMIN_HOME } from "@/lib/roles";
 
 export type AdminNavItem = {
   href: string;
@@ -15,7 +16,7 @@ export type AdminNavItem = {
   icon: LucideIcon;
 };
 
-export const ADMIN_HOME_HREF = "/admin";
+export const ADMIN_HOME_HREF = ADMIN_HOME;
 
 /**
  * Figma "Student Listing(1440)" — the admin rail. Two groups behind a divider,
