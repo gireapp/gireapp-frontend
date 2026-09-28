@@ -9,6 +9,9 @@ import {
   MOOD_THEMES,
   DEPARTMENTS,
   STUDENT_STATUSES,
+  ANALYTICS_RANGE_DAYS,
+  ANALYTICS_GROUPINGS,
+  type AnalyticsRangeDays,
 } from "./types";
 import { PAGINATION } from "./constants";
 
@@ -417,3 +420,25 @@ export const studentListQuerySchema = z.object({
 });
 
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
+
+// ── Admin: Analytics ──
+
+const DEFAULT_ANALYTICS_RANGE_DAYS: AnalyticsRangeDays = 30;
+
+function isAnalyticsRange(days: number): days is AnalyticsRangeDays {
+  return (ANALYTICS_RANGE_DAYS as readonly number[]).includes(days);
+}
+
+export const analyticsQuerySchema = z.object({
+  rangeDays: z.coerce
+    .number()
+    .refine(isAnalyticsRange, {
+      message: `Range must be one of ${ANALYTICS_RANGE_DAYS.join(", ")} days`,
+    })
+    .default(DEFAULT_ANALYTICS_RANGE_DAYS),
+  academicLevel: z.enum(ACADEMIC_LEVELS).optional(),
+  courseId: z.string().cuid("Invalid course ID").optional(),
+  groupBy: z.enum(ANALYTICS_GROUPINGS).default("DAILY"),
+});
+
+export type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>;
