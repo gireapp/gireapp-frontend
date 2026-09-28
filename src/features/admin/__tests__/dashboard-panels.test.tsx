@@ -8,11 +8,8 @@ import type {
   AdminTrackShare,
 } from "@gireapp/shared";
 import { AdminStatCard } from "@/features/admin/dashboard-cards";
-import {
-  GrowthChart,
-  axisLabelIndexes,
-  formatAxisDate,
-} from "@/features/admin/growth-chart";
+import { GrowthChart } from "@/features/admin/growth-chart";
+import { axisLabelIndexes, formatAxisDate } from "@/features/admin/line-chart";
 import {
   TrackDistribution,
   exactShares,
