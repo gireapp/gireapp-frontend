@@ -1,12 +1,7 @@
 import type { AdminTrackShare } from "@gireapp/shared";
 import { DONUT, donutSegments } from "@/features/admin/chart-geometry";
 import { AdminPanelEmpty } from "@/features/admin/dashboard-cards";
-
-const TRACK_LABELS: Record<string, string> = {
-  SECONDARY: "Secondary",
-  TERTIARY: "Tertiary",
-  PROFESSIONAL: "Professional",
-};
+import { TRACK_LABELS } from "@/features/admin/track-labels";
 
 const PERCENT = 100;
 

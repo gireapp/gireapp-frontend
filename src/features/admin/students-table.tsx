@@ -2,20 +2,10 @@ import Image from "next/image";
 import type { StudentListItem } from "@gireapp/shared";
 import { StudentStatusBadge } from "@/features/admin/student-status-badge";
 import { StudentProgress } from "@/features/admin/student-progress";
-
-const TRACK_LABELS: Record<string, string> = {
-  SECONDARY: "Secondary",
-  TERTIARY: "Tertiary",
-  PROFESSIONAL: "Professional",
-};
+import { trackLabel } from "@/features/admin/track-labels";
 
 /** The one em dash used wherever the schema has nothing to show. */
 const ABSENT = "—";
-
-function trackLabel(academicLevel: string | null): string {
-  if (!academicLevel) return ABSENT;
-  return TRACK_LABELS[academicLevel] ?? academicLevel;
-}
 
 function StudentAvatar({ student }: { student: StudentListItem }) {
   if (student.image) {
@@ -79,7 +69,7 @@ export function StudentsTable({ students }: { students: StudentListItem[] }) {
                   {student.course?.title ?? ABSENT}
                 </td>
                 <td className="px-4 py-5 font-sans text-[14px] text-indigo-950">
-                  {trackLabel(student.academicLevel)}
+                  {trackLabel(student.academicLevel) ?? ABSENT}
                 </td>
                 <td className="px-4 py-5">
                   {student.progress === null ? (

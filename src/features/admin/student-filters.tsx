@@ -6,15 +6,11 @@ import { Search } from "lucide-react";
 import { ACADEMIC_LEVELS, STUDENT_STATUSES } from "@gireapp/shared";
 import { cn } from "@/lib/utils";
 import type { CourseOption } from "@/features/admin/students";
-
-const CONTROL_CLASSNAME =
-  "h-12 rounded border border-indigo-800 bg-transparent px-3 font-sans text-[16px] font-medium text-indigo-950 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
-
-const TRACK_LABELS: Record<string, string> = {
-  SECONDARY: "Secondary",
-  TERTIARY: "Tertiary",
-  PROFESSIONAL: "Professional",
-};
+import {
+  FILTER_CONTROL_CLASSNAME,
+  FilterSelect,
+} from "@/features/admin/filter-select";
+import { TRACK_LABELS } from "@/features/admin/track-labels";
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: "Active",
@@ -67,7 +63,7 @@ export function StudentFilters({ courses }: { courses: CourseOption[] }) {
           placeholder="Search students"
           aria-label="Search students by name or email"
           className={cn(
-            CONTROL_CLASSNAME,
+            FILTER_CONTROL_CLASSNAME,
             "w-full pl-11 placeholder:text-indigo-500",
           )}
         />
@@ -110,35 +106,5 @@ export function StudentFilters({ courses }: { courses: CourseOption[] }) {
         />
       </div>
     </div>
-  );
-}
-
-function FilterSelect({
-  label,
-  allLabel,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  allLabel: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <select
-      aria-label={label}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className={cn(CONTROL_CLASSNAME, "min-w-[149px] pr-8")}
-    >
-      <option value="">{allLabel}</option>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
   );
 }
