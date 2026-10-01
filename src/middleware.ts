@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import * as jose from "jose";
 import type { JwtPayload } from "@gireapp/shared";
 import { JWT_SECRET } from "@/lib/auth-secret";
+import { ADMIN_HOME, isStaffRole } from "@/lib/roles";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -71,6 +72,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Staff have no learner dashboard: they are never onboarded as learners, so
+  // /dashboard would bounce them to /onboarding. Every "go home" path — the
+  // post-login fallback, a signed-in visit to /login — lands on /dashboard, so
+  // resolving staff here covers all of them at once.
+  if (session && pathname === "/dashboard" && isStaffRole(session.role)) {
+    return NextResponse.redirect(new URL(ADMIN_HOME, request.url));
+  }
+
   // Segment / Role based routing enforcement
   if (session && pathname.startsWith("/dashboard")) {
     // Onboarding must be completed before any dashboard route is reachable
@@ -100,6 +109,17 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
+  }
+
+  // Everything under /admin is staff-only. The backend enforces this too
+  // (`requireStaff` on /api/admin/*); this stops a learner from loading the shell
+  // and its empty-looking screens at all.
+  if (
+    session &&
+    pathname.startsWith(ADMIN_HOME) &&
+    !isStaffRole(session.role)
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Attach session data to headers for Server Components to consume easily

@@ -25,10 +25,18 @@ const HTTP_GATEWAY_TIMEOUT = 504;
  *
  * SECURITY: Never sends credentials to third-party domains.
  */
+/** Pagination block carried alongside `data` by `PaginatedResponse`. */
+export type ApiMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 export async function apiClient<T>(
   path: string,
   options: RequestInit & { token?: string } = {},
-): Promise<{ data: T; status: number }> {
+): Promise<{ data: T; status: number; meta?: ApiMeta }> {
   const { token, ...fetchOptions } = options;
 
   const url = `${API_BASE_URL}${path}`;
@@ -97,7 +105,19 @@ export async function apiClient<T>(
   // which is what lets the backend migrate one route at a time.
   const data = (isEnvelope(body) ? body.data : body) as T;
 
-  return { data, status: response.status };
+  // `meta` sits beside `data` in PaginatedResponse, so unwrapping the envelope
+  // would otherwise throw the page count away.
+  return { data, status: response.status, meta: metaOf(body) };
+}
+
+function metaOf(body: unknown): ApiMeta | undefined {
+  if (typeof body !== "object" || body === null || !("meta" in body)) {
+    return undefined;
+  }
+  const meta = (body as { meta: unknown }).meta;
+  return typeof meta === "object" && meta !== null
+    ? (meta as ApiMeta)
+    : undefined;
 }
 
 /** A wrapped success response: `{ success: true, data: … }`. */
@@ -149,7 +169,7 @@ export class ApiError extends Error {
 export async function serverApiClient<T>(
   path: string,
   options: RequestInit = {},
-): Promise<{ data: T; status: number }> {
+): Promise<{ data: T; status: number; meta?: ApiMeta }> {
   // Dynamic import to avoid bundling server-only code in client
   const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
