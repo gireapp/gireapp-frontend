@@ -15,7 +15,13 @@ vi.mock("next/navigation", () => ({
 
 import { StudentFilters } from "@/features/admin/student-filters";
 
-const COURSES = [{ id: "course-1", title: "Data Analytics" }];
+const COURSES = [
+  {
+    id: "course-1",
+    title: "Data Analytics",
+    academicLevel: "PROFESSIONAL" as const,
+  },
+];
 
 function replacedParams(): URLSearchParams {
   const call = replaceMock.mock.calls.at(-1);

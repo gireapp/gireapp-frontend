@@ -16,7 +16,13 @@ vi.mock("next/navigation", () => ({
 
 import { AnalyticsFilters } from "@/features/admin/analytics-filters";
 
-const COURSES = [{ id: "course-1", title: "Data Analytics" }];
+const COURSES = [
+  {
+    id: "course-1",
+    title: "Data Analytics",
+    academicLevel: "PROFESSIONAL" as const,
+  },
+];
 
 /** What the page resolved and actually queried with. */
 const DEFAULTS: AnalyticsQuery = { rangeDays: 30, groupBy: "DAILY" };
