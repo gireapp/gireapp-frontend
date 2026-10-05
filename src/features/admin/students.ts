@@ -1,4 +1,8 @@
-import type { StudentListItem, StudentListQuery } from "@gireapp/shared";
+import type {
+  AcademicLevel,
+  StudentListItem,
+  StudentListQuery,
+} from "@gireapp/shared";
 import { API_PATHS } from "@gireapp/shared";
 import { serverApiClient, type ApiMeta } from "@/lib/api-client";
 import { logActionError } from "@/lib/log";
@@ -40,7 +44,12 @@ export async function getStudents(
   }
 }
 
-export type CourseOption = { id: string; title: string };
+export type CourseOption = {
+  id: string;
+  title: string;
+  /** Lets the quiz builder narrow subjects to the chosen track. */
+  academicLevel: AcademicLevel;
+};
 
 /**
  * Options for the course filter. An empty list is a valid answer — the filter
