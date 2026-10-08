@@ -29,6 +29,9 @@ const contentSecurityPolicy = [
   // that fetch unless the storage host is named here.
   `connect-src 'self'${apiOrigin ? ` ${apiOrigin}` : ""}${mediaOrigin ? ` ${mediaOrigin}` : ""}${isDev ? " ws:" : ""}`,
   `frame-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
+  // Video lessons stream from object storage. Without this, <video> falls
+  // back to default-src 'self' and the browser silently refuses to play.
+  `media-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
