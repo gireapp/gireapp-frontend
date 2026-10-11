@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { GireappLogo } from "@/components/shared/gireapp-logo";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/features/auth/actions";
@@ -144,7 +144,7 @@ export function AdminNavBody({
         </div>
       </nav>
 
-      <StaffCard staff={staff} variant={variant} onNavigate={onNavigate} />
+      <StaffCard staff={staff} variant={variant} />
     </>
   );
 }
@@ -172,15 +172,17 @@ export function AdminSidebar({ staff }: { staff: StaffIdentity }) {
   );
 }
 
-/** Figma "Frame 88" — the account card pinned to the foot of the nav. */
+/**
+ * Figma "Frame 88" — the account card pinned to the foot of the nav. The
+ * design's chevron opens an account menu that does not exist yet, so for now
+ * this is a label, not a control: it shows who is signed in and nothing else.
+ */
 function StaffCard({
   staff,
   variant,
-  onNavigate,
 }: {
   staff: StaffIdentity;
   variant: AdminNavVariant;
-  onNavigate?: () => void;
 }) {
   return (
     <div
@@ -190,11 +192,7 @@ function StaffCard({
         variant === "rail" && "hidden tall:block",
       )}
     >
-      <Link
-        href="/admin/settings"
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-lg bg-indigo-950 p-2.5 transition-colors hover:bg-indigo-950/80"
-      >
+      <div className="flex items-center gap-3 rounded-lg bg-indigo-950 p-2.5">
         <StaffAvatar staff={staff} />
         <span className="min-w-0 flex-1">
           {staff.name && (
@@ -206,11 +204,7 @@ function StaffCard({
             {staff.roleLabel}
           </span>
         </span>
-        <ChevronDown
-          className="h-4 w-4 shrink-0 text-indigo-300"
-          aria-hidden="true"
-        />
-      </Link>
+      </div>
     </div>
   );
 }
