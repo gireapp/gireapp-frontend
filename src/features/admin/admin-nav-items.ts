@@ -2,10 +2,8 @@ import {
   Home,
   BookOpen,
   Users,
-  UserCheck,
   BarChart3,
   ClipboardList,
-  Settings,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_HOME } from "@/lib/roles";
@@ -28,13 +26,9 @@ export const ADMIN_NAV_GROUPS: AdminNavItem[][] = [
     { href: ADMIN_HOME_HREF, label: "Home", icon: Home },
     { href: "/admin/courses", label: "Courses", icon: BookOpen },
     { href: "/admin/students", label: "Students", icon: Users },
-    { href: "/admin/mentors", label: "Mentors", icon: UserCheck },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   ],
-  [
-    { href: "/admin/quizzes", label: "Quiz Builder", icon: ClipboardList },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
-  ],
+  [{ href: "/admin/quizzes", label: "Quiz Builder", icon: ClipboardList }],
 ];
 
 /**

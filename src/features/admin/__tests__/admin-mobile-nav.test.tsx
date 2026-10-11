@@ -28,10 +28,8 @@ describe("AdminMobileNav", () => {
       "Home",
       "Courses",
       "Students",
-      "Mentors",
       "Analytics",
       "Quiz Builder",
-      "Settings",
     ]) {
       expect(within(drawer).getByRole("link", { name: label })).toBeTruthy();
     }
