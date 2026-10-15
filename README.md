@@ -1,114 +1,147 @@
 # GIREAPP — Frontend
 
-The web client for **GIREAPP** (Get It Right Edu App), a pan-African e-learning
-platform serving three learner tracks — Secondary, Tertiary and Professional — on
-one platform.
+[![Frontend CI](https://github.com/gireapp/gireapp-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/gireapp/gireapp-frontend/actions/workflows/ci.yml)
 
-Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind · shadcn/ui.
-It talks to the [`gireapp-backend`](https://github.com/gireapp/gireapp-backend)
-Express API and shares types, Zod schemas and constants with it through
-`@gireapp/shared`.
+The web client for **GIREAPP** (Get It Right Edu App), an e-learning platform
+for African learners across three tracks — Secondary, Tertiary and
+Professional.
 
-## What it does
+It is a Next.js application that talks to the GIREAPP backend API for all of
+its data, and shares types, validation schemas and constants with it through
+the `@gireapp/shared` package.
 
-**Learners**
+## Features
 
-- Sign up with email verification, guardian consent for under-18s, password reset
-- Onboarding by track and department, which routes each learner to their own dashboard
-- Courses: enrol, read lessons (Markdown, plain text, PDF, video), track progress
+**For learners**
+
+- Sign-up with email verification, guardian consent for under-18s, and
+  password reset
+- Onboarding by track and department, routing each learner to their own
+  dashboard
+- Courses with Markdown, plain-text, PDF and video lessons, and progress
+  tracking
 - Timed quizzes graded on the server, with a full answer review afterwards
 - Points, badges and a dashboard of progress and recent activity
-- Profile & Settings: name, email, password, photo, learning preferences
+- Profile and settings: name, email, password, photo and learning preferences
 - Help Center and Contact Support
 
-**Staff** (admins and tutors, at `/admin`)
+**For staff** (admins and tutors)
 
-- Dashboard of headline numbers, growth, track distribution and recent activity
+- Dashboard of headline figures, growth, track distribution and recent
+  activity
 - Student listing with search and filters
 - Analytics filterable by date range, track, course and grouping
-- Course builder: modules and lessons, drafts and publishing, file uploads
-- Quiz builder: questions, answers, points, drafts and publishing
+- Course builder and quiz builder, with drafts and publishing
+
+## Tech stack
+
+- [Next.js 15](https://nextjs.org/) (App Router) and React 19
+- TypeScript (strict)
+- Tailwind CSS and [shadcn/ui](https://ui.shadcn.com/)
+- Zod for validation
+- Vitest and Testing Library for unit tests
 
 ## Getting started
 
-Requires **Node.js 22.12 or later**. Run the backend first — the frontend has no
-data of its own.
+### Prerequisites
+
+- **Node.js 22.12 or later** and npm
+- A running instance of the GIREAPP backend API — the frontend has no data
+  of its own
+
+### Installation
 
 ```bash
-cp .env.example .env.local    # then fill it in — see below
+git clone https://github.com/gireapp/gireapp-frontend.git
+cd gireapp-frontend
 npm install
-npm run dev                   # http://localhost:3000
+cp .env.example .env.local
 ```
 
-### Environment variables
+### Configuration
 
-| Variable                | Required            | What it is                                                                                                                                                                                            |
-| ----------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`   | Yes                 | Base URL of the backend, e.g. `http://localhost:8000`. Also the only origin the API client will call, and an entry in the security policy.                                                            |
-| `AUTH_SECRET`           | Yes                 | **Must be byte-for-byte identical to the backend's.** Otherwise every session the backend issues is rejected. Generate with `openssl rand -base64 32`.                                                |
-| `CLIENT_IP_SECRET`      | Yes, in production  | **Must be identical to the backend's.** Sent with each learner's IP so the backend rate-limits per learner; without it every learner shares one budget, and a handful of sign-ins locks everyone out. |
-| `NEXT_PUBLIC_MEDIA_URL` | For uploads         | Origin of the object-storage bucket. Profile photos and lesson files go straight from the browser to storage; if this is unset the browser's security policy blocks them, **silently**.               |
-| `NEXT_PUBLIC_APP_URL`   | Production          | The site's own public URL, used for link previews. Defaults to `http://localhost:3000`.                                                                                                               |
-| `MOCK_AUTH`             | Never in production | Development only: `true` signs people in on registration without the backend.                                                                                                                         |
+Set these in `.env.local`:
 
-## Commands
+| Variable                | Required      | Description                                                                                                                                                    |
+| ----------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`   | Yes           | Base URL of the backend API, e.g. `http://localhost:8000`. The API client refuses to call any other origin.                                                    |
+| `AUTH_SECRET`           | Yes           | Verifies session tokens. Must be identical to the backend's `AUTH_SECRET`. Generate one with `openssl rand -base64 32`.                                        |
+| `CLIENT_IP_SECRET`      | In production | Shared with the backend so it can rate-limit each visitor separately. Must be identical on both sides, and must never be given a `NEXT_PUBLIC_` prefix.        |
+| `NEXT_PUBLIC_MEDIA_URL` | For uploads   | Origin of the object-storage bucket. Uploads go straight from the browser to storage, and the site's Content Security Policy blocks any origin not named here. |
+| `NEXT_PUBLIC_APP_URL`   | In production | The site's public URL, used for link previews. Defaults to `http://localhost:3000`.                                                                            |
+
+### Running
 
 ```bash
-npm run dev            # dev server
-npm run build          # production build
-npm start              # serve the production build
-npm run lint           # ESLint (lint:fix to auto-fix)
-npm run type-check     # tsc --noEmit
-npm run format         # Prettier on src/** (format:check to verify)
-npm test               # Vitest unit tests
-npm run test:watch     # Vitest in watch mode
-npm run test:e2e       # Playwright — there are no end-to-end tests yet
+npm run dev
 ```
 
-Run a single test file: `npx vitest run src/lib/__tests__/sanitize.test.ts`
-(or add `-t "<test name>"`).
+The app is served at [http://localhost:3000](http://localhost:3000).
 
-**Commits run a pre-commit hook** (Husky + lint-staged): ESLint and Prettier on
-staged `.ts`/`.tsx` files. ESLint takes around 45 seconds to start on a modest
-laptop, so a commit can look stuck — let it finish before staging anything else.
+## Scripts
 
-## Project layout
+| Command              | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `npm run dev`        | Start the development server                    |
+| `npm run build`      | Create a production build                       |
+| `npm start`          | Serve the production build                      |
+| `npm run lint`       | Lint with ESLint (`lint:fix` to fix)            |
+| `npm run type-check` | Type-check with `tsc`                           |
+| `npm run format`     | Format with Prettier (`format:check` to verify) |
+| `npm test`           | Run the unit tests                              |
+| `npm run test:watch` | Run the unit tests in watch mode                |
+
+To run a single test file:
+
+```bash
+npx vitest run src/lib/__tests__/sanitize.test.ts
+```
+
+## Project structure
 
 ```
 src/
   app/
     (auth)/        sign-up, login, verification, onboarding, password reset
-    (dashboard)/   the learner app — /dashboard/…
-    (admin)/       the staff app — /admin/…
-  features/        logic and components per area: auth, dashboard, courses,
-                   quizzes, settings, admin
-  components/      shadcn/ui primitives and shared components
-  lib/             API client, session, roles, sanitising, logging
-  middleware.ts    signs-in, role and track routing for every request
-shared/            the frontend's copy of @gireapp/shared — see below
+    (dashboard)/   the learner app, under /dashboard
+    (admin)/       the staff app, under /admin
+  features/        components and server actions, grouped by area
+  components/      UI primitives and shared components
+  lib/             API client, session handling, routing rules, utilities
+  middleware.ts    authentication and role-based routing for every request
+shared/            @gireapp/shared: types, schemas and constants
 ```
 
-## Things worth knowing
+## Contributing
 
-- **`@gireapp/shared` exists as two hand-maintained copies** — `./shared` here and
-  `shared/` in the backend repo. A change to one must be made to the other, or the
-  two sides silently disagree.
-- **Route access is enforced in `src/middleware.ts`**: signed-out users go to
-  login, learners can't open `/admin`, staff are sent to `/admin` rather than a
-  learner dashboard, and a learner can only open their own track's dashboard. The
-  backend enforces the same rules on its side.
-- **Every link in either navigation must point at a page that exists** — a test
-  fails otherwise. Add the page with the link.
+1. Branch from `staging` and open your pull request against `staging`.
+2. Make sure `npm run lint`, `npm run type-check` and `npm test` pass. CI runs
+   the same checks on every push and pull request.
+3. A pre-commit hook runs ESLint and Prettier on staged files.
 
-`CLAUDE.md` is the detailed guide to how the codebase works: sessions, the API
-client, the server-action pattern, routing, the admin area and design tokens.
+Two things to know before changing code:
 
-## Deployment
+- **`@gireapp/shared` is kept in both repositories.** The copy in `./shared`
+  must stay identical in behaviour to the backend's; a change to one needs the
+  same change in the other.
+- **Every navigation link must point to a page that exists.** A test checks
+  each link in both navigations against the app's routes.
 
-Deployed on **Vercel**. Set the variables above in the Vercel project, using the
-live backend URL and the same `AUTH_SECRET` as the backend.
+## Security
 
-## Decision log
+The frontend never handles database credentials, and session tokens live in an
+httpOnly cookie that client-side scripts cannot read. All data goes through
+the backend API, which validates every request.
 
-Architecture Decision Records live in `docs/decisions/`, which is kept local and
-not versioned.
+If you find a security issue, please **do not open a public issue**. Report it
+privately through
+[GitHub's private vulnerability reporting](https://github.com/gireapp/gireapp-frontend/security/advisories/new),
+and we will respond there.
+
+## License
+
+Copyright (c) 2026 GIREAPP. All rights reserved.
+
+This is proprietary software. The source is visible, but no licence is
+granted to use, copy, modify or distribute it without GIREAPP's written
+permission. See [LICENSE](LICENSE).
