@@ -73,15 +73,10 @@ export default async function CourseOverviewPage({
 
   const course = await getCourse(courseId);
 
+  // No track or department check here: the backend answers 404 for any course
+  // this learner may not open, and keeps open the ones they joined before
+  // changing department, which a check against the session would bounce.
   if (!course || !course.published) notFound();
-
-  // Validate segment match
-  if (
-    course.academicLevel !== session.academicLevel ||
-    course.department !== session.department
-  ) {
-    redirect("/dashboard/courses");
-  }
 
   const isEnrolled = course.isEnrolled;
   const enrolmentProgress = isEnrolled ? Math.round(course.progress * 100) : 0;
