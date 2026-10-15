@@ -3,6 +3,8 @@
 // Centralised, type-safe HTTP client for backend API
 // ─────────────────────────────────────────────────
 
+import { clientIpHeaders } from "@/lib/client-ip";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
@@ -171,9 +173,18 @@ export async function serverApiClient<T>(
   options: RequestInit = {},
 ): Promise<{ data: T; status: number; meta?: ApiMeta }> {
   // Dynamic import to avoid bundling server-only code in client
-  const { cookies } = await import("next/headers");
+  const { cookies, headers: requestHeaders } = await import("next/headers");
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
-  return apiClient<T>(path, { ...options, token });
+  const headers = new Headers(options.headers);
+  const forwarded = clientIpHeaders(
+    await requestHeaders(),
+    process.env.CLIENT_IP_SECRET,
+  );
+  for (const [name, value] of Object.entries(forwarded)) {
+    headers.set(name, value);
+  }
+
+  return apiClient<T>(path, { ...options, headers, token });
 }

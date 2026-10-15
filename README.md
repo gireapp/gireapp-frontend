@@ -42,13 +42,14 @@ npm run dev                   # http://localhost:3000
 
 ### Environment variables
 
-| Variable                | Required            | What it is                                                                                                                                                                              |
-| ----------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`   | Yes                 | Base URL of the backend, e.g. `http://localhost:8000`. Also the only origin the API client will call, and an entry in the security policy.                                              |
-| `AUTH_SECRET`           | Yes                 | **Must be byte-for-byte identical to the backend's.** Otherwise every session the backend issues is rejected. Generate with `openssl rand -base64 32`.                                  |
-| `NEXT_PUBLIC_MEDIA_URL` | For uploads         | Origin of the object-storage bucket. Profile photos and lesson files go straight from the browser to storage; if this is unset the browser's security policy blocks them, **silently**. |
-| `NEXT_PUBLIC_APP_URL`   | Production          | The site's own public URL, used for link previews. Defaults to `http://localhost:3000`.                                                                                                 |
-| `MOCK_AUTH`             | Never in production | Development only: `true` signs people in on registration without the backend.                                                                                                           |
+| Variable                | Required            | What it is                                                                                                                                                                                            |
+| ----------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`   | Yes                 | Base URL of the backend, e.g. `http://localhost:8000`. Also the only origin the API client will call, and an entry in the security policy.                                                            |
+| `AUTH_SECRET`           | Yes                 | **Must be byte-for-byte identical to the backend's.** Otherwise every session the backend issues is rejected. Generate with `openssl rand -base64 32`.                                                |
+| `CLIENT_IP_SECRET`      | Yes, in production  | **Must be identical to the backend's.** Sent with each learner's IP so the backend rate-limits per learner; without it every learner shares one budget, and a handful of sign-ins locks everyone out. |
+| `NEXT_PUBLIC_MEDIA_URL` | For uploads         | Origin of the object-storage bucket. Profile photos and lesson files go straight from the browser to storage; if this is unset the browser's security policy blocks them, **silently**.               |
+| `NEXT_PUBLIC_APP_URL`   | Production          | The site's own public URL, used for link previews. Defaults to `http://localhost:3000`.                                                                                                               |
+| `MOCK_AUTH`             | Never in production | Development only: `true` signs people in on registration without the backend.                                                                                                                         |
 
 ## Commands
 
