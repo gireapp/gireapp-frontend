@@ -25,6 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EnrollButton } from "@/features/courses/enroll-button";
+import { CourseQuizList } from "@/features/quizzes/course-quiz-list";
 import { API_PATHS } from "@gireapp/shared";
 import type { CourseDetail } from "@gireapp/shared";
 
@@ -319,6 +320,8 @@ export default async function CourseOverviewPage({
           </Accordion>
         )}
       </div>
+
+      <CourseQuizList quizzes={course.quizzes} isEnrolled={isEnrolled} />
     </div>
   );
 }

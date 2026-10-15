@@ -1,8 +1,6 @@
 import {
   Home,
   BookOpen,
-  TrendingUp,
-  Users,
   UserCircle,
   HelpCircle,
   Headphones,
@@ -36,8 +34,6 @@ export function getNavGroups(academicLevel: string | null): NavItem[][] {
     [
       { href: homeHref(academicLevel), label: "Home", icon: Home },
       { href: "/dashboard/courses", label: "Courses", icon: BookOpen },
-      { href: "/dashboard/progress", label: "Progress", icon: TrendingUp },
-      { href: "/dashboard/mentors", label: "Mentors", icon: Users },
     ],
     [
       {
@@ -58,7 +54,7 @@ export function getNavGroups(academicLevel: string | null): NavItem[][] {
   ];
 }
 
-/** Bottom bar: the four primary destinations plus Profile. */
+/** Bottom bar: the primary destinations plus Profile. */
 export function getBottomNavItems(academicLevel: string | null): NavItem[] {
   const groups = getNavGroups(academicLevel);
   return [...(groups[0] ?? []), ...(groups[1] ?? [])];

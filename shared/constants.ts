@@ -40,11 +40,21 @@ export const API_PATHS = {
     ME: "/api/auth/me",
     FORGOT_PASSWORD: "/api/auth/forgot-password",
     RESET_PASSWORD: "/api/auth/reset-password",
+    CHANGE_PASSWORD: "/api/auth/change-password",
+    UPDATE_EMAIL: "/api/auth/update-email",
+    CONFIRM_EMAIL_CHANGE: "/api/auth/confirm-email-change",
+    AVATAR_UPLOAD_URL: "/api/auth/avatar-upload-url",
+    AVATAR: "/api/auth/avatar",
+    NAME: "/api/auth/name",
     VERIFY_EMAIL: "/api/auth/verify-email",
     RESEND_VERIFICATION: "/api/auth/resend-verification",
     ONBOARDING: "/api/auth/onboarding",
     GUARDIAN_CONSENT: "/api/auth/guardian-consent",
   },
+  SUPPORT: {
+    CONTACT: "/api/support/contact",
+  },
+
   COURSES: {
     LIST: "/api/courses",
     DETAIL: (courseId: string) => `/api/courses/${courseId}`,
@@ -59,11 +69,30 @@ export const API_PATHS = {
   },
   QUIZZES: {
     DETAIL: (quizId: string) => `/api/quizzes/${quizId}`,
+    START: (quizId: string) => `/api/quizzes/${quizId}/start`,
     SUBMIT: (quizId: string) => `/api/quizzes/${quizId}/submit`,
   },
   ADMIN: {
     COURSES: "/api/admin/courses",
+    COURSE: (courseId: string) => `/api/admin/courses/${courseId}`,
+    UPLOAD_URL: "/api/admin/upload-url",
     USERS: "/api/admin/users",
+    STUDENTS: "/api/admin/students",
+    OVERVIEW: "/api/admin/overview",
+    ANALYTICS: "/api/admin/analytics",
+    QUIZZES: "/api/admin/quizzes",
+    QUIZ: (quizId: string) => `/api/admin/quizzes/${quizId}`,
   },
   HEALTH: "/api/health",
+} as const;
+
+/**
+ * Headers the frontend's server attaches to every backend call. All learner
+ * traffic reaches the backend from the frontend's server, so without these
+ * the backend would rate-limit every learner as one visitor. The secret proves
+ * the IP came from our own server rather than from a client forging it.
+ */
+export const CLIENT_IP_HEADERS = {
+  IP: "x-gireapp-client-ip",
+  SECRET: "x-gireapp-client-ip-secret",
 } as const;

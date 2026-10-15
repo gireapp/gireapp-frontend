@@ -16,15 +16,28 @@ function renderNav(
 }
 
 describe("DashboardBottomNav", () => {
-  it("shows the five destinations from the design", () => {
+  it("shows the destinations that exist", () => {
     renderNav("/dashboard/secondary");
 
-    for (const label of ["Home", "Courses", "Progress", "Mentors", "Profile"]) {
+    for (const label of ["Home", "Courses", "Profile"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
   });
 
-  it("uses the short label so five items fit a 375px bar", () => {
+  it("leaves out Progress and Mentors until those screens are built", () => {
+    renderNav("/dashboard/secondary");
+
+    // The design shows both, but neither page exists; a link to a 404 is
+    // worse than no link.
+    expect(
+      screen.queryByRole("link", { name: "Progress" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Mentors" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses the short label so the items fit a 375px bar", () => {
     renderNav("/dashboard/secondary");
 
     expect(screen.getByRole("link", { name: "Profile" })).toBeInTheDocument();

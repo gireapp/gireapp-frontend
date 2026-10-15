@@ -132,6 +132,18 @@ export default async function LessonPlayerPage({
               title={currentLesson.title}
             />
           </div>
+        ) : currentLesson.contentType === "VIDEO" && currentLesson.mediaUrl ? (
+          <video
+            src={currentLesson.mediaUrl}
+            controls
+            preload="metadata"
+            // No download button: the signed URL expires, and a saved copy
+            // would sidestep enrolment entirely.
+            controlsList="nodownload"
+            className="aspect-video w-full rounded bg-black"
+          >
+            Your browser cannot play this video.
+          </video>
         ) : (
           <div className="py-12 text-center text-muted-foreground italic">
             This lesson type is not supported yet or missing content.

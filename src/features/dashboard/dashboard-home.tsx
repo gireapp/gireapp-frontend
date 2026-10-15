@@ -107,7 +107,7 @@ export function DashboardHome({
           />
 
           <section className="order-3 flex flex-col gap-4 xl:order-none xl:gap-8">
-            <SectionHeader title="Your Progress" href="/dashboard/progress" />
+            <SectionHeader title="Your Progress" />
             <ProgressCard
               points={points}
               badges={badges}
@@ -116,8 +116,6 @@ export function DashboardHome({
               extras={extras}
             />
           </section>
-
-          <NeedGuidanceCard className="order-7 xl:order-none" />
         </div>
 
         <div className="contents xl:flex xl:w-[443px] xl:shrink-0 xl:flex-col xl:gap-8">
@@ -143,13 +141,16 @@ export function DashboardHome({
   );
 }
 
-function SectionHeader({ title, href }: { title: string; href: string }) {
+/** `href` is omitted when the section has no page of its own to open yet. */
+function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <h2 className={SECTION_TITLE_CLASSNAME}>{title}</h2>
-      <Link href={href} className={VIEW_ALL_CLASSNAME}>
-        View All
-      </Link>
+      {href && (
+        <Link href={href} className={VIEW_ALL_CLASSNAME}>
+          View All
+        </Link>
+      )}
     </div>
   );
 }
@@ -528,39 +529,5 @@ function UpNextCard({ quiz }: { quiz: NextQuiz }) {
         Start quiz
       </Link>
     </div>
-  );
-}
-
-function NeedGuidanceCard({ className }: { className?: string }) {
-  return (
-    <section
-      className={`relative flex min-h-[185px] items-center gap-6 overflow-hidden rounded-lg bg-indigo-200 px-7 py-6 md:min-h-[156px] md:px-14 md:py-4 ${className ?? ""}`}
-    >
-      <div className="flex flex-col gap-2">
-        <h2 className="font-heading text-[16px] font-bold text-indigo-950">
-          Need guidance?
-        </h2>
-        <p className="max-w-[190px] font-sans text-[14px] text-indigo-800 md:max-w-[308px]">
-          Connect with a mentor who can help you stay focused and overcome
-          challenges
-        </p>
-        <Link
-          href="/dashboard/mentors"
-          className={`${COMPACT_BUTTON_CLASSNAME} mt-2 w-full max-w-[160px] bg-coral-500 hover:bg-coral-600 md:max-w-[263px]`}
-        >
-          Find a mentor
-        </Link>
-      </div>
-
-      {/* Figma: "image 4" — flush top-right, 154×154, desktop only (not
-          present in the mobile frame at this spot). */}
-      <Image
-        src="/dashboard/mentor-guidance.png"
-        alt=""
-        width={154}
-        height={154}
-        className="pointer-events-none absolute right-0 top-0 z-0 hidden h-[154px] w-[154px] object-contain md:block"
-      />
-    </section>
   );
 }
