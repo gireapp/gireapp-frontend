@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { CLIENT_IP_HEADERS } from "@gireapp/shared";
 
 const API_BASE = "https://api.gireapp.test";
 
@@ -229,6 +230,7 @@ describe("serverApiClient", () => {
         get: (name: string) =>
           name === "token" ? { value: "cookie-jwt" } : undefined,
       }),
+      headers: async () => new Headers(),
     }));
     fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
 
@@ -246,6 +248,7 @@ describe("serverApiClient", () => {
     vi.stubEnv("NEXT_PUBLIC_API_URL", API_BASE);
     vi.doMock("next/headers", () => ({
       cookies: async () => ({ get: () => undefined }),
+      headers: async () => new Headers(),
     }));
     fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
 
@@ -255,6 +258,28 @@ describe("serverApiClient", () => {
     const headers = (fetchMock.mock.calls[0] as [string, RequestInit])[1]
       .headers as Headers;
     expect(headers.has("Cookie")).toBe(false);
+    vi.doUnmock("next/headers");
+  });
+
+  it("forwards the learner's IP with the shared secret, keeping caller headers", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_URL", API_BASE);
+    vi.stubEnv("CLIENT_IP_SECRET", "shared-secret");
+    vi.doMock("next/headers", () => ({
+      cookies: async () => ({ get: () => undefined }),
+      headers: async () =>
+        new Headers({ "x-forwarded-for": "203.0.113.9, 10.0.0.1" }),
+    }));
+    fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
+
+    const { serverApiClient } = await import("@/lib/api-client");
+    await serverApiClient("/me", { headers: { "X-Caller": "kept" } });
+
+    const headers = (fetchMock.mock.calls[0] as [string, RequestInit])[1]
+      .headers as Headers;
+    expect(headers.get(CLIENT_IP_HEADERS.IP)).toBe("203.0.113.9");
+    expect(headers.get(CLIENT_IP_HEADERS.SECRET)).toBe("shared-secret");
+    expect(headers.get("X-Caller")).toBe("kept");
     vi.doUnmock("next/headers");
   });
 });
