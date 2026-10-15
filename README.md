@@ -133,5 +133,7 @@ The frontend never handles database credentials, and session tokens live in an
 httpOnly cookie that client-side scripts cannot read. All data goes through
 the backend API, which validates every request.
 
-If you find a security issue, please **do not open a public issue**. Contact
-the maintainers privately instead.
+If you find a security issue, please **do not open a public issue**. Report it
+privately through
+[GitHub's private vulnerability reporting](https://github.com/gireapp/gireapp-frontend/security/advisories/new),
+and we will respond there.
