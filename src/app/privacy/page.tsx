@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const LAST_UPDATED = "18 October 2026";
+const CONTACT_EMAIL = "support@gireapp.com";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -157,8 +158,16 @@ export default function PrivacyPage() {
 
         <Section title="Contact us">
           <p>
-            If you have an account, use <strong>Contact Support</strong> in your
-            account settings and we will reply by email.
+            Email us at{" "}
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="font-medium underline text-indigo-800 hover:text-indigo-600"
+            >
+              {CONTACT_EMAIL}
+            </a>
+            , including if you are a parent or guardian, or don&apos;t have an
+            account. If you do have one, you can also use{" "}
+            <strong>Contact Support</strong> in your account settings.
           </p>
         </Section>
       </main>
