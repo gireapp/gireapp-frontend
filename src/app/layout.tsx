@@ -9,6 +9,7 @@ import { JetBrains_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { CookieConsent } from "@/components/shared/cookie-consent";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // ── Fonts ──
@@ -54,16 +55,14 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "GIREAPP Team" }],
   creator: "GIREAPP",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  ),
+  metadataBase: siteUrl(),
   openGraph: {
     type: "website",
     locale: "en_NG",
     siteName: "GIREAPP",
     title: "GIREAPP — Enabling Academic Excellence Across Africa",
     description:
-      "Personalised learning paths with departmentalised dashboards, gamified assessments, and integrated mentorship.",
+      "Personalised learning paths with departmentalised dashboards and gamified assessments.",
   },
   twitter: {
     card: "summary_large_image",

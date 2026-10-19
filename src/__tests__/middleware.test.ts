@@ -65,6 +65,20 @@ describe("middleware — non-page requests", () => {
   );
 });
 
+describe("middleware — link previews and icons", () => {
+  // Crawlers building a link preview have no session, and a signed-in
+  // browser fetching the tab icon must not be bounced to the dashboard.
+  it.each(["/opengraph-image", "/apple-icon"])(
+    "serves %s with or without a session",
+    async (pathname) => {
+      expect(isPassThrough(await middleware(request(pathname)))).toBe(true);
+      expect(
+        isPassThrough(await middleware(request(pathname, await signToken()))),
+      ).toBe(true);
+    },
+  );
+});
+
 describe("middleware — unauthenticated visitors", () => {
   it.each([
     "/",
@@ -74,6 +88,8 @@ describe("middleware — unauthenticated visitors", () => {
     "/reset-password",
     // A guardian opening the emailed consent link has no account at all.
     "/guardian-consent",
+    "/privacy",
+    "/mentorship",
   ])("allows the public route %s", async (pathname) => {
     const response = await middleware(request(pathname));
     expect(isPassThrough(response)).toBe(true);
@@ -133,10 +149,13 @@ describe("middleware — authenticated visitors on public routes", () => {
     },
   );
 
-  it("leaves the landing page reachable", async () => {
-    const response = await middleware(request("/", await signToken()));
-    expect(isPassThrough(response)).toBe(true);
-  });
+  it.each(["/", "/privacy", "/mentorship"])(
+    "leaves %s reachable",
+    async (pathname) => {
+      const response = await middleware(request(pathname, await signToken()));
+      expect(isPassThrough(response)).toBe(true);
+    },
+  );
 });
 
 describe("middleware — onboarding gate", () => {

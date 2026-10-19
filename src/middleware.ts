@@ -20,12 +20,23 @@ const publicRoutes = [
   "/guardian-consent",
   // Opened from the link sent to a new address during an email change.
   "/confirm-email-change",
+  "/privacy",
+  "/mentorship",
 ];
 
 // Public routes a signed-in user may also open, so they are not bounced to the
-// dashboard: the landing page, and the email-change link — which is normally
-// opened in the very browser that asked for the change.
-const sessionAgnosticRoutes = ["/", "/confirm-email-change"];
+// dashboard: the landing page and informational pages, and the email-change
+// link — which is normally opened in the very browser that asked for the change.
+const sessionAgnosticRoutes = [
+  "/",
+  "/privacy",
+  "/mentorship",
+  "/confirm-email-change",
+];
+
+// Generated images with no file extension. Crawlers building a link preview
+// have no session, and a signed-in browser must not be bounced either.
+const metadataImageRoutes = ["/opengraph-image", "/apple-icon"];
 
 // Dashboard segments gated by academic level
 const LEVEL_SEGMENTS = ["secondary", "tertiary", "professional"] as const;
@@ -37,7 +48,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
-    pathname.includes(".")
+    pathname.includes(".") ||
+    metadataImageRoutes.includes(pathname)
   ) {
     return NextResponse.next();
   }
