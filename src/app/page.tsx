@@ -7,59 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { SafeLink } from "@/components/shared/safe-link";
 import { Sparkles } from "lucide-react";
+import { SiteHeader } from "@/components/landing-page/site-header";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-50 bg-indigo-800 border-b border-border/40">
-        <nav className="flex items-center justify-between px-4 py-6 mx-auto max-w-7xl md:px-6">
-          <Image
-            src="/logo-white.svg"
-            alt="GIREAPP Logo"
-            width={136}
-            height={32}
-            className="w-[106px] h-[28px] md:w-[136px] md:h-[32px]"
-          />
-
-          <div className="flex items-center gap-4 font-inter">
-            <Link
-              href="/login"
-              className="text-base font-normal transition-colors text-indigo-50 hover:text-white"
-            >
-              Login
-            </Link>
-            <SafeLink
-              href="/register"
-              id="nav-signup-cta"
-              className="flex gap-1 items-center justify-center bg-orange-500 text-white rounded-lg font-normal text-base py-1 px-2.5"
-            >
-              Sign up
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18.5 12H5"
-                  stroke="#EEF2FF"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M13 18C13 18 19 13.5811 19 12C19 10.4188 13 6 13 6"
-                  stroke="#EEF2FF"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </SafeLink>
-          </div>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main id="main-content">
         {/* ── Hero Section ── */}
@@ -98,8 +51,8 @@ export default function LandingPage() {
                 style={{ animationDelay: "200ms" }}
               >
                 Your path to academic success shouldn&apos;t be a guessing game.
-                GIREAPP gives you the exact courses, mentorship, and practice
-                you need to excel at every stage.
+                GIREAPP gives you the exact courses and practice you need to
+                excel at every stage.
               </p>
 
               {/* CTAs */}
@@ -145,7 +98,7 @@ export default function LandingPage() {
               </div>
 
               <p className="px-4 mt-16 text-sm text-indigo-400 text-normal md:px-0 font-inter">
-                Trusted by 500+ students across Nigeria, Ghana and South Africa
+                Built for students across Nigeria, Ghana and South Africa
               </p>
             </div>
           </div>
@@ -183,8 +136,8 @@ export default function LandingPage() {
                 <span className="text-orange-500">Excel</span>
               </h2>
               <p className="max-w-3xl text-sm leading-relaxed text-indigo-400 md:text-lg font-inter">
-                From structured lessons to gamified assessments and real
-                mentorship - GIREAPP is your complete academic companion.
+                From structured lessons to gamified assessments, with mentorship
+                on the way - GIREAPP is your complete academic companion.
               </p>
             </div>
 
@@ -212,8 +165,8 @@ export default function LandingPage() {
               Ready to get it <span className="text-orange-500">right?</span>
             </h2>
             <p className="max-w-2xl px-2 mx-auto text-lg leading-tight text-indigo-400 md:text-xl md:px-0 md:leading-relaxed font-inter">
-              Join thousands of Students across Africa who are taking control of
-              their academic future.
+              Join students across Africa who are taking control of their
+              academic future.
             </p>
             <div className="pt-10 md:pt-14">
               <SafeLink
@@ -249,8 +202,13 @@ export default function LandingPage() {
           </div>
 
           <div className="flex justify-center px-4 pb-2 mt-16 md:px-10 md:pb-4 md:justify-end md:mt-24">
-            <p className="text-[10px] md:text-sm text-indigo-200 font-inter">
-              ©️ {new Date().getFullYear()} GIREAPP. All rights reserved.
+            <p className="flex gap-4 text-[10px] md:text-sm text-indigo-200 font-inter">
+              <span>
+                ©️ {new Date().getFullYear()} GIREAPP. All rights reserved.
+              </span>
+              <Link href="/privacy" className="underline hover:text-white">
+                Privacy
+              </Link>
             </p>
           </div>
         </section>

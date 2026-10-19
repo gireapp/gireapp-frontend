@@ -1,4 +1,6 @@
+import Link from "next/link";
 import {
+  ArrowRight,
   BookOpen,
   GraduationCap,
   LucideIcon,
@@ -13,6 +15,7 @@ interface EducationCardProps {
   title: string;
   description: string;
   tags?: string[];
+  link?: { href: string; label: string };
 }
 
 const EducationCard = ({
@@ -21,6 +24,7 @@ const EducationCard = ({
   title,
   description,
   tags = [],
+  link,
 }: EducationCardProps) => {
   return (
     <div
@@ -46,6 +50,15 @@ const EducationCard = ({
           </span>
         ))}
       </div>
+      {link && (
+        <Link
+          href={link.href}
+          className="inline-flex items-center gap-1.5 text-xs md:text-sm font-medium text-orange-500 hover:text-orange-400 font-inter"
+        >
+          {link.label}
+          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+        </Link>
+      )}
     </div>
   );
 };
@@ -99,13 +112,15 @@ export const Features: EducationCardProps[] = [
     borderColor: "border-green-500",
     title: "Mentorship Access",
     description:
-      "Stuck on a concept? Connect directly with verified academic counselors and industry mentors within the platform.",
+      "Stuck on a concept? We're partnering with academic counsellors and industry mentors to bring one-to-one guidance into the platform.",
+    link: { href: "/mentorship", label: "Coming soon" },
   },
   {
     icon: Shield,
     borderColor: "border-yellow-500",
     title: "Enterprise Grade Privacy",
     description:
-      "Fully NDPR and POPIA compliant. Your academic records and personal data are encrypted and strictly access-controlled.",
+      "Your academic records and personal data are encrypted and strictly access-controlled.",
+    link: { href: "/privacy", label: "Read our privacy notice" },
   },
 ];

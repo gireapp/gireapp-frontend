@@ -58,14 +58,14 @@ export default function AuthLayout({
                   className="w-2 h-2 rounded-full bg-green-500 shrink-0"
                   aria-hidden="true"
                 />
-                Mentorship access
+                Mentorship coming soon
               </span>
               <span className="flex items-center gap-2 whitespace-nowrap">
                 <span
                   className="w-2 h-2 rounded-full bg-yellow-500 shrink-0"
                   aria-hidden="true"
                 />
-                NDPR compliant
+                Privacy-first
               </span>
             </div>
           </div>
