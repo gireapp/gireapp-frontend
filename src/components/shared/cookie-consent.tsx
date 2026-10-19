@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { X } from "lucide-react";
 
-const CONSENT_KEY = 'gireapp_cookie_consent';
+const CONSENT_KEY = "gireapp_cookie_consent";
 
 export function CookieConsent() {
   const [show, setShow] = useState(false);
@@ -22,38 +23,50 @@ export function CookieConsent() {
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem(CONSENT_KEY, 'accepted');
+    localStorage.setItem(CONSENT_KEY, "accepted");
     setShow(false);
     // In M6, this is where we'd initialize Mixpanel/GA4
     // initializeAnalytics();
   };
 
   const handleDecline = () => {
-    localStorage.setItem(CONSENT_KEY, 'declined');
+    localStorage.setItem(CONSENT_KEY, "declined");
     setShow(false);
   };
 
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-[100] p-4 animate-slide-in-up">
-      <div className="max-w-4xl mx-auto bg-card border border-border shadow-2xl rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
-        <div className="flex-1 space-y-2 text-center md:text-left">
-          <h3 className="font-semibold text-foreground text-lg">We value your privacy</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            We use cookies to enhance your learning experience, analyze site traffic, and support our gamification engine. By clicking &quot;Accept&quot;, you consent to our use of cookies in accordance with NDPR and POPIA guidelines.
+    // Slim on phones: a tall panel here covered the hero's main call to action.
+    <div className="fixed bottom-0 inset-x-0 z-[100] p-2 md:p-4 animate-slide-in-up">
+      <div className="max-w-4xl mx-auto bg-card border border-border shadow-2xl rounded-xl md:rounded-2xl p-3 md:p-6 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+        <div className="flex-1 md:space-y-2">
+          <h3 className="hidden md:block font-semibold text-foreground text-lg">
+            We value your privacy
+          </h3>
+          <p className="text-xs md:text-sm text-muted-foreground leading-snug md:leading-relaxed">
+            We use cookies to enhance your learning experience, analyze site
+            traffic, and support our gamification engine. By clicking
+            &quot;Accept&quot;, you consent to our use of cookies in accordance
+            with NDPR and POPIA guidelines.{" "}
+            <Link
+              href="/privacy"
+              className="underline text-foreground hover:text-primary"
+            >
+              Privacy notice
+            </Link>
           </p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto shrink-0">
           <button
             onClick={handleDecline}
-            className="flex-1 md:flex-none px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted border border-border rounded-lg transition-colors"
+            className="flex-1 md:flex-none px-3 md:px-4 py-2 md:py-2.5 text-sm font-medium text-foreground hover:bg-muted border border-border rounded-lg transition-colors"
           >
             Decline All
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 md:flex-none px-4 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-opacity"
+            className="flex-1 md:flex-none px-3 md:px-4 py-2 md:py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-opacity"
           >
             Accept Cookies
           </button>
